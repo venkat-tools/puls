@@ -265,6 +265,7 @@ const server = http.createServer((req, res) => {
         res.writeHead(500, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: 'Failed to fetch geo data', details: error.message }));
       });
+    return;
   }
 
 
