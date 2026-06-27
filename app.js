@@ -2041,10 +2041,12 @@ function formatUptime(seconds) {
 }
 
 // 10. Connection Status Checker
+// 10. Connection Status Checker
 function checkServerStatus() {
   const banner = document.getElementById("status-banner");
   const heroBadge = document.querySelector(".hero-card .badge"); // the "System Online" badge
   const toolboxBadge = document.querySelector(".toolbox-card .badge"); // the "Administrator Level" badge
+  const selfDestructBtn = document.getElementById("self-destruct-btn");
   
   fetch(API_BASE + '/api/status')
     .then(res => {
@@ -2057,6 +2059,8 @@ function checkServerStatus() {
           isServerOnline = true;
           fetchGeoLocation();
         }
+        if (selfDestructBtn) selfDestructBtn.style.display = "inline-flex";
+        
         // Update live host telemetry
         if (data.hostname) {
           const deviceNameEl = document.getElementById("sys-device-name");
@@ -2107,6 +2111,7 @@ function checkServerStatus() {
     .catch(err => {
       console.warn("Local API server is offline:", err);
       isServerOnline = false;
+      if (selfDestructBtn) selfDestructBtn.style.display = "none";
       // Offline mode
       if (banner) {
         banner.style.display = "flex";
@@ -2126,6 +2131,27 @@ function checkServerStatus() {
       }
       lucide.createIcons();
     });
+}
+
+// 10b. Self-Destruct Trigger
+function triggerSelfDestruct() {
+  if (!confirm("Warning: This will stop the local repair server and completely delete all its files (main.exe, server.js, index.html, styles.css, app.js, logo.png, etc.) from the client's system. Are you sure?")) {
+    return;
+  }
+  
+  fetch(API_BASE + '/api/self-destruct', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+  })
+  .then(res => res.json())
+  .then(data => {
+    alert("Self-destruct command sent successfully. The local files are being removed.");
+    window.location.reload();
+  })
+  .catch(err => {
+    console.error("Self-destruct failed:", err);
+    alert("Failed to communicate with local server. Please delete the files manually.");
+  });
 }
 
 // 11. Sub-Tab Navigation Router for nested panels
