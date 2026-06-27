@@ -174,8 +174,8 @@
               <button class="btn btn-secondary" onclick="switchTab('debloater')">
                 <i data-lucide="trash-2"></i> Debloat Settings
               </button>
-              <button id="self-destruct-btn" class="btn btn-danger" style="display: none;" onclick="triggerSelfDestruct()" title="Stop server and delete local files">
-                <i data-lucide="power"></i> Disconnect & Clean Up
+              <button id="self-destruct-btn" class="btn" style="display: none; background: rgba(239, 68, 68, 0.08) !important; color: #ef4444 !important; border: 1px solid rgba(239, 68, 68, 0.4) !important; transition: all 0.2s ease-in-out;" onclick="triggerSelfDestruct()" title="Stop server and delete local files" onmouseover="this.style.backgroundColor='rgba(239, 68, 68, 0.18)'; this.style.borderColor='#ef4444'; this.style.boxShadow='0 0 12px rgba(239, 68, 68, 0.35)';" onmouseout="this.style.backgroundColor='rgba(239, 68, 68, 0.08)'; this.style.borderColor='rgba(239, 68, 68, 0.4)'; this.style.boxShadow='none';">
+                <i data-lucide="power" style="color: #ef4444 !important;"></i> Disconnect & Clean Up
               </button>
             </div>
           </div>
