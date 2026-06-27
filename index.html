@@ -1,0 +1,1734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VenkatPulse AI // Printer Diagnostic & Repair Suite</title>
+  <!-- Outfit Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="dark-theme">
+  <!-- Ambient background glow spots -->
+  <div class="glow-bg">
+    <div class="glow-spot spot-1"></div>
+    <div class="glow-spot spot-2"></div>
+  </div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo-area">
+        <img src="logo.png" alt="VenkatPulse AI Logo" style="width: 42px; height: 42px; object-fit: cover; border-radius: var(--border-radius-md); border: 1px solid var(--border-color); filter: drop-shadow(var(--shadow-glow));">
+        <div class="logo-text">
+          <h1>VenkatPulse <span class="accent-text">AI</span></h1>
+          <span class="sub-text">Windows Repair & Optimization Suite</span>
+        </div>
+      </div>
+      <nav class="nav-tabs">
+        <button class="nav-tab active" data-tab="dashboard">
+          <i data-lucide="layout-dashboard"></i>
+          <span>Dashboard</span>
+        </button>
+        <button class="nav-tab" data-tab="repairs">
+          <i data-lucide="shield-alert"></i>
+          <span>System Repairs</span>
+        </button>
+        <button class="nav-tab" data-tab="debloater">
+          <i data-lucide="trash-2"></i>
+          <span>Debloater</span>
+        </button>
+        <button class="nav-tab" data-tab="downloader">
+          <i data-lucide="download-cloud"></i>
+          <span>App Downloader</span>
+        </button>
+        <button class="nav-tab" data-tab="usertools">
+          <i data-lucide="users"></i>
+          <span>User Tools</span>
+        </button>
+        <button class="nav-tab" data-tab="aiassistant">
+          <i data-lucide="bot"></i>
+          <span>AI Assistant</span>
+        </button>
+        <button class="nav-tab" data-tab="officesetup">
+          <i data-lucide="briefcase"></i>
+          <span>Office Setup</span>
+        </button>
+        <button class="nav-tab" data-tab="activator">
+          <i data-lucide="key"></i>
+          <span>Activation</span>
+        </button>
+        <button class="nav-tab" data-tab="nirsoft">
+          <i data-lucide="package"></i>
+          <span>NirSoft Suite</span>
+        </button>
+        <button class="nav-tab" data-tab="superadmin">
+          <i data-lucide="shield-check"></i>
+          <span>Super Admin</span>
+        </button>
+        <button class="nav-tab" data-tab="printers">
+          <i data-lucide="printer"></i>
+          <span>Printers</span>
+        </button>
+        <button class="nav-tab" data-tab="auditlogs">
+          <i data-lucide="list-ordered"></i>
+          <span>Audit Logs</span>
+        </button>
+      </nav>
+      <div class="header-actions">
+        <div class="theme-select-container" style="display: flex; align-items: center; gap: 8px;">
+          <i data-lucide="palette" style="width: 18px; height: 18px; color: var(--text-secondary);"></i>
+          <select id="theme-select" style="background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-primary); padding: 6px 12px; border-radius: var(--border-radius-sm); font-size: 0.8rem; cursor: pointer; outline: none; transition: border-color var(--transition-fast);">
+            <option value="dark">Space Dark</option>
+            <option value="light">Sleek Light</option>
+            <option value="cyberpunk">Cyberpunk Neon</option>
+            <option value="emerald">Emerald Forest</option>
+            <option value="crimson">Crimson Rose</option>
+          </select>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="main-content">
+      <!-- Connection & Admin Status Banner -->
+      <div id="status-banner" class="status-banner" style="display: none;">
+        <div class="banner-icon-container">
+          <i data-lucide="shield-alert" class="banner-icon"></i>
+        </div>
+        <div class="banner-content">
+          <span class="banner-title">Elevation / Connection Alert</span>
+          <span class="banner-desc">Local Repair Server is OFFLINE. One-click repairs are disabled. Please launch <strong>main.exe</strong> and accept the UAC prompt (Image 2).</span>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="checkServerStatus()" style="margin-left: auto; flex-shrink: 0;">
+          <i data-lucide="refresh-cw" style="width: 12px; height: 12px; margin-right: 4px; vertical-align: middle;"></i> Retry Connection
+        </button>
+      </div>
+      
+      <!-- TAB 1: DASHBOARD -->
+      <section id="dashboard" class="tab-panel active">
+        <div class="logo-banner-container" style="margin-bottom: 20px; display: flex; justify-content: center; background: var(--bg-card); padding: 24px; border-radius: var(--border-radius-lg); border: 1px solid var(--border-color); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: var(--shadow-md);">
+          <img src="logo.png" alt="VenkatPulse AI Banner" style="max-height: 180px; width: auto; max-width: 100%; object-fit: contain; filter: drop-shadow(0 0 15px rgba(0, 255, 255, 0.1));">
+        </div>
+        
+        <!-- Live Time & Geolocation Panel -->
+        <div class="live-info-bar">
+          <div class="live-info-item">
+            <i data-lucide="clock" style="color: var(--accent-cyan);"></i>
+            <span class="live-info-label">Live Time:</span>
+            <span class="live-info-value" id="live-clock">--:--:-- --</span>
+          </div>
+          <div class="live-info-item geo-clickable" onclick="editGeoLocation()" title="Click to manually set location">
+            <i data-lucide="globe" style="color: var(--accent-blue);"></i>
+            <span class="live-info-label">Country:</span>
+            <span class="live-info-value" id="geo-country">Fetching...</span>
+            <i data-lucide="edit-2" class="edit-icon" style="width: 12px; height: 12px; opacity: 0.5;"></i>
+          </div>
+          <div class="live-info-item geo-clickable" onclick="editGeoLocation()" title="Click to manually set location">
+            <i data-lucide="map-pin" style="color: var(--accent-purple);"></i>
+            <span class="live-info-label">Region / City:</span>
+            <span class="live-info-value" id="geo-region-city">Fetching...</span>
+            <i data-lucide="edit-2" class="edit-icon" style="width: 12px; height: 12px; opacity: 0.5;"></i>
+          </div>
+          <div class="live-info-item">
+            <i data-lucide="navigation" style="color: var(--accent-cyan);"></i>
+            <span class="live-info-label">IP Address:</span>
+            <span class="live-info-value" id="geo-coordinates">Fetching...</span>
+          </div>
+        </div>
+
+        <div class="dashboard-grid">
+          <!-- Left Panel: System Status Overview -->
+          <div class="card hero-card">
+            <div class="card-header">
+              <span class="badge badge-success" id="dashboard-status-badge">
+                <i data-lucide="check-circle" style="width:12px; height:12px; margin-right:4px; vertical-align: middle;"></i> System Healthy
+              </span>
+              <h2>Windows System Health</h2>
+            </div>
+            <div class="telemetry-viz" style="display: flex; flex-direction: column; justify-content: center; gap: 15px; margin: 15px 0;">
+              <div class="sys-info-block" style="display: flex; flex-direction: column; gap: 10px;">
+                <div class="stat-row" style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+                  <span class="stat-label" style="color: var(--text-secondary); font-weight: 500;">OS Version:</span>
+                  <span class="stat-value" id="sys-os-ver" style="font-weight: 600;">Windows 11 Pro (23H2)</span>
+                </div>
+                <div class="stat-row" style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+                  <span class="stat-label" style="color: var(--text-secondary); font-weight: 500;">Device Name:</span>
+                  <span class="stat-value" id="sys-device-name" style="font-weight: 600;">WINPULSE-HOST-PC</span>
+                </div>
+                <div class="stat-row" style="display: flex; justify-content: space-between; padding-bottom: 8px;">
+                  <span class="stat-label" style="color: var(--text-secondary); font-weight: 500;">System Uptime:</span>
+                  <span class="stat-value" id="sys-uptime" style="font-weight: 600;">2d 4h 12m</span>
+                </div>
+              </div>
+            </div>
+            <div class="quick-diagnostics-bar">
+              <button class="btn btn-secondary" onclick="switchTab('repairs')">
+                <i data-lucide="shield-alert"></i> Run System Scans
+              </button>
+              <button class="btn btn-secondary" onclick="switchTab('debloater')">
+                <i data-lucide="trash-2"></i> Debloat Settings
+              </button>
+            </div>
+          </div>
+
+          <!-- System Telemetry Card -->
+          <div class="card telemetry-card">
+            <h3>System Resource Monitor</h3>
+            <p class="subtitle">Live CPU, Memory, and Storage telemetry</p>
+            <div class="telemetry-levels-container" style="display: flex; justify-content: space-around; margin: 25px 0 20px; height: 130px;">
+              <!-- CPU -->
+              <div class="telemetry-gauge" style="display: flex; flex-direction: column; align-items: center; gap: 8px; width: 60px;">
+                <div class="telemetry-cylinder cpu-telemetry" style="position: relative; width: 32px; height: 90px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color); border-radius: 16px; overflow: hidden; box-shadow: inset 0 2px 8px rgba(0,0,0,0.4);">
+                  <div class="telemetry-fill cpu-fill" style="position: absolute; bottom: 0; left: 0; width: 100%; height: 24%; border-radius: 0 0 14px 14px; background: linear-gradient(180deg, #22d3ee, #0891b2); transition: height 1s cubic-bezier(0.4, 0, 0.2, 1);"></div>
+                  <span class="telemetry-percentage" id="cpu-pct" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 0.75rem; font-weight: 700; text-shadow: 0 1px 3px rgba(0,0,0,0.8); color: #ffffff;">24%</span>
+                </div>
+                <span class="telemetry-label" style="font-size: 0.7rem; font-weight: 600; color: var(--text-secondary);">CPU Load</span>
+              </div>
+              <!-- RAM -->
+              <div class="telemetry-gauge" style="display: flex; flex-direction: column; align-items: center; gap: 8px; width: 60px;">
+                <div class="telemetry-cylinder ram-telemetry" style="position: relative; width: 32px; height: 90px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color); border-radius: 16px; overflow: hidden; box-shadow: inset 0 2px 8px rgba(0,0,0,0.4);">
+                  <div class="telemetry-fill ram-fill" style="position: absolute; bottom: 0; left: 0; width: 100%; height: 58%; border-radius: 0 0 14px 14px; background: linear-gradient(180deg, #a855f7, #6366f1); transition: height 1s cubic-bezier(0.4, 0, 0.2, 1);"></div>
+                  <span class="telemetry-percentage" id="ram-pct" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 0.75rem; font-weight: 700; text-shadow: 0 1px 3px rgba(0,0,0,0.8); color: #ffffff;">58%</span>
+                </div>
+                <span class="telemetry-label" style="font-size: 0.7rem; font-weight: 600; color: var(--text-secondary);">RAM Usage</span>
+              </div>
+              <!-- Storage -->
+              <div class="telemetry-gauge" style="display: flex; flex-direction: column; align-items: center; gap: 8px; width: 60px;">
+                <div class="telemetry-cylinder disk-telemetry" style="position: relative; width: 32px; height: 90px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color); border-radius: 16px; overflow: hidden; box-shadow: inset 0 2px 8px rgba(0,0,0,0.4);">
+                  <div class="telemetry-fill disk-fill" style="position: absolute; bottom: 0; left: 0; width: 100%; height: 65%; border-radius: 0 0 14px 14px; background: linear-gradient(180deg, #10b981, #047857); transition: height 1s cubic-bezier(0.4, 0, 0.2, 1);"></div>
+                  <span class="telemetry-percentage" id="disk-pct" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 0.75rem; font-weight: 700; text-shadow: 0 1px 3px rgba(0,0,0,0.8); color: #ffffff;">65%</span>
+                </div>
+                <span class="telemetry-label" style="font-size: 0.7rem; font-weight: 600; color: var(--text-secondary);">Disk (C:)</span>
+              </div>
+            </div>
+            <div class="warning-box" id="telemetry-alert-box" style="background: rgba(16, 185, 129, 0.08); border-color: rgba(16, 185, 129, 0.15); color: var(--text-primary); padding: 12px; display: flex; gap: 10px; font-size: 0.8rem; line-height: 1.4; border-radius: var(--border-radius-md);">
+              <i data-lucide="check-circle" style="color: var(--state-success); flex-shrink: 0; width: 16px; height: 16px;"></i>
+              <span id="telemetry-alert-text">All resources operating within normal parameters.</span>
+            </div>
+          </div>
+
+          <!-- Quick System Repairs Card -->
+          <div class="card list-card">
+            <h3>Quick System Repairs</h3>
+            <p class="subtitle">Execute common Windows repair protocols instantly</p>
+            <div class="solutions-list">
+              <div class="solution-item" onclick="openToolModal('sfc_scan')">
+                <div class="solution-icon offline-color">
+                  <i data-lucide="shield-check"></i>
+                </div>
+                <div class="solution-info">
+                  <h4>Run SFC Scan</h4>
+                  <p>Scan and repair corrupted or missing system files.</p>
+                </div>
+                <i data-lucide="chevron-right" class="arrow-right"></i>
+              </div>
+              <div class="solution-item" onclick="openToolModal('dism_restore')">
+                <div class="solution-icon jam-color">
+                  <i data-lucide="activity"></i>
+                </div>
+                <div class="solution-info">
+                  <h4>DISM Image Health Repair</h4>
+                  <p>Restore Windows component store image health.</p>
+                </div>
+                <i data-lucide="chevron-right" class="arrow-right"></i>
+              </div>
+              <div class="solution-item" onclick="openToolModal('flush_dns')">
+                <div class="solution-icon quality-color">
+                  <i data-lucide="network"></i>
+                </div>
+                <div class="solution-info">
+                  <h4>Flush DNS & IP</h4>
+                  <p>Clear client resolver cache and renew DHCP allocation.</p>
+                </div>
+                <i data-lucide="chevron-right" class="arrow-right"></i>
+              </div>
+              <div class="solution-item" onclick="openToolModal('reset_wua')">
+                <div class="solution-icon spooler-color">
+                  <i data-lucide="refresh-cw"></i>
+                </div>
+                <div class="solution-info">
+                  <h4>Reset Windows Update</h4>
+                  <p>Purge local update download caches and restart services.</p>
+                </div>
+                <i data-lucide="chevron-right" class="arrow-right"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Maintenance Summary Log -->
+          <div class="card summary-card">
+            <div class="card-header-row">
+              <h3>Recent Actions</h3>
+              <button class="btn btn-link" onclick="switchTab('auditlogs')">View All</button>
+            </div>
+            <div class="timeline-compact" id="compact-timeline">
+              <!-- Dynamically Populated -->
+              <p class="empty-state">No actions logged yet.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 8: PRINTERS (SUB-TABS WRAPPER) -->
+      <section id="printers" class="tab-panel">
+        <!-- Sub navigation tabs -->
+        <div class="sub-nav-tabs">
+          <button class="sub-nav-tab active" onclick="switchSubTab('printer-status')">
+            <i data-lucide="printer" style="width:14px; height:14px; margin-right:4px; vertical-align: middle;"></i> Status & Control
+          </button>
+          <button class="sub-nav-tab" onclick="switchSubTab('diagnostics')">
+            <i data-lucide="activity" style="width:14px; height:14px; margin-right:4px; vertical-align: middle;"></i> Smart Diagnostics
+          </button>
+          <button class="sub-nav-tab" onclick="switchSubTab('errors')">
+            <i data-lucide="search-code" style="width:14px; height:14px; margin-right:4px; vertical-align: middle;"></i> Error Lookup
+          </button>
+          <button class="sub-nav-tab" onclick="switchSubTab('testpage')">
+            <i data-lucide="printer-check" style="width:14px; height:14px; margin-right:4px; vertical-align: middle;"></i> Test Page Studio
+          </button>
+          <button class="sub-nav-tab" onclick="switchSubTab('printer-migration')">
+            <i data-lucide="folder-sync" style="width:14px; height:14px; margin-right:4px; vertical-align: middle;"></i> Printer Migration
+          </button>
+        </div>
+
+        <!-- Sub-tab panel 1: Status & Control -->
+        <div id="printer-status" class="sub-tab-panel active">
+          <div class="dashboard-grid">
+            <!-- Left Panel: Printer Status Overview -->
+            <div class="card hero-card">
+              <div class="card-header">
+                <span class="badge badge-success">System Online</span>
+                <h2>Active Device Overview</h2>
+              </div>
+              <div class="printer-viz">
+                <div class="printer-frame">
+                  <i data-lucide="printer" class="printer-illustration"></i>
+                  <div class="paper-feed"></div>
+                </div>
+                <div class="printer-stats">
+                  <div class="stat-row">
+                    <span class="stat-label">Model:</span>
+                    <span class="stat-value">Generic Multi-Function Inkjet / Laser</span>
+                  </div>
+                  <div class="stat-row">
+                    <span class="stat-label">Status:</span>
+                    <span class="stat-value text-success">Ready to Print</span>
+                  </div>
+                  <div class="stat-row">
+                    <span class="stat-label">Connection:</span>
+                    <span class="stat-value">Wi-Fi (5 GHz)</span>
+                  </div>
+                </div>
+              </div>
+              <div class="quick-diagnostics-bar">
+                <button class="btn btn-secondary" onclick="switchSubTab('diagnostics')">
+                  <i data-lucide="activity"></i> Run Diagnostics
+                </button>
+                <button class="btn btn-secondary" onclick="switchSubTab('testpage')">
+                  <i data-lucide="printer-check"></i> Test Page Studio
+                </button>
+              </div>
+            </div>
+
+            <!-- Ink Levels Card -->
+            <div class="card ink-card">
+              <h3>Cartridge & Ink Levels</h3>
+              <p class="subtitle">Estimated remaining supply levels</p>
+              <div class="ink-levels-container">
+                <!-- Black -->
+                <div class="ink-gauge">
+                  <div class="ink-cylinder black-ink">
+                    <div class="ink-fill" style="height: 65%;"></div>
+                    <span class="ink-percentage">65%</span>
+                  </div>
+                  <span class="ink-label">Black (K)</span>
+                </div>
+                <!-- Cyan -->
+                <div class="ink-gauge">
+                  <div class="ink-cylinder cyan-ink">
+                    <div class="ink-fill" style="height: 42%;"></div>
+                    <span class="ink-percentage">42%</span>
+                  </div>
+                  <span class="ink-label">Cyan (C)</span>
+                </div>
+                <!-- Magenta -->
+                <div class="ink-gauge">
+                  <div class="ink-cylinder magenta-ink">
+                    <div class="ink-fill" style="height: 18%;"></div>
+                    <span class="ink-percentage warning-text">18%</span>
+                  </div>
+                  <span class="ink-label">Magenta (M)</span>
+                </div>
+                <!-- Yellow -->
+                <div class="ink-gauge">
+                  <div class="ink-cylinder yellow-ink">
+                    <div class="ink-fill" style="height: 80%;"></div>
+                    <span class="ink-percentage">80%</span>
+                  </div>
+                  <span class="ink-label">Yellow (Y)</span>
+                </div>
+              </div>
+              <div class="ink-alert warning-box">
+                <i data-lucide="alert-triangle"></i>
+                <span>Magenta ink is low. Consider replacing soon to maintain print quality.</span>
+              </div>
+            </div>
+
+            <!-- Common Issues Quick Actions -->
+            <div class="card list-card">
+              <h3>Common Printer Solutions</h3>
+              <div class="solutions-list">
+                <div class="solution-item" onclick="startWizardWithIssue('offline')">
+                  <div class="solution-icon offline-color">
+                    <i data-lucide="wifi-off"></i>
+                  </div>
+                  <div class="solution-info">
+                    <h4>Printer is Offline</h4>
+                    <p>Fix wireless connectivity, IP conflicts, or offline driver state.</p>
+                  </div>
+                  <i data-lucide="chevron-right" class="arrow-right"></i>
+                </div>
+                <div class="solution-item" onclick="startWizardWithIssue('paperjam')">
+                  <div class="solution-icon jam-color">
+                    <i data-lucide="alert-octagon"></i>
+                  </div>
+                  <div class="solution-info">
+                    <h4>Clear Paper Jam</h4>
+                    <p>Step-by-step guidance on removing paper and cleaning roller sensors.</p>
+                  </div>
+                  <i data-lucide="chevron-right" class="arrow-right"></i>
+                </div>
+                <div class="solution-item" onclick="startWizardWithIssue('streaks')">
+                  <div class="solution-icon quality-color">
+                    <i data-lucide="brush"></i>
+                  </div>
+                  <div class="solution-info">
+                    <h4>Faded Prints or Streaks</h4>
+                    <p>Run printhead cleaning cycle, fix clogged nozzles, or realign cartridge.</p>
+                  </div>
+                  <i data-lucide="chevron-right" class="arrow-right"></i>
+                </div>
+                <div class="solution-item" onclick="startWizardWithIssue('spooler')">
+                  <div class="solution-icon spooler-color">
+                    <i data-lucide="cpu"></i>
+                  </div>
+                  <div class="solution-info">
+                    <h4>Clear Print Spooler</h4>
+                    <p>Fix jobs stuck in queue blocking all printing tasks.</p>
+                  </div>
+                  <i data-lucide="chevron-right" class="arrow-right"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Printer Admin Toolbox -->
+            <div class="card toolbox-card" style="grid-column: span 6;">
+              <div class="card-header-row">
+                <div>
+                  <h3>Printer Admin Toolbox</h3>
+                  <p class="subtitle" style="margin-bottom: 0;">Registry fixes, queue resets, spooler utilities, and system configurations for printing infrastructure.</p>
+                </div>
+                <span class="badge badge-warning"><i data-lucide="shield-alert" style="width:12px; height:12px; margin-right:4px; vertical-align: middle;"></i> Elevated</span>
+              </div>
+              <div class="toolbox-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; margin-top: 15px;">
+                <button class="tool-btn btn-secondary" onclick="openToolModal('quick_repair')">
+                  <i data-lucide="zap"></i>
+                  <span>Printer Quick Repair</span>
+                </button>
+                <button class="tool-btn btn-secondary" onclick="openToolModal('clear_queue')">
+                  <i data-lucide="trash-2"></i>
+                  <span>Clear Print Queue</span>
+                </button>
+                <button class="tool-btn btn-secondary" onclick="openToolModal('restart_spooler')">
+                  <i data-lucide="rotate-cw"></i>
+                  <span>Restart Print Spooler</span>
+                </button>
+                <button class="tool-btn btn-secondary" onclick="openToolModal('devices_printers')">
+                  <i data-lucide="folder-open"></i>
+                  <span>Devices and Printers</span>
+                </button>
+                <button class="tool-btn btn-secondary" onclick="openToolModal('print_management')">
+                  <i data-lucide="sliders"></i>
+                  <span>Print Management</span>
+                </button>
+                <button class="tool-btn btn-secondary" onclick="openToolModal('sharing_center')">
+                  <i data-lucide="network"></i>
+                  <span>Network Sharing Center</span>
+                </button>
+                <button class="tool-btn btn-secondary" onclick="openToolModal('printers_settings')">
+                  <i data-lucide="settings"></i>
+                  <span>Printers Scanners</span>
+                </button>
+                <button class="tool-btn btn-secondary" onclick="openToolModal('point_print_fix')">
+                  <i data-lucide="unlock"></i>
+                  <span>Point and Print Fix</span>
+                </button>
+                <button class="tool-btn btn-secondary" onclick="openToolModal('rpc_fixes')">
+                  <i data-lucide="shield-alert"></i>
+                  <span>RPC & GPO Fixes</span>
+                </button>
+                <button class="tool-btn btn-secondary" onclick="openToolModal('network_discovery')">
+                  <i data-lucide="eye"></i>
+                  <span>Enable Network Discovery</span>
+                </button>
+                <button class="tool-btn btn-secondary" onclick="openToolModal('enable_smb1')">
+                  <i data-lucide="plus-circle"></i>
+                  <span>Enable SMB1</span>
+                </button>
+                <button class="tool-btn btn-secondary" onclick="openToolModal('disable_smb1')">
+                  <i data-lucide="minus-circle"></i>
+                  <span>Disable SMB1</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sub-tab panel 2: Smart Diagnostics -->
+        <div id="diagnostics" class="sub-tab-panel">
+          <div class="container-medium">
+            <div class="page-heading">
+              <h2>Interactive Smart Diagnostics</h2>
+              <p>Our intelligent wizard isolates common errors and details exact mechanical or configuration actions to take.</p>
+            </div>
+
+            <div class="card wizard-card">
+              <!-- Wizard Progress Bar -->
+              <div class="wizard-progress">
+                <div class="progress-step active" id="step-dot-1">1. Choose Issue</div>
+                <div class="progress-line"></div>
+                <div class="progress-step" id="step-dot-2">2. Diagnostics</div>
+                <div class="progress-line"></div>
+                <div class="progress-step" id="step-dot-3">3. Solution</div>
+              </div>
+
+              <!-- Wizard Inner Content -->
+              <div class="wizard-body">
+                
+                <!-- STEP 1: Select Broad Category -->
+                <div class="wizard-step-pane active" id="wizard-step-1">
+                  <h3 class="step-title">What seems to be the problem with your printer?</h3>
+                  <div class="category-grid">
+                    <button class="category-btn" onclick="wizardSelectCategory('connectivity')">
+                      <i data-lucide="wifi"></i>
+                      <h4>Connectivity & Network</h4>
+                      <p>Cannot connect, offline state, USB or network sharing issues.</p>
+                    </button>
+                    <button class="category-btn" onclick="wizardSelectCategory('quality')">
+                      <i data-lucide="sparkles"></i>
+                      <h4>Print Quality & Ink</h4>
+                      <p>Streaks, light printing, missing colors, or double image.</p>
+                    </button>
+                    <button class="category-btn" onclick="wizardSelectCategory('paper')">
+                      <i data-lucide="files"></i>
+                      <h4>Paper Jam & Feeding</h4>
+                      <p>Paper stuck, multi-sheet feeding, or empty tray warnings.</p>
+                    </button>
+                    <button class="category-btn" onclick="wizardSelectCategory('hardware')">
+                      <i data-lucide="alert-triangle"></i>
+                      <h4>Hardware & Errors</h4>
+                      <p>Flashing red lights, strange noises, or device error codes.</p>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- STEP 2: Questions Dynamic Portal -->
+                <div class="wizard-step-pane" id="wizard-step-2">
+                  <h3 class="step-title" id="diagnostic-question-title">Diagnostic check in progress...</h3>
+                  <div class="question-options" id="diagnostic-options">
+                    <!-- JS will dynamically populate buttons here -->
+                  </div>
+                  <div class="wizard-navigation">
+                    <button class="btn btn-secondary" onclick="wizardBack()"><i data-lucide="arrow-left"></i> Back</button>
+                  </div>
+                </div>
+
+                <!-- STEP 3: Detailed Solution Action Plan -->
+                <div class="wizard-step-pane" id="wizard-step-3">
+                  <div class="solution-header">
+                    <div class="success-icon-wrap">
+                      <i data-lucide="check-circle-2" class="icon-success"></i>
+                    </div>
+                    <div>
+                      <h3 class="step-title" id="solution-title">Recommended Solution</h3>
+                      <p class="subtitle">Follow the instructions below to resolve the issue.</p>
+                    </div>
+                  </div>
+
+                  <div class="solution-content">
+                    <div class="solution-steps" id="solution-steps-list">
+                      <!-- Dynamic Steps List -->
+                    </div>
+                    
+                    <div class="solution-sidebar">
+                      <div class="info-card">
+                        <h4><i data-lucide="info"></i> Quick Tip</h4>
+                        <p id="solution-tip-text">Always power down your printer before performing hardware interventions like clearing paper jams or replacing printer heads.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="wizard-navigation solution-footer">
+                    <button class="btn btn-secondary" onclick="wizardReset()"><i data-lucide="rotate-ccw"></i> Restart Wizard</button>
+                    <button class="btn btn-secondary" id="log-solution-btn">
+                      <i data-lucide="clipboard-check"></i> Log Resolution Action
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sub-tab panel 3: Error Code Lookup -->
+        <div id="errors" class="sub-tab-panel">
+          <div class="container-medium">
+            <div class="page-heading">
+              <h2>Printer Error Code Directory</h2>
+              <p>Enter your printer's brand and the flashing error code or message to view troubleshooting guides.</p>
+            </div>
+
+            <div class="card search-card">
+              <div class="search-form">
+                <div class="input-group flex-2">
+                  <i data-lucide="search" class="input-icon"></i>
+                  <input type="text" id="error-search-input" placeholder="Type error code e.g. 59.F0, 1401, 0xEA, E2..." autocomplete="off">
+                </div>
+                <div class="input-group">
+                  <i data-lucide="tag" class="input-icon"></i>
+                  <select id="brand-select">
+                    <option value="all">All Brands</option>
+                    <option value="hp">HP</option>
+                    <option value="canon">Canon</option>
+                    <option value="epson">Epson</option>
+                    <option value="brother">Brother</option>
+                    <option value="windows">Windows / Network</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Fast Filters tags -->
+              <div class="tag-filters">
+                <span class="tag-label">Popular searches:</span>
+                <button class="btn-tag" onclick="fillSearch('59.F0', 'hp')">HP 59.F0</button>
+                <button class="btn-tag" onclick="fillSearch('1401', 'canon')">Canon 1401</button>
+                <button class="btn-tag" onclick="fillSearch('0xEA', 'epson')">Epson 0xEA</button>
+                <button class="btn-tag" onclick="fillSearch('0x0000011b', 'windows')">RPC 0x0000011b</button>
+                <button class="btn-tag" onclick="fillSearch('0x00000709', 'windows')">RPC 0x00000709</button>
+                <button class="btn-tag" onclick="fillSearch('SMB-Share', 'windows')">SMB Config</button>
+              </div>
+            </div>
+
+            <div class="search-results-section">
+              <div id="results-count-text" class="results-count">Showing common codes...</div>
+              <div class="results-grid" id="error-results-grid">
+                <!-- Error Code cards populated dynamically -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sub-tab panel 4: Test Page Studio -->
+        <div id="testpage" class="sub-tab-panel">
+          <div class="test-page-layout">
+            <!-- Control Panel Left -->
+            <div class="card control-card">
+              <h3>Test Page Settings</h3>
+              <p class="subtitle">Customize alignment grids and print patterns to run manual diagnostics.</p>
+              
+              <div class="control-form">
+                <div class="form-group">
+                  <label>Test Template Type</label>
+                  <div class="radio-group-vertical">
+                    <label class="radio-label">
+                      <input type="radio" name="test-type" value="standard" checked>
+                      <div class="radio-custom"></div>
+                      <div class="radio-info">
+                        <strong>Standard Calibration</strong>
+                        <span>Colors, gradients, alignment & text test</span>
+                      </div>
+                    </label>
+                    <label class="radio-label">
+                      <input type="radio" name="test-type" value="cmyk">
+                      <div class="radio-custom"></div>
+                      <div class="radio-info">
+                        <strong>CMYK Solid Bars</strong>
+                        <span>Verifies nozzle ink flow for primary colors</span>
+                      </div>
+                    </label>
+                    <label class="radio-label">
+                      <input type="radio" name="test-type" value="alignment">
+                      <div class="radio-custom"></div>
+                      <div class="radio-info">
+                        <strong>Alignment & Grid</strong>
+                        <span>Check paper feed sync & printhead spacing</span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <hr class="divider">
+
+                <div class="form-group">
+                  <label>Pattern Colors</label>
+                  <div class="checkbox-group">
+                    <label class="checkbox-label">
+                      <input type="checkbox" id="check-color-c" checked> Cyan
+                    </label>
+                    <label class="checkbox-label">
+                      <input type="checkbox" id="check-color-m" checked> Magenta
+                    </label>
+                    <label class="checkbox-label">
+                      <input type="checkbox" id="check-color-y" checked> Yellow
+                    </label>
+                    <label class="checkbox-label">
+                      <input type="checkbox" id="check-color-k" checked> Black
+                    </label>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="include-text" checked> Include Text Block & Font Scales
+                  </label>
+                </div>
+
+                <div class="form-group">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="include-grid" checked> Render Printhead Margin Guides
+                  </label>
+                </div>
+
+                <div class="action-buttons-stack">
+                  <button class="btn btn-secondary btn-large" onclick="triggerTestPagePrint()">
+                    <i data-lucide="printer"></i> Send to Printer / Print PDF
+                  </button>
+                  <button class="btn btn-secondary" onclick="logMaintenanceAction('Printed Calibration Test Page')">
+                    <i data-lucide="save"></i> Log Print Task
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Preview Panel Right -->
+            <div class="preview-panel">
+              <div class="preview-header">
+                <span><i data-lucide="eye"></i> Digital Print Sheet Preview</span>
+                <span class="preview-badge">A4 / Letter Format</span>
+              </div>
+              
+              <div class="print-paper-wrapper">
+                <!-- Printable container -->
+                <div class="print-paper-sheet" id="test-page-printout">
+                  <!-- Header of sheet (rendered in black/white styled for printer) -->
+                  <div class="sheet-header">
+                    <div class="sheet-title">PrintPulse Diagnostic Calibration Test</div>
+                    <div class="sheet-meta">
+                      <span id="sheet-timestamp">Date: 2026-06-25</span> | System Code: DIAG-902-A
+                    </div>
+                  </div>
+
+                  <!-- Alignment targets corners -->
+                  <div class="target top-left"></div>
+                  <div class="target top-right"></div>
+                  <div class="target bottom-left"></div>
+                  <div class="target bottom-right"></div>
+
+                  <!-- Text scale block -->
+                  <div class="sheet-section" id="sheet-text-section">
+                    <h4 class="section-title">Font Size & Sharpness Test (12pt to 6pt)</h4>
+                    <p class="test-text text-12">The quick brown fox jumps over the lazy dog. (12pt)</p>
+                    <p class="test-text text-10">The quick brown fox jumps over the lazy dog. (10pt)</p>
+                    <p class="test-text text-8">The quick brown fox jumps over the lazy dog. (8pt)</p>
+                    <p class="test-text text-7">The quick brown fox jumps over the lazy dog. (7pt)</p>
+                    <p class="test-text text-6">The quick brown fox jumps over the lazy dog. (6pt)</p>
+                    <p class="lorem-block">abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ 1234567890 !@#$%^&*()</p>
+                  </div>
+
+                  <!-- Color bar block -->
+                  <div class="sheet-section" id="sheet-color-section">
+                    <h4 class="section-title">Solid Colors & Gradients</h4>
+                    <div class="gradient-bars">
+                      <!-- Cyan bar -->
+                      <div class="bar-row cyan-row">
+                        <div class="solid-color cyan-solid">C</div>
+                        <div class="gradient-fill cyan-grad"></div>
+                      </div>
+                      <!-- Magenta bar -->
+                      <div class="bar-row magenta-row">
+                        <div class="solid-color magenta-solid">M</div>
+                        <div class="gradient-fill magenta-grad"></div>
+                      </div>
+                      <!-- Yellow bar -->
+                      <div class="bar-row yellow-row">
+                        <div class="solid-color yellow-solid">Y</div>
+                        <div class="gradient-fill yellow-grad"></div>
+                      </div>
+                      <!-- Black bar -->
+                      <div class="bar-row black-row">
+                        <div class="solid-color black-solid">K</div>
+                        <div class="gradient-fill black-grad"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Dynamic CMYK Blocks for direct jet test (toggled via js) -->
+                  <div class="sheet-section" id="sheet-cmyk-blocks" style="display: none;">
+                    <h4 class="section-title">CMYK Inkjets Channel Test</h4>
+                    <div class="cmyk-grid">
+                      <div class="cmyk-block cyan-block"></div>
+                      <div class="cmyk-block magenta-block"></div>
+                      <div class="cmyk-block yellow-block"></div>
+                      <div class="cmyk-block black-block"></div>
+                    </div>
+                  </div>
+
+                  <!-- Alignment Grid Section -->
+                  <div class="sheet-section" id="sheet-grid-section">
+                    <h4 class="section-title">Alignment Grid & Aspect Ratio Guides</h4>
+                    <div class="alignment-grid-box">
+                      <div class="vertical-center-line"></div>
+                      <div class="horizontal-center-line"></div>
+                      <div class="alignment-circles">
+                        <div class="circle c1"></div>
+                        <div class="circle c2"></div>
+                        <div class="circle c3"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Footer of sheet -->
+                  <div class="sheet-footer">
+                    <span>If lines are wavy, perform Printhead Alignment. If colors streak/are absent, perform Nozzle Cleaning.</span>
+                    <span>Page 1 / 1</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sub-tab panel 5: Printer Migration -->
+        <div id="printer-migration" class="sub-tab-panel">
+          <div class="container-medium">
+            <div class="page-heading">
+              <h2>Printer Settings & Drivers Migration</h2>
+              <p>Backup and restore printer drivers, export network profiles, and migration templates using Windows native PrintBrm.exe.</p>
+            </div>
+            
+            <div class="downloader-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
+              <div class="card">
+                <div class="app-card-header" style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                  <div class="app-card-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--state-warning); width: 40px; height: 40px; border-radius: var(--border-radius-sm); display: flex; align-items: center; justify-content: center;"><i data-lucide="folder-output"></i></div>
+                  <div>
+                    <h4 class="app-card-title" style="font-weight: 600;">Backup All Printers</h4>
+                    <span class="app-card-category" style="font-size: 0.75rem; color: var(--text-muted);">Printer Migration</span>
+                  </div>
+                </div>
+                <p class="app-card-desc" style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 16px;">Exports all active printers, print queues, network ports, and drivers to a single backup file.</p>
+                <button class="btn btn-secondary" onclick="openToolModal('backup_printers')"><i data-lucide="download"></i> Backup Printers</button>
+              </div>
+              <div class="card">
+                <div class="app-card-header" style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                  <div class="app-card-icon" style="background: rgba(16, 185, 129, 0.15); color: var(--state-success); width: 40px; height: 40px; border-radius: var(--border-radius-sm); display: flex; align-items: center; justify-content: center;"><i data-lucide="folder-input"></i></div>
+                  <div>
+                    <h4 class="app-card-title" style="font-weight: 600;">Restore All Printers</h4>
+                    <span class="app-card-category" style="font-size: 0.75rem; color: var(--text-muted);">Printer Migration</span>
+                  </div>
+                </div>
+                <p class="app-card-desc" style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 16px;">Restores printer queues, drivers, and port settings from a previously exported migration backup file.</p>
+                <button class="btn btn-secondary" onclick="openToolModal('restore_printers')"><i data-lucide="upload"></i> Restore Printers</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: SYSTEM REPAIRS -->
+      <section id="repairs" class="tab-panel">
+        <div class="card-header-row" style="margin-bottom: 20px;">
+          <div>
+            <h2>System Scans & Repairs</h2>
+            <p class="subtitle">Windows system file checkers, update recovery, and network troubleshooter blocks.</p>
+          </div>
+        </div>
+        <div class="downloader-grid">
+          <!-- SFC & DISM repairs -->
+          <div class="app-card">
+            <div class="app-card-header">
+              <div class="app-card-icon"><i data-lucide="shield-check"></i></div>
+              <div>
+                <h4 class="app-card-title">System File Checker (SFC)</h4>
+                <span class="app-card-category">System Integrity</span>
+              </div>
+            </div>
+            <p class="app-card-desc">Scans and repairs corrupted or missing system files using the Windows cache copy.</p>
+            <button class="btn btn-secondary" onclick="openToolModal('sfc_scan')"><i data-lucide="play"></i> Run SFC /scannow</button>
+          </div>
+          <div class="app-card">
+            <div class="app-card-header">
+              <div class="app-card-icon"><i data-lucide="activity"></i></div>
+              <div>
+                <h4 class="app-card-title">DISM Health Restore</h4>
+                <span class="app-card-category">System Integrity</span>
+              </div>
+            </div>
+            <p class="app-card-desc">Restores Windows system image health against corruption using Windows Update as a source.</p>
+            <button class="btn btn-secondary" onclick="openToolModal('dism_restore')"><i data-lucide="play"></i> Run DISM RestoreHealth</button>
+          </div>
+          <!-- Windows Update Reset -->
+          <div class="app-card">
+            <div class="app-card-header">
+              <div class="app-card-icon"><i data-lucide="refresh-cw"></i></div>
+              <div>
+                <h4 class="app-card-title">Windows Update Reset</h4>
+                <span class="app-card-category">System Services</span>
+              </div>
+            </div>
+            <p class="app-card-desc">Stops update services, purges corrupted SoftwareDistribution download cache, and restarts update engine.</p>
+            <button class="btn btn-secondary" onclick="openToolModal('reset_wua')"><i data-lucide="zap"></i> Reset Update Service</button>
+          </div>
+          <!-- Network Fixes -->
+          <div class="app-card">
+            <div class="app-card-header">
+              <div class="app-card-icon"><i data-lucide="network"></i></div>
+              <div>
+                <h4 class="app-card-title">Network Resolver Flush</h4>
+                <span class="app-card-category">Networking</span>
+              </div>
+            </div>
+            <p class="app-card-desc">Flushes DNS cache, releases and renews DHCP IP configurations to restore connection state.</p>
+            <button class="btn btn-secondary" onclick="openToolModal('flush_dns')"><i data-lucide="zap"></i> Flush DNS & IP</button>
+          </div>
+          <div class="app-card">
+            <div class="app-card-header">
+              <div class="app-card-icon"><i data-lucide="zap"></i></div>
+              <div>
+                <h4 class="app-card-title">Winsock Reset</h4>
+                <span class="app-card-category">Networking</span>
+              </div>
+            </div>
+            <p class="app-card-desc">Resets the Windows socket API catalog to default TCP/IP stack configuration.</p>
+            <button class="btn btn-secondary" onclick="openToolModal('reset_winsock')"><i data-lucide="zap"></i> Reset Winsock Catalog</button>
+          </div>
+          <!-- Firewall Control -->
+          <div class="app-card">
+            <div class="app-card-header">
+              <div class="app-card-icon"><i data-lucide="lock"></i></div>
+              <div>
+                <h4 class="app-card-title">Windows Firewall Reset</h4>
+                <span class="app-card-category">Security</span>
+              </div>
+            </div>
+            <p class="app-card-desc">Resets Windows Defender Firewall rules and profiles back to factory default policies.</p>
+            <button class="btn btn-secondary" onclick="openToolModal('reset_firewall')"><i data-lucide="rotate-ccw"></i> Reset Firewall</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: WINDOWS DEBLOATER -->
+      <section id="debloater" class="tab-panel">
+        <div class="card-header-row" style="margin-bottom: 20px;">
+          <div>
+            <h2>Windows System Debloater</h2>
+            <p class="subtitle">Disable background telemetry, stop tracking services, remove built-in bloatware, and create restore points.</p>
+          </div>
+          <button class="btn btn-secondary" onclick="executeDebloatAll()"><i data-lucide="check-square"></i> Apply Selected Tweaks</button>
+        </div>
+        <div class="debloater-container">
+          <!-- Restore point helper -->
+          <div class="card" style="background: rgba(6, 182, 212, 0.04); border-color: rgba(6, 182, 212, 0.15);">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px; width: 100%;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <i data-lucide="shield" style="color: var(--accent-cyan); width: 24px; height: 24px;"></i>
+                <div>
+                  <h4 style="margin: 0; font-weight:600; font-size:14px;">Create System Restore Point</h4>
+                  <p style="margin: 2px 0 0 0; font-size:12px; color: var(--text-muted);">Recommended before running system tweaks or uninstalls.</p>
+                </div>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="openToolModal('create_restore_point')"><i data-lucide="plus"></i> Create Point</button>
+            </div>
+          </div>
+
+          <div class="debloat-card-list">
+            <label class="debloat-card">
+              <input type="checkbox" id="tweak-telemetry" checked>
+              <div class="debloat-info">
+                <span class="debloat-title">Disable System Telemetry</span>
+                <span class="debloat-desc">Blocks background telemetry data collection (DiagTrack, feedback loops).</span>
+              </div>
+            </label>
+            <label class="debloat-card">
+              <input type="checkbox" id="tweak-cortana" checked>
+              <div class="debloat-info">
+                <span class="debloat-title">Disable Cortana Search</span>
+                <span class="debloat-desc">Disables Cortana integration and background assistant processes.</span>
+              </div>
+            </label>
+            <label class="debloat-card">
+              <input type="checkbox" id="tweak-onedrive">
+              <div class="debloat-info">
+                <span class="debloat-title">Disable OneDrive Client</span>
+                <span class="debloat-desc">Blocks OneDrive from running at startup and unlinks integration.</span>
+              </div>
+            </label>
+            <label class="debloat-card">
+              <input type="checkbox" id="tweak-xbox" checked>
+              <div class="debloat-info">
+                <span class="debloat-title">Disable Xbox Live Services</span>
+                <span class="debloat-desc">Stops and disables non-essential Xbox background monitoring services.</span>
+              </div>
+            </label>
+            <label class="debloat-card">
+              <input type="checkbox" id="tweak-bloatware">
+              <div class="debloat-info">
+                <span class="debloat-title">Uninstall Bloatware Apps</span>
+                <span class="debloat-desc">Removes Bing News, Weather, ZuneMusic, Solitaire, and preinstalled junk.</span>
+              </div>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: APP DOWNLOADER -->
+      <section id="downloader" class="tab-panel">
+        <div class="card-header-row" style="margin-bottom: 20px;">
+          <div>
+            <h2>One-Click App Downloader</h2>
+            <p class="subtitle">Install common applications silently in the background using the Windows Package Manager (winget).</p>
+          </div>
+        </div>
+        <div class="downloader-grid">
+          <!-- Web Browsers -->
+          <div class="app-card" id="app-chrome">
+            <div class="app-card-header">
+              <div class="app-card-icon"><i data-lucide="chrome"></i></div>
+              <div>
+                <span class="app-card-category">Web Browser</span>
+                <h4 class="app-card-title">Google Chrome</h4>
+              </div>
+            </div>
+            <p class="app-card-desc">Google's fast, secure, and popular web browser featuring rich extension support.</p>
+            <button class="btn btn-secondary app-install-btn" onclick="installApp('Google.Chrome')"><i data-lucide="download"></i> Install App</button>
+          </div>
+          <div class="app-card" id="app-firefox">
+            <div class="app-card-header">
+              <div class="app-card-icon"><i data-lucide="globe"></i></div>
+              <div>
+                <span class="app-card-category">Web Browser</span>
+                <h4 class="app-card-title">Mozilla Firefox</h4>
+              </div>
+            </div>
+            <p class="app-card-desc">Privacy-focused, fast web browser built on a secure open-source engine.</p>
+            <button class="btn btn-secondary app-install-btn" onclick="installApp('Mozilla.Firefox')"><i data-lucide="download"></i> Install App</button>
+          </div>
+          <!-- Development Tools -->
+          <div class="app-card" id="app-vscode">
+            <div class="app-card-header">
+              <div class="app-card-icon"><i data-lucide="code-2"></i></div>
+              <div>
+                <span class="app-card-category">Development</span>
+                <h4 class="app-card-title">VS Code</h4>
+              </div>
+            </div>
+            <p class="app-card-desc">Visual Studio Code editor featuring syntax highlighting, debugging, and git integration.</p>
+            <button class="btn btn-secondary app-install-btn" onclick="installApp('Microsoft.VisualStudioCode')"><i data-lucide="download"></i> Install App</button>
+          </div>
+          <div class="app-card" id="app-git">
+            <div class="app-card-header">
+              <div class="app-card-icon"><i data-lucide="git-branch"></i></div>
+              <div>
+                <span class="app-card-category">Development</span>
+                <h4 class="app-card-title">Git Command Line</h4>
+              </div>
+            </div>
+            <p class="app-card-desc">Distributed version control system for tracking source code files changes.</p>
+            <button class="btn btn-secondary app-install-btn" onclick="installApp('Git.Git')"><i data-lucide="download"></i> Install App</button>
+          </div>
+          <!-- Utilities -->
+          <div class="app-card" id="app-vlc">
+            <div class="app-card-header">
+              <div class="app-card-icon"><i data-lucide="play-square"></i></div>
+              <div>
+                <span class="app-card-category">Multimedia</span>
+                <h4 class="app-card-title">VLC Media Player</h4>
+              </div>
+            </div>
+            <p class="app-card-desc">Universal multimedia player that runs almost any file format without additional codecs.</p>
+            <button class="btn btn-secondary app-install-btn" onclick="installApp('VideoLAN.VLC')"><i data-lucide="download"></i> Install App</button>
+          </div>
+          <div class="app-card" id="app-sevenzip">
+            <div class="app-card-header">
+              <div class="app-card-icon"><i data-lucide="archive"></i></div>
+              <div>
+                <span class="app-card-category">Utility</span>
+                <h4 class="app-card-title">7-Zip Archiver</h4>
+              </div>
+            </div>
+            <p class="app-card-desc">High-ratio file archiver utility featuring support for ZIP, 7z, RAR, and TAR files.</p>
+            <button class="btn btn-secondary app-install-btn" onclick="installApp('7zip.7zip')"><i data-lucide="download"></i> Install App</button>
+          </div>
+
+          <!-- Ninite Integration -->
+          <div class="app-card" id="app-ninite">
+            <div class="app-card-header" style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+              <div class="app-card-icon" style="background: rgba(6, 182, 212, 0.15); color: var(--accent-cyan); width: 40px; height: 40px; border-radius: var(--border-radius-sm); display: flex; align-items: center; justify-content: center;"><i data-lucide="grid"></i></div>
+              <div>
+                <span class="app-card-category" style="font-size: 0.75rem; color: var(--text-muted);">Installer Portal</span>
+                <h4 class="app-card-title" style="font-weight: 600;">Ninite custom download</h4>
+              </div>
+            </div>
+            <p class="app-card-desc" style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 16px;">Create a custom installer package with multiple apps on ninite.com, or launch the automated winget bundle.</p>
+            <div style="display: flex; gap: 8px;">
+              <a href="https://ninite.com" target="_blank" class="btn btn-secondary" style="flex: 1; text-align: center; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 4px; font-size: 0.75rem;"><i data-lucide="external-link"></i> Website</a>
+              <button class="btn btn-secondary app-install-btn" style="flex: 1.2; font-size: 0.75rem; padding: 6px 8px;" onclick="installNiniteBundle()"><i data-lucide="zap"></i> WinGet Bundle</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 5: USER TOOLS -->
+      <section id="usertools" class="tab-panel">
+        <div class="card-header-row" style="margin-bottom: 20px;">
+          <div>
+            <h2>Administrative User Tools</h2>
+            <p class="subtitle">Quick access shortcuts to launch Windows administrative consoles and policy editors.</p>
+          </div>
+        </div>
+        <div class="downloader-grid">
+          <div class="card">
+            <div class="app-card-header">
+              <div class="app-card-icon"><i data-lucide="user-cog"></i></div>
+              <div>
+                <h4 class="app-card-title">Local Users & Groups</h4>
+                <span class="app-card-category">Management Console</span>
+              </div>
+            </div>
+            <p class="app-card-desc">Manages user accounts, local group profiles, and password requirements (lusrmgr.msc).</p>
+            <button class="btn btn-secondary" onclick="openToolModal('lusrmgr')"><i data-lucide="external-link"></i> Launch lusrmgr.msc</button>
+          </div>
+          <div class="card">
+            <div class="app-card-header">
+              <div class="app-card-icon"><i data-lucide="shield-alert"></i></div>
+              <div>
+                <h4 class="app-card-title">User Account Control (UAC)</h4>
+                <span class="app-card-category">Security Settings</span>
+              </div>
+            </div>
+            <p class="app-card-desc">Configure security slider levels for app permissions warnings and execution elevation prompts.</p>
+            <button class="btn btn-secondary" onclick="openToolModal('uac_settings')"><i data-lucide="external-link"></i> Open UAC Settings</button>
+          </div>
+          <div class="card">
+            <div class="app-card-header">
+              <div class="app-card-icon"><i data-lucide="settings"></i></div>
+              <div>
+                <h4 class="app-card-title">System Properties</h4>
+                <span class="app-card-category">Advanced Settings</span>
+              </div>
+            </div>
+            <p class="app-card-desc">Configures virtual memory swap files, environment variables, and system hardware properties (sysdm.cpl).</p>
+            <button class="btn btn-secondary" onclick="openToolModal('sys_properties')"><i data-lucide="external-link"></i> Open sysdm.cpl</button>
+          </div>
+          <div class="card">
+            <div class="app-card-header">
+              <div class="app-card-icon"><i data-lucide="cpu"></i></div>
+              <div>
+                <h4 class="app-card-title">Computer Management</h4>
+                <span class="app-card-category">Management Console</span>
+              </div>
+            </div>
+            <p class="app-card-desc">Central console containing Event Viewer, Device Manager, Disk Management, and services (compmgmt.msc).</p>
+            <button class="btn btn-secondary" onclick="openToolModal('comp_mgmt')"><i data-lucide="external-link"></i> Launch compmgmt.msc</button>
+          </div>
+          <div class="card">
+            <div class="app-card-header">
+              <div class="app-card-icon"><i data-lucide="scale"></i></div>
+              <div>
+                <h4 class="app-card-title">Local Group Policy Editor</h4>
+                <span class="app-card-category">Policy Editor</span>
+              </div>
+            </div>
+            <p class="app-card-desc">Configures system-wide security policies, updates behavior, and audit templates (gpedit.msc).</p>
+            <button class="btn btn-secondary" onclick="openToolModal('gp_editor')"><i data-lucide="external-link"></i> Launch gpedit.msc</button>
+          </div>
+          <div class="card">
+            <div class="app-card-header">
+              <div class="app-card-icon"><i data-lucide="file-edit"></i></div>
+              <div>
+                <h4 class="app-card-title">Registry Editor</h4>
+                <span class="app-card-category">System Database</span>
+              </div>
+            </div>
+            <p class="app-card-desc">Advanced utility to browse and modify keys inside the Windows Registry database (regedit.exe).</p>
+            <button class="btn btn-secondary" onclick="openToolModal('reg_editor')"><i data-lucide="external-link"></i> Launch Registry Editor</button>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- TAB 7: AI ASSISTANT -->
+      <section id="aiassistant" class="tab-panel">
+        <div class="ai-assistant-wrapper">
+          <!-- Sidebar: Config & Info -->
+          <div class="ai-sidebar">
+            <h3>AI Configuration</h3>
+            <p class="subtitle">Configure settings for online image analysis or offline text-based diagnostics.</p>
+            
+            <div class="setting-row">
+              <span>Online AI Mode</span>
+              <label class="toggle-switch-container">
+                <input type="checkbox" id="ai-mode-toggle" onchange="toggleAiMode()">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            
+            <div id="ai-key-section" style="display: none; flex-direction: column; gap: 8px;">
+              <span class="setting-label">Gemini API Key</span>
+              <input type="password" id="ai-api-key" class="api-key-input-field" placeholder="Enter API Key" oninput="saveApiKey()">
+              <a href="https://aistudio.google.com/app/apikey" target="_blank" style="font-size:11px; color: var(--accent-cyan); text-decoration: underline;">Get a free Gemini API Key</a>
+            </div>
+
+            <div class="warning-box" style="margin-top: auto; padding: 12px; font-size:12px;">
+              <i data-lucide="info" style="color: var(--accent-cyan);"></i>
+              <span id="ai-status-desc"><strong>Offline Mode Active:</strong> Type system issues or upload log files (.log, .txt) to perform local pattern-matching error scans.</span>
+            </div>
+          </div>
+
+          <!-- Main Chat Panel -->
+          <div class="ai-chat-container">
+            <div class="ai-chat-messages" id="ai-chat-messages">
+              <div class="chat-bubble ai">
+                Hello! I am your VenkatPulse AI Assistant. Describe any Windows or printing issues you are experiencing.
+                <br><br>
+                <strong>Offline features:</strong> You can upload system/printer `.log` or `.txt` files directly, and I'll analyze them for known printer or networking error codes.
+                <br><br>
+                <strong>Online features:</strong> Enable Online AI mode and insert a Gemini API key to upload screenshot files so I can visually diagnose your error codes!
+                <span class="chat-bubble-meta">Just now</span>
+              </div>
+            </div>
+            
+            <!-- Attachments preview bar -->
+            <div class="chat-input-container">
+              <div class="attachment-preview-bar" id="attachment-preview-bar" style="display: none;"></div>
+              
+              <div class="chat-input-row">
+                <!-- Attachment triggers -->
+                <button class="btn btn-secondary btn-icon" onclick="triggerFileInput()" title="Attach image or log file">
+                  <i data-lucide="paperclip"></i>
+                </button>
+                <input type="file" id="ai-file-input" style="display: none;" onchange="handleFileSelect(event)" accept=".png,.jpg,.jpeg,.log,.txt">
+                
+                <textarea id="ai-chat-input" class="chat-textarea" placeholder="Type a message or issue description... (Ctrl+Enter to send)" onkeydown="handleChatKeyDown(event)"></textarea>
+                
+                <button class="btn btn-secondary" onclick="sendChatMessage()">
+                  <i data-lucide="send"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 9: AUDIT LOGS -->
+      <section id="auditlogs" class="tab-panel">
+        <div class="maintenance-layout">
+          <!-- Form Left -->
+          <div class="card form-card">
+            <h3>Log Maintenance Activity</h3>
+            <p class="subtitle">Record mechanical cleanings, replacement parts, or checks to keep a detailed repair timeline.</p>
+            
+            <form id="maintenance-form" onsubmit="handleLogSubmit(event)">
+              <div class="form-group">
+                <label for="log-printer-model">Printer Model</label>
+                <input type="text" id="log-printer-model" placeholder="e.g. HP OfficeJet Pro 9015" required>
+              </div>
+
+              <div class="form-group">
+                <label for="log-action">Action Performed</label>
+                <select id="log-action" required onchange="toggleCustomActionInput(this)">
+                  <option value="Nozzle Cleaning Run">Nozzle Cleaning Run</option>
+                  <option value="Printhead Alignment">Printhead Alignment</option>
+                  <option value="Cleared Paper Jam">Cleared Paper Jam</option>
+                  <option value="Ink Cartridge Replacement">Ink Cartridge Replacement</option>
+                  <option value="Roller Cleaning">Roller Cleaning</option>
+                  <option value="Firmware Update">Firmware Update</option>
+                  <option value="custom">Other (Custom Action...)</option>
+                </select>
+                <input type="text" id="log-action-custom" placeholder="Describe custom action..." class="custom-action-input" style="display: none; margin-top: 10px;">
+              </div>
+
+              <div class="form-group-row">
+                <div class="form-group flex-2">
+                  <label for="log-date">Date Performed</label>
+                  <input type="date" id="log-date" required>
+                </div>
+                <div class="form-group">
+                  <label for="log-status">Result Status</label>
+                  <select id="log-status" required>
+                    <option value="Resolved">Resolved</option>
+                    <option value="Improved">Improved</option>
+                    <option value="Unresolved">Unresolved</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="log-notes">Notes / Observations</label>
+                <textarea id="log-notes" rows="4" placeholder="Enter errors seen, ink level details, or parts replaced..."></textarea>
+              </div>
+
+              <button type="submit" class="btn btn-secondary btn-large">
+                <i data-lucide="plus-circle"></i> Save Log Entry
+              </button>
+            </form>
+          </div>
+
+          <!-- History Table Right -->
+          <div class="card history-card">
+            <div class="card-header-row">
+              <div>
+                <h3>Maintenance History Log</h3>
+                <p class="subtitle">Saved actions and repair events recorded in this browser.</p>
+              </div>
+              <button class="btn btn-secondary btn-small" onclick="clearAllLogs()">
+                <i data-lucide="trash-2"></i> Clear History
+              </button>
+            </div>
+
+            <div class="table-container">
+              <table class="data-table" id="logs-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Printer Model</th>
+                    <th>Action Performed</th>
+                    <th>Status</th>
+                    <th>Notes</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="logs-table-body">
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+            
+            <div class="history-empty-state" id="history-empty">
+              <i data-lucide="history" class="empty-icon"></i>
+              <h4>No Log Entries Yet</h4>
+              <p>Fill in the form on the left or log solutions from the diagnostic wizard to populate this table.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB: OFFICE SETUP -->
+      <section id="officesetup" class="tab-panel">
+        <div class="card-header-row" style="margin-bottom: 20px;">
+          <div>
+            <h2>Microsoft Office Installer</h2>
+            <p class="subtitle">Silently configure and install official Microsoft Office suites using winget and Microsoft ODT.</p>
+          </div>
+        </div>
+
+        <div class="warning-box" style="margin-bottom: 20px; background: rgba(245, 158, 11, 0.08); border-color: rgba(245, 158, 11, 0.15); color: var(--text-primary); padding: 12px; display: flex; gap: 10px; font-size: 0.8rem; line-height: 1.4; border-radius: var(--border-radius-md);">
+          <i data-lucide="shield-alert" style="color: var(--state-warning); flex-shrink: 0; width: 16px; height: 16px;"></i>
+          <span><strong>Official Deployment Notice:</strong> These installers configure official Microsoft Office packages directly from Microsoft servers. You will need a genuine Microsoft Account or LTSC product key to activate Office once installed. VenkatPulse AI enforces safety standards and does not contain cracked activation bypasses or tools.</span>
+        </div>
+
+        <div class="downloader-grid">
+          <!-- Microsoft 365 Apps -->
+          <div class="app-card" id="office-m365">
+            <div class="app-card-header" style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+              <div class="app-card-icon" style="background: rgba(6, 182, 212, 0.15); color: var(--accent-cyan); width: 40px; height: 40px; border-radius: var(--border-radius-sm); display: flex; align-items: center; justify-content: center;"><i data-lucide="briefcase"></i></div>
+              <div>
+                <span class="app-card-category" style="font-size: 0.75rem; color: var(--text-muted);">Subscription Suite</span>
+                <h4 class="app-card-title" style="font-weight: 600;">Microsoft 365 Apps</h4>
+              </div>
+            </div>
+            <p class="app-card-desc" style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 16px;">Installs the latest Word, Excel, PowerPoint, Outlook, and OneNote with cloud service support.</p>
+            <button class="btn btn-secondary app-install-btn" onclick="installOffice('m365')"><i data-lucide="download"></i> Install Microsoft 365</button>
+          </div>
+
+          <!-- Office LTSC 2021 -->
+          <div class="app-card" id="office-2021">
+            <div class="app-card-header" style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+              <div class="app-card-icon" style="background: rgba(168, 85, 247, 0.15); color: var(--accent-purple); width: 40px; height: 40px; border-radius: var(--border-radius-sm); display: flex; align-items: center; justify-content: center;"><i data-lucide="file-text"></i></div>
+              <div>
+                <span class="app-card-category" style="font-size: 0.75rem; color: var(--text-muted);">Volume License</span>
+                <h4 class="app-card-title" style="font-weight: 600;">Office LTSC 2021</h4>
+              </div>
+            </div>
+            <p class="app-card-desc" style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 16px;">Installs the perpetual Office LTSC 2021 Professional Plus edition using Microsoft ODT.</p>
+            <button class="btn btn-secondary app-install-btn" onclick="installOffice('2021')"><i data-lucide="download"></i> Install Office 2021</button>
+          </div>
+
+          <!-- Office LTSC 2024 -->
+          <div class="app-card" id="office-2024">
+            <div class="app-card-header" style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+              <div class="app-card-icon" style="background: rgba(99, 102, 241, 0.15); color: var(--accent-indigo); width: 40px; height: 40px; border-radius: var(--border-radius-sm); display: flex; align-items: center; justify-content: center;"><i data-lucide="layers"></i></div>
+              <div>
+                <span class="app-card-category" style="font-size: 0.75rem; color: var(--text-muted);">Volume License</span>
+                <h4 class="app-card-title" style="font-weight: 600;">Office LTSC 2024</h4>
+              </div>
+            </div>
+            <p class="app-card-desc" style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 16px;">Installs the modern perpetual Office LTSC 2024 preview/retail edition utilizing ODT configurations.</p>
+            <button class="btn btn-secondary app-install-btn" onclick="installOffice('2024')"><i data-lucide="download"></i> Install Office 2024</button>
+          </div>
+
+          <!-- Office 2007 (Legacy) -->
+          <div class="app-card" id="office-2007">
+            <div class="app-card-header" style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+              <div class="app-card-icon" style="background: rgba(100, 116, 139, 0.15); color: var(--text-muted); width: 40px; height: 40px; border-radius: var(--border-radius-sm); display: flex; align-items: center; justify-content: center;"><i data-lucide="archive"></i></div>
+              <div>
+                <span class="app-card-category" style="font-size: 0.75rem; color: var(--text-muted);">Legacy Suite</span>
+                <h4 class="app-card-title" style="font-weight: 600;">Office Professional 2007</h4>
+              </div>
+            </div>
+            <p class="app-card-desc" style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 16px;">Legacy perpetual suite (Word, Excel, PPT). Redirects to official archive guides for downloading compatible legacy setups.</p>
+            <button class="btn btn-secondary app-install-btn" onclick="installOffice('2007')"><i data-lucide="external-link"></i> Download Office 2007</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 10: WINDOWS & OFFICE ACTIVATION -->
+      <section id="activator" class="tab-panel">
+        <div class="card-header-row" style="margin-bottom: 20px;">
+          <div>
+            <h2>Windows & Office Activation</h2>
+            <p class="subtitle">Activate Microsoft Windows and Office products safely and permanently using official Microsoft Activation Scripts (MAS).</p>
+          </div>
+        </div>
+
+        <div class="warning-box" style="margin-bottom: 20px; background: rgba(168, 85, 247, 0.08); border-color: rgba(168, 85, 247, 0.15); color: var(--text-primary); padding: 12px; display: flex; gap: 10px; font-size: 0.8rem; line-height: 1.4; border-radius: var(--border-radius-md);">
+          <i data-lucide="info" style="color: var(--accent-purple); flex-shrink: 0; width: 16px; height: 16px;"></i>
+          <span><strong>Safety & Transparency Notice:</strong> VenkatPulse AI routes requests directly through the official and open-source massgrave.dev script. This process requires Administrator permissions. If your antivirus triggers a block, you may need to temporarily pause it, as activation mechanisms are commonly flagged.</span>
+        </div>
+
+        <div class="downloader-grid">
+          <!-- Windows Activation -->
+          <div class="app-card" id="activate-windows">
+            <div class="app-card-header" style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+              <div class="app-card-icon" style="background: rgba(59, 130, 246, 0.15); color: var(--accent-blue); width: 40px; height: 40px; border-radius: var(--border-radius-sm); display: flex; align-items: center; justify-content: center;"><i data-lucide="monitor"></i></div>
+              <div>
+                <span class="app-card-category" style="font-size: 0.75rem; color: var(--text-muted);">Windows License</span>
+                <h4 class="app-card-title" style="font-weight: 600;">Activate Windows (HWID)</h4>
+              </div>
+            </div>
+            <p class="app-card-desc" style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 16px;">Permanently activates Windows 10/11 using a digital hardware ID license. Tied to your motherboard; never expires.</p>
+            <button class="btn btn-secondary app-install-btn" onclick="executeActivation('windows')"><i data-lucide="zap"></i> Activate Windows</button>
+          </div>
+
+          <!-- Office Activation -->
+          <div class="app-card" id="activate-office">
+            <div class="app-card-header" style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+              <div class="app-card-icon" style="background: rgba(16, 185, 129, 0.15); color: var(--state-success); width: 40px; height: 40px; border-radius: var(--border-radius-sm); display: flex; align-items: center; justify-content: center;"><i data-lucide="briefcase"></i></div>
+              <div>
+                <span class="app-card-category" style="font-size: 0.75rem; color: var(--text-muted);">Office License</span>
+                <h4 class="app-card-title" style="font-weight: 600;">Activate Office (Ohook)</h4>
+              </div>
+            </div>
+            <p class="app-card-desc" style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 16px;">Activates Microsoft Office suites using the Ohook method. Works with perpetual and subscription-based Office apps.</p>
+            <button class="btn btn-secondary app-install-btn" onclick="executeActivation('office')"><i data-lucide="zap"></i> Activate Office</button>
+          </div>
+
+          <!-- Windows & Office (Online KMS) -->
+          <div class="app-card" id="activate-kms">
+            <div class="app-card-header" style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+              <div class="app-card-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--state-warning); width: 40px; height: 40px; border-radius: var(--border-radius-sm); display: flex; align-items: center; justify-content: center;"><i data-lucide="globe"></i></div>
+              <div>
+                <span class="app-card-category" style="font-size: 0.75rem; color: var(--text-muted);">Universal KMS</span>
+                <h4 class="app-card-title" style="font-weight: 600;">Activate Both (Online KMS)</h4>
+              </div>
+            </div>
+            <p class="app-card-desc" style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 16px;">Activates both Windows and Office using Online KMS server query. Recommended for non-HWID compatible setups.</p>
+            <button class="btn btn-secondary app-install-btn" onclick="executeActivation('kms')"><i data-lucide="zap"></i> Activate KMS</button>
+          </div>
+
+          <!-- KMS Uninstall -->
+          <div class="app-card" id="activate-kms-uninstall">
+            <div class="app-card-header" style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+              <div class="app-card-icon" style="background: rgba(239, 68, 68, 0.15); color: var(--state-danger); width: 40px; height: 40px; border-radius: var(--border-radius-sm); display: flex; align-items: center; justify-content: center;"><i data-lucide="trash-2"></i></div>
+              <div>
+                <span class="app-card-category" style="font-size: 0.75rem; color: var(--text-muted);">Cleanup Utility</span>
+                <h4 class="app-card-title" style="font-weight: 600;">Uninstall Online KMS</h4>
+              </div>
+            </div>
+            <p class="app-card-desc" style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 16px;">Removes previously installed Online KMS background servers, registry tags, and scheduled tasks completely.</p>
+            <button class="btn btn-secondary app-install-btn" onclick="executeActivation('kms-uninstall')"><i data-lucide="trash-2"></i> Clean KMS Setup</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 11: NIRSOFT SUITE -->
+      <section id="nirsoft" class="tab-panel">
+        <div class="card-header-row" style="margin-bottom: 20px;">
+          <div>
+            <h2>NirSoft Portable Utilities Suite</h2>
+            <p class="subtitle">Download, extract, and launch the collection of 200+ powerful Windows administrative utilities.</p>
+          </div>
+        </div>
+
+        <div class="warning-box" style="margin-bottom: 20px; background: rgba(245, 158, 11, 0.08); border-color: rgba(245, 158, 11, 0.15); color: var(--text-primary); padding: 12px; display: flex; gap: 10px; font-size: 0.8rem; line-height: 1.4; border-radius: var(--border-radius-md);">
+          <i data-lucide="shield-alert" style="color: var(--state-warning); flex-shrink: 0; width: 16px; height: 16px;"></i>
+          <span><strong>Antivirus & Password Alert:</strong> NirSoft utilities (especially password recovery tools) are commonly flagged as threat false-positives by Windows Defender/antivirus software. The official NirLauncher ZIP is encrypted. Use password <strong>nirsoft9876$</strong> to extract it if prompted manually.</span>
+        </div>
+
+        <div class="downloader-grid">
+          <!-- Download Card -->
+          <div class="app-card" id="nirsoft-download-card">
+            <div class="app-card-header" style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+              <div class="app-card-icon" style="background: rgba(168, 85, 247, 0.15); color: var(--accent-purple); width: 40px; height: 40px; border-radius: var(--border-radius-sm); display: flex; align-items: center; justify-content: center;"><i data-lucide="download-cloud"></i></div>
+              <div>
+                <span class="app-card-category" style="font-size: 0.75rem; color: var(--text-muted);">Package Download</span>
+                <h4 class="app-card-title" style="font-weight: 600;">Download & Extract NirLauncher</h4>
+              </div>
+            </div>
+            <p class="app-card-desc" style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 16px;">Fetches the official password-protected NirLauncher ZIP from launcher.nirsoft.net, and extracts it to <code>C:\NirLauncher</code>.</p>
+            <button class="btn btn-secondary app-install-btn" onclick="executeNirSoft('download')"><i data-lucide="download"></i> Download & Extract</button>
+          </div>
+
+          <!-- Launch Card -->
+          <div class="app-card" id="nirsoft-launch-card">
+            <div class="app-card-header" style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+              <div class="app-card-icon" style="background: rgba(16, 185, 129, 0.15); color: var(--state-success); width: 40px; height: 40px; border-radius: var(--border-radius-sm); display: flex; align-items: center; justify-content: center;"><i data-lucide="play"></i></div>
+              <div>
+                <span class="app-card-category" style="font-size: 0.75rem; color: var(--text-muted);">Launcher Panel</span>
+                <h4 class="app-card-title" style="font-weight: 600;">Launch NirLauncher Suite</h4>
+              </div>
+            </div>
+            <p class="app-card-desc" style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 16px;">Launches the main NirLauncher desktop control panel (requires extraction/download first).</p>
+            <button class="btn btn-secondary app-install-btn" onclick="executeNirSoft('launch')"><i data-lucide="external-link"></i> Launch Launcher</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 12: SUPER ADMIN SUITE -->
+      <section id="superadmin" class="tab-panel">
+        <div class="card-header-row" style="margin-bottom: 20px;">
+          <div>
+            <h2>Super Admin Repair Suite</h2>
+            <p class="subtitle">Complete diagnostics, credential auditing, backups, driver management, network mapping, and storage optimization toolkit.</p>
+          </div>
+        </div>
+
+        <div class="downloader-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 20px;">
+          <!-- 1. System Diagnostics Node -->
+          <div class="card">
+            <h3><i data-lucide="cpu" style="color: var(--accent-cyan); vertical-align: middle; margin-right: 6px;"></i> System Diagnostics Node</h3>
+            <p class="subtitle">Gather specs, performance data, and power battery health metrics.</p>
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 15px;">
+              <button class="btn btn-secondary btn-large" onclick="executeAdminTool('launch_info_specs')">Launch Info Specs (msinfo32)</button>
+              <button class="btn btn-secondary btn-large" onclick="executeAdminTool('generate_health_report')">Generate Health Report (perfmon)</button>
+              <button class="btn btn-secondary btn-large" onclick="executeAdminTool('generate_battery_report')">Generate Battery Report (powercfg)</button>
+            </div>
+          </div>
+
+          <!-- 2. Antivirus & Core Malware Scanner Engine -->
+          <div class="card">
+            <h3><i data-lucide="shield" style="color: var(--state-danger); vertical-align: middle; margin-right: 6px;"></i> Antivirus & Malware Scanner</h3>
+            <p class="subtitle">Control Windows Defender antivirus scanning engines.</p>
+            <div style="display: flex; gap: 8px; margin-top: 15px;">
+              <button class="btn btn-secondary" style="flex: 1; padding: 12px 6px; font-size: 0.8rem;" onclick="executeAdminTool('run_quick_scan')"><i data-lucide="play"></i> Quick Scan</button>
+              <button class="btn btn-secondary" style="flex: 1; padding: 12px 6px; font-size: 0.8rem;" onclick="executeAdminTool('deep_full_scan')"><i data-lucide="shield-alert"></i> Deep Scan</button>
+              <button class="btn btn-secondary" style="flex: 1; padding: 12px 6px; font-size: 0.8rem;" onclick="executeAdminTool('update_defender_db')"><i data-lucide="refresh-cw"></i> Update DB</button>
+            </div>
+          </div>
+
+          <!-- 3. Credentials Auditing & Local Security Password Viewers -->
+          <div class="card">
+            <h3><i data-lucide="key" style="color: var(--state-warning); vertical-align: middle; margin-right: 6px;"></i> Credentials & Password Viewers</h3>
+            <p class="subtitle">Recover Wi-Fi profile keys, application vault details, or mail credentials.</p>
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 15px;">
+              <button class="btn btn-secondary btn-large" onclick="executeAdminTool('download_mailpv')">Launch Outlook Viewer (MailPassView)</button>
+              <button class="btn btn-secondary btn-large" onclick="executeAdminTool('wifi_password_decoder')">View Wi-Fi Passwords (netsh)</button>
+              <button class="btn btn-secondary btn-large" onclick="executeAdminTool('open_credential_manager')">Open Credential Manager</button>
+            </div>
+          </div>
+
+          <!-- 4. Data Migration & Server Backups Hub -->
+          <div class="card" style="grid-column: span 1;">
+            <h3><i data-lucide="database" style="color: var(--accent-purple); vertical-align: middle; margin-right: 6px;"></i> Data Migration & Backups Hub</h3>
+            <p class="subtitle">Robocopy multi-threaded file replication engine and profile backups.</p>
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <input type="text" id="robocopy-source" placeholder="Source directory path..." class="robocopy-input">
+                <button class="btn btn-secondary" onclick="browseFolder('robocopy-source')" style="padding: 8px 12px; font-size: 0.8rem; display: flex; align-items: center; gap: 4px; height: 35px; border-radius: var(--border-radius-sm); cursor: pointer;"><i data-lucide="folder-open" style="width: 14px; height: 14px;"></i> Browse</button>
+              </div>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <input type="text" id="robocopy-target" placeholder="Target directory path..." class="robocopy-input">
+                <button class="btn btn-secondary" onclick="browseFolder('robocopy-target')" style="padding: 8px 12px; font-size: 0.8rem; display: flex; align-items: center; gap: 4px; height: 35px; border-radius: var(--border-radius-sm); cursor: pointer;"><i data-lucide="folder-open" style="width: 14px; height: 14px;"></i> Browse</button>
+              </div>
+              <button class="btn btn-secondary" onclick="runRobocopyEngine()"><i data-lucide="play-circle"></i> Run Robocopy Mirror Engine</button>
+              
+              <div style="display: flex; gap: 8px; margin-top: 5px;">
+                <button class="btn btn-secondary" style="flex: 1; font-size:0.75rem;" onclick="executeAdminTool('export_appdata')"><i data-lucide="upload-cloud"></i> Export AppData</button>
+                <button class="btn btn-secondary" style="flex: 1; font-size:0.75rem;" onclick="executeAdminTool('import_appdata')"><i data-lucide="download-cloud"></i> Import AppData</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5. MS Office & Outlook Diagnostics Toolkit -->
+          <div class="card" style="grid-column: span 1;">
+            <h3><i data-lucide="briefcase" style="color: var(--accent-blue); vertical-align: middle; margin-right: 6px;"></i> Office & Outlook Diagnostics</h3>
+            <p class="subtitle">Comprehensive Outlook PST/OST, profile setups, and Office repairs.</p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 15px;">
+              <button class="btn btn-secondary" style="font-size:0.7rem; padding: 8px 4px;" onclick="executeAdminTool('office_quick_repair')">Office Quick Repair</button>
+              <button class="btn btn-secondary" style="font-size:0.7rem; padding: 8px 4px;" onclick="executeAdminTool('office_online_repair')">Office Online Repair</button>
+              <button class="btn btn-secondary" style="font-size:0.7rem; padding: 8px 4px;" onclick="executeAdminTool('outlook_safe_mode')">Outlook Safe Mode</button>
+              <button class="btn btn-secondary" style="font-size:0.7rem; padding: 8px 4px;" onclick="executeAdminTool('outlook_reset_nav')">Reset Nav Pane</button>
+              <button class="btn btn-secondary" style="font-size:0.7rem; padding: 8px 4px;" onclick="executeAdminTool('outlook_reset_folders')">Reset Folders</button>
+              <button class="btn btn-secondary" style="font-size:0.7rem; padding: 8px 4px;" onclick="executeAdminTool('outlook_reset_bar')">Reset Outlook Bar</button>
+              <button class="btn btn-secondary" style="font-size:0.7rem; padding: 8px 4px;" onclick="executeAdminTool('outlook_mail_setup')">Mail Setup (mlcfg32)</button>
+              <button class="btn btn-secondary" style="font-size:0.7rem; padding: 8px 4px;" onclick="executeAdminTool('open_credential_manager')">Stored Credentials</button>
+              <button class="btn btn-secondary" style="font-size:0.7rem; padding: 8px 4px;" onclick="executeAdminTool('outlook_scanpst_auto')">ScanPST (Auto)</button>
+              <button class="btn btn-secondary" style="font-size:0.7rem; padding: 8px 4px;" onclick="executeAdminTool('outlook_scanpst_browse')">ScanPST (Browse)</button>
+              <button class="btn btn-secondary" style="font-size:0.7rem; padding: 8px 4px;" onclick="executeAdminTool('outlook_open_data')">Open Outlook Data</button>
+              <button class="btn btn-secondary" style="font-size:0.7rem; padding: 8px 4px;" onclick="executeAdminTool('outlook_backup_pst')">Backup PST/OST File</button>
+              <button class="btn btn-secondary" style="font-size:0.7rem; padding: 8px 4px;" onclick="executeAdminTool('outlook_backup_folder')">Backup Outlook Folder</button>
+              <button class="btn btn-secondary" style="font-size:0.7rem; padding: 8px 4px;" onclick="executeAdminTool('outlook_new_profile')">Outlook New Profile</button>
+              <button class="btn btn-secondary" style="font-size:0.7rem; padding: 8px 4px;" onclick="executeAdminTool('winword_safe_mode')">Word Safe Mode</button>
+              <button class="btn btn-secondary" style="font-size:0.7rem; padding: 8px 4px;" onclick="executeAdminTool('excel_safe_mode')">Excel Safe Mode</button>
+              <button class="btn btn-secondary" style="font-size:0.7rem; padding: 8px 4px; grid-column: span 2;" onclick="executeAdminTool('powerpnt_safe_mode')">PowerPoint Safe Mode</button>
+            </div>
+          </div>
+
+          <!-- 6. Drivers Depot, System Backups & Policies -->
+          <div class="card">
+            <h3><i data-lucide="settings" style="color: var(--accent-indigo); vertical-align: middle; margin-right: 6px;"></i> Drivers, Backups & Policies</h3>
+            <p class="subtitle">Export system drivers, manage policies, and enable God Mode.</p>
+            <div style="display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 15px;">
+              <div style="display: flex; flex-direction: column; gap: 6px;">
+                <span class="telemetry-label" style="font-size: 0.75rem; font-weight:600; color: var(--text-secondary);">Hardware Drivers Manager</span>
+                <button class="btn btn-secondary" style="font-size:0.8rem; text-align: left;" onclick="executeAdminTool('driver_scan')">🔍 Scan Missing Drivers</button>
+                <button class="btn btn-secondary" style="font-size:0.8rem; text-align: left;" onclick="executeAdminTool('driver_upgrade')">⚙ Run Force Driver Upgrades</button>
+                <button class="btn btn-secondary" style="font-size:0.8rem; text-align: left;" onclick="executeAdminTool('driver_backup')">📦 Backup Drivers Desktop (Export)</button>
+                <button class="btn btn-secondary" style="font-size:0.8rem; text-align: left;" onclick="executeAdminTool('driver_restore')">🚚 Restore Drivers (Import)</button>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 5px;">
+                <span class="telemetry-label" style="font-size: 0.75rem; font-weight:600; color: var(--text-secondary);">Admin Accounts & Policy Editor</span>
+                <button class="btn btn-secondary" style="font-size:0.8rem; text-align: left;" onclick="executeAdminTool('lusrmgr')">🔑 Local Users Manager (lusrmgr)</button>
+                <button class="btn btn-secondary" style="font-size:0.8rem; text-align: left;" onclick="executeAdminTool('user_netplwiz')">⚙ User Accounts Console (netplwiz)</button>
+                <button class="btn btn-secondary" style="font-size:0.8rem; text-align: left;" onclick="executeAdminTool('gp_editor')">🛡 Group Policy Layout (gpedit.msc)</button>
+                <button class="btn btn-secondary" style="font-size:0.8rem; text-align: left;" onclick="executeAdminTool('create_godmode')">👑 Create 'God Mode' Folder</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 7. Advanced Networking Subnet Tools -->
+          <div class="card">
+            <h3><i data-lucide="network" style="color: var(--accent-cyan); vertical-align: middle; margin-right: 6px;"></i> Advanced Networking Tools</h3>
+            <p class="subtitle">IP mapping, subnet diagnostics, and Remote Desktop controls.</p>
+            <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 15px;">
+              <div>
+                <span class="telemetry-label" style="font-size: 0.75rem; font-weight:600; color: var(--text-secondary);">IP Stack & Subnet Scanner Matrix</span>
+                <button class="btn btn-secondary btn-large" style="margin-top: 6px;" onclick="executeAdminTool('flush_dns')">Flush DNS Cache & Reset IP Socket Stack</button>
+                <button class="btn btn-secondary btn-large" style="margin-top: 6px;" onclick="executeAdminTool('net_scan_subnet')">Scan Local Active Subnet Nodes (ARP)</button>
+              </div>
+              <div>
+                <span class="telemetry-label" style="font-size: 0.75rem; font-weight:600; color: var(--text-secondary);">Network Diagnostics & Cycling</span>
+                <button class="btn btn-secondary btn-large" style="margin-top: 6px;" onclick="executeAdminTool('flush_dns')">Release and Renew Local IP Allocation</button>
+                <button class="btn btn-secondary btn-large" style="margin-top: 6px;" onclick="executeAdminTool('net_recycle_adapters')">Force Recycle Active Network Adapters</button>
+                <button class="btn btn-secondary btn-large" style="margin-top: 6px;" onclick="executeAdminTool('net_enable_rdp')">Enable Inbound Remote Desktop Terminal</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 8. Volume Diagnostics & Storage Optimization -->
+          <div class="card">
+            <h3><i data-lucide="hard-drive" style="color: var(--state-success); vertical-align: middle; margin-right: 6px;"></i> Volume Diagnostics & Storage</h3>
+            <p class="subtitle">Verify disk blocks, check large files, and run SSD trim sweeps.</p>
+              <div>
+                <span class="telemetry-label" style="font-size: 0.75rem; font-weight:600; color: var(--text-secondary);">Drive Integrity & Volume Verification</span>
+                <button class="btn btn-secondary btn-large" style="margin-top: 6px;" onclick="executeAdminTool('disk_chkdsk')">Check Drive Block Integrity (Chkdsk C: /F /R)</button>
+                <button class="btn btn-secondary btn-large" style="margin-top: 6px;" onclick="executeAdminTool('disk_heaviest_files')">Map Top 10 Heaviest Files</button>
+              </div>
+              <div>
+                <span class="telemetry-label" style="font-size: 0.75rem; font-weight:600; color: var(--text-secondary);">Disk Maintenance & SolidState ReTrim</span>
+                <button class="btn btn-secondary btn-large" style="margin-top: 6px;" onclick="executeAdminTool('disk_defrag')">Run Storage Fragment Optimizer (C:)</button>
+                <button class="btn btn-secondary btn-large" style="margin-top: 6px;" onclick="executeAdminTool('disk_trim_ssd')">Force Run SSD Block Re-Trim Optimization</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 9. Enterprise Services Engine & Cache Purge Suite -->
+          <div class="card">
+            <h3><i data-lucide="server" style="color: var(--accent-purple); vertical-align: middle; margin-right: 6px;"></i> Enterprise Services & Cache Purge</h3>
+            <p class="subtitle">Restart Tally server engines, rebuild explorer icon shells, and clear prefetch caches.</p>
+            <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 15px;">
+              <div>
+                <span class="telemetry-label" style="font-size: 0.75rem; font-weight:600; color: var(--text-secondary);">Enterprise Gateways & Log Purges</span>
+                <button class="btn btn-secondary btn-large" style="margin-top: 6px;" onclick="executeAdminTool('restart_tally')">Restart Active Tally Gateway Server Engine</button>
+                <button class="btn btn-secondary btn-large" style="margin-top: 6px;" onclick="executeAdminTool('purge_temp_cache')">Purge System Prefetch, Cache, and Temp Files</button>
+              </div>
+              <div>
+                <span class="telemetry-label" style="font-size: 0.75rem; font-weight:600; color: var(--text-secondary);">Shell Recovery & Icon Database Rebuild</span>
+                <button class="btn btn-secondary btn-large" style="margin-top: 6px;" onclick="executeAdminTool('explorer_restart')">Terminate and Restart Explorer Shell</button>
+                <button class="btn btn-secondary btn-large" style="margin-top: 6px;" onclick="executeAdminTool('icon_cache_rebuild')">Rebuild Corrupted Windows System Icons Database</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer-bar">
+      <p>VenkatPulse AI &bull; Web Diagnostics Module &bull; No physical drivers required</p>
+      <div class="footer-links">
+        <a href="#" onclick="switchTab('diagnostics')">Troubleshoot</a>
+        <a href="#" onclick="switchTab('errors')">Error Directory</a>
+        <a href="https://github.com" target="_blank">Docs</a>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Modal Overlay for Toolbox Scripts -->
+  <div class="modal-overlay" id="tool-modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-tool-title">Tool Name</h3>
+        <button class="btn-close-modal" onclick="closeToolModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p id="modal-tool-description" class="tool-desc">Description of what this command/tool does.</p>
+        
+        <div class="gpo-note-box" id="modal-gpo-note-box" style="display: none;">
+          <h4><i data-lucide="shield-check"></i> Group Policy / System Settings</h4>
+          <p id="modal-gpo-note-text">Specific Group Policy Editor paths and values.</p>
+        </div>
+
+        <div class="code-container">
+          <div class="code-header">
+            <span id="code-type-label">Command / Registry Script</span>
+            <button class="btn-copy-code" onclick="copyToolCommand()">
+              <i data-lucide="copy" style="width:14px; height:14px; vertical-align: middle;"></i> Copy
+            </button>
+          </div>
+          <pre><code id="modal-tool-code"># code goes here</code></pre>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <span id="modal-exec-status" style="margin-right: auto; font-size: 0.85rem; font-weight:600; display: none;"></span>
+        <button class="btn btn-secondary" id="modal-apply-btn" onclick="executeLocalFix()">
+          <i data-lucide="play-circle"></i> Apply Fix Automatically
+        </button>
+        <button class="btn btn-secondary" onclick="closeToolModal()">Close</button>
+        <button class="btn btn-secondary" id="modal-launch-btn" style="display: none;" onclick="launchSettingsUri()">
+          <i data-lucide="external-link"></i> Launch Settings
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js?v=2.0"></script>
+</body>
+</html>
