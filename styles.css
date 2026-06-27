@@ -446,6 +446,22 @@ body.light-theme .btn-secondary:hover {
   background: rgba(0, 0, 0, 0.08);
 }
 
+.btn-danger {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
+
+.btn-danger:hover {
+  background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.35);
+  transform: translateY(-1px);
+}
+
+.btn-danger:active {
+  transform: translateY(0);
+}
+
 .btn-link {
   background: transparent;
   border: none;
@@ -627,6 +643,7 @@ body.light-theme .stat-row {
 
 .quick-diagnostics-bar {
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
   margin-top: 15px;
   border-top: 1px solid var(--border-color);
