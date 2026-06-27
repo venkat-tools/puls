@@ -647,38 +647,6 @@ async function fetchGeoLocation() {
   
   if (!countryEl || !regionEl || !coordinatesEl) return;
 
-  // Check if user has overridden location in localStorage
-  const savedCountry = localStorage.getItem('custom_country');
-  const savedRegion = localStorage.getItem('custom_region');
-  
-  if (savedCountry || savedRegion) {
-    if (savedCountry) countryEl.textContent = savedCountry;
-    if (savedRegion) regionEl.textContent = savedRegion;
-    
-    // Resolve IP silently in the background if it is still empty or default
-    const currentIP = coordinatesEl.textContent;
-    if (currentIP === 'Fetching...' || currentIP === 'Offline / Unavailable' || currentIP === '--') {
-      try {
-        const fetchUrl = window.location.protocol === 'file:' ? (API_BASE + '/api/geoip') : 'https://freeipapi.com/api/json';
-        fetch(fetchUrl)
-          .then(res => res.json())
-          .then(data => {
-            const ip = data.ipAddress || data.ip || 'Unknown IP';
-            coordinatesEl.textContent = ip;
-          })
-          .catch(() => {
-            fetch('https://freeipapi.com/api/json')
-              .then(res => res.json())
-              .then(data => {
-                coordinatesEl.textContent = data.ipAddress || data.ip || 'Unknown IP';
-              })
-              .catch(() => {});
-          });
-      } catch (e) {}
-    }
-    return;
-  }
-
   // Helper for IP-based geolocation fallback
   const runIpGeoFallback = async (onlyIp = false) => {
     const urls = [];
@@ -728,6 +696,22 @@ async function fetchGeoLocation() {
       }
     }
   };
+
+  // Check if user has overridden location in localStorage
+  const savedCountry = localStorage.getItem('custom_country');
+  const savedRegion = localStorage.getItem('custom_region');
+  
+  if (savedCountry || savedRegion) {
+    if (savedCountry) countryEl.textContent = savedCountry;
+    if (savedRegion) regionEl.textContent = savedRegion;
+    
+    // Resolve IP silently in the background if it is still empty or default
+    const currentIP = coordinatesEl.textContent;
+    if (currentIP === 'Fetching...' || currentIP === 'Offline / Unavailable' || currentIP === '--') {
+      runIpGeoFallback(true);
+    }
+    return;
+  }
 
   // Try HTML5 Browser Geolocation (highly accurate GPS/WiFi coordinates)
   if (navigator.geolocation) {
