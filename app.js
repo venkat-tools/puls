@@ -2129,7 +2129,7 @@ function checkServerStatus() {
         banner.className = "status-banner danger";
         const descEl = banner.querySelector(".banner-desc");
         if (descEl) {
-          descEl.innerHTML = `Local Repair Server is <strong>OFFLINE</strong> (or connection blocked by browser). If you opened this page as a file (file:///...), please open <a href="http://localhost:3000" target="_blank" style="color: var(--accent-cyan); font-weight: bold; text-decoration: underline;">http://localhost:3000</a> in a new tab instead. Otherwise, double-click <strong style="color: var(--accent-cyan);">main.exe</strong> (or Start-Admin-Server.bat) and click <strong>'Yes'</strong> to UAC.`;
+          descEl.innerHTML = `Local Repair Server is <strong>OFFLINE</strong>. One-click repairs are disabled. Please <a href="https://github.com/venkat-tools/puls/archive/refs/heads/main.zip" style="color: var(--accent-cyan); font-weight: bold; text-decoration: underline;">Download the Repair Client (ZIP)</a>, extract it, double-click <strong style="color: var(--accent-cyan);">main.exe</strong> and click <strong>'Yes'</strong> to UAC.`;
         }
       }
       if (heroBadge) {
