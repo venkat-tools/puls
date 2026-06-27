@@ -1,0 +1,45 @@
+@echo off
+:: Self-elevating script to run Node Server as Administrator
+:init
+set localdirectory=%~dp0
+set tempname=%temp%\getadmin.vbs
+openfiles >nul 2>&1
+if %errorlevel% neq 0 (
+    echo Requesting Administrator privileges to run PrintPulse AI Server...
+    echo Set UAC = CreateObject^("Shell.Application"^) > "%tempname%"
+    echo UAC.ShellExecute "%~s0", "", "", "runas", 1 >> "%tempname%"
+    "%tempname%"
+    del "%tempname%"
+    exit /B
+)
+
+cd /d "%localdirectory%."
+title PrintPulse AI Admin Web Server (Node.js)
+
+:: Kill any process currently occupying port 3000
+for /f "tokens=5" %%a in ('netstat -aon ^| findstr :3000 ^| findstr LISTENING') do taskkill /F /PID %%a >nul 2>&1
+
+echo ======================================================================
+echo             Starting PrintPulse AI Node.js Admin Web Server
+echo ======================================================================
+echo.
+echo Server is launching on: http://localhost:3000
+echo One-click repairs are now active through this terminal socket.
+echo Keep this window open while using the web application dashboard.
+echo.
+echo ======================================================================
+
+:: Check if node is available
+node --version >nul 2>&1
+if %errorlevel% equ 0 (
+    start http://localhost:3000
+    node server.js
+    goto end
+)
+
+echo.
+echo [ERROR] Node.js is not detected in your system PATH.
+echo.
+pause
+
+:end
