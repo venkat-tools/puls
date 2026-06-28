@@ -29,16 +29,21 @@ echo Keep this window open while using the web application dashboard.
 echo.
 echo ======================================================================
 
-:: Check if node is available
-node --version >nul 2>&1
+:: Check if python is available
+python --version >nul 2>&1
 if %errorlevel% equ 0 (
-    start http://localhost:3000
-    node server.js
+    python server.py
+    goto end
+)
+
+:: Fallback to compiled main.exe
+if exist main.exe (
+    main.exe
     goto end
 )
 
 echo.
-echo [ERROR] Node.js is not detected in your system PATH.
+echo [ERROR] Neither Python nor main.exe was detected.
 echo.
 pause
 
