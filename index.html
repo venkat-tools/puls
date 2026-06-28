@@ -20,7 +20,44 @@
     <div class="glow-spot spot-2"></div>
   </div>
 
-  <div class="app-container">
+  <!-- Public Landing Page for GitHub Pages (Non-local environments) -->
+  <div id="public-landing" class="landing-container" style="display: none;">
+    <div class="landing-card">
+      <div class="landing-logo">
+        <img src="logo.png" alt="VenkatPulse AI Logo">
+      </div>
+      <h2 class="landing-title">VenkatPulse <span class="accent-text" style="color: var(--state-success);">AI</span></h2>
+      <p class="landing-subtitle">Windows Repair & Optimization Suite</p>
+      
+      <div class="landing-divider"></div>
+      
+      <p class="landing-desc">
+        A powerful automated diagnostic and system optimization toolbox for Windows systems. 
+        To run one-click repairs, system debloating, and advanced diagnostics, you must run the offline client backend locally.
+      </p>
+
+      <div class="landing-steps">
+        <h3>Quick Start Instructions:</h3>
+        <ul>
+          <li><strong>Step 1:</strong> Download the offline client package zip by clicking the button below.</li>
+          <li><strong>Step 2:</strong> Right-click the downloaded zip file and select <strong>Extract All...</strong></li>
+          <li><strong>Step 3:</strong> Open the extracted folder and double-click <strong>main.exe</strong> (or run <strong>Start-Admin-Server.bat</strong>).</li>
+          <li><strong>Step 4:</strong> Click <strong>Yes</strong> to UAC elevation. The tool will launch locally and automatically connect!</li>
+        </ul>
+      </div>
+
+      <a href="https://github.com/venkat-tools/puls/archive/refs/heads/main.zip" class="landing-btn">
+        <i data-lucide="download"></i>
+        <span>Download Client (ZIP)</span>
+      </a>
+      
+      <div class="landing-footer">
+        <p>Compatible with Windows 10 & 11 (64-bit)</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-container" id="app-container">
     <!-- Header -->
     <header class="app-header">
       <div class="logo-area">

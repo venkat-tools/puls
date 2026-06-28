@@ -544,6 +544,19 @@ const SOLUTIONS = {
 
 // INITIALIZATION
 document.addEventListener("DOMContentLoaded", () => {
+  // Environment Detection (Local Host vs. GitHub Pages landing)
+  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
+  const publicLanding = document.getElementById("public-landing");
+  const appContainer = document.getElementById("app-container");
+
+  if (isLocal) {
+    if (publicLanding) publicLanding.style.display = "none";
+    if (appContainer) appContainer.style.display = "flex";
+  } else {
+    if (publicLanding) publicLanding.style.display = "flex";
+    if (appContainer) appContainer.style.display = "none";
+  }
+
   // Load saved theme
   const savedTheme = localStorage.getItem("theme") || "dark";
   document.body.className = `${savedTheme}-theme`;
