@@ -2984,8 +2984,6 @@ function formatAiResponse(text) {
   return formatted;
 }
 
-}
-
 // 15. Telemetry monitor simulation
 function startTelemetryMonitor() {
   setInterval(() => {
