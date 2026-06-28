@@ -106,7 +106,8 @@ class PrintPulseApp(ctk.CTk):
             ("OfficeActivation", "🔑 Office & Activation"),
             ("AdminTools", "🛠️ Admin Tools"),
             ("AiAssistant", "💬 AI Assistant"),
-            ("WinPEBuilder", "💾 WinPE USB Builder")
+            ("WinPEBuilder", "💾 WinPE USB Builder"),
+            ("DiskSecurity", "💾 Disk & Password Tools")
         ]
         
         for idx, (key, text) in enumerate(nav_items):
@@ -150,6 +151,7 @@ class PrintPulseApp(ctk.CTk):
         self.create_admin_tools_frame()
         self.create_ai_assistant_frame()
         self.create_winpe_builder_frame()
+        self.create_disk_security_frame()
         
         # Show Dashboard initially
         self.select_frame("Dashboard")
@@ -1285,6 +1287,448 @@ Write-Host 'Office Installation finished.'
                 self.iso_entry.configure(state="normal")
                 self.embed_chk.configure(state="normal")
             self.after(0, enable_inputs)
+
+    def create_disk_security_frame(self):
+        frame = ctk.CTkScrollableFrame(self, fg_color="transparent")
+        self.frames["DiskSecurity"] = frame
+        
+        frame.grid_columnconfigure(0, weight=1)
+        frame.grid_columnconfigure(1, weight=1)
+        
+        title = ctk.CTkLabel(frame, text="Disk Management, Boot Recovery & Security Suite", font=ctk.CTkFont(size=20, weight="bold"))
+        title.grid(row=0, column=0, columnspan=2, padx=10, pady=10, sticky="w")
+        
+        # -------------------------------------------------------------
+        # Left Column: Disk Converters, Passwords, and Boot Repairs
+        # -------------------------------------------------------------
+        left_column = ctk.CTkFrame(frame, fg_color="transparent")
+        left_column.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
+        left_column.grid_columnconfigure(0, weight=1)
+        
+        # Panel 1: Windows Password Recovery (SAM / Utilman Bypass)
+        p1 = ctk.CTkFrame(left_column, corner_radius=10)
+        p1.grid(row=0, column=0, padx=5, pady=8, sticky="ew")
+        p1.grid_columnconfigure(0, weight=1)
+        
+        ctk.CTkLabel(p1, text="🔑 Offline Windows Password Recovery", font=ctk.CTkFont(size=14, weight="bold")).grid(row=0, column=0, padx=15, pady=(10, 5), sticky="w")
+        ctk.CTkLabel(p1, text="Bypasses Windows Login screen by replacing Utility Manager (Ease of Access) with cmd.exe.", text_color="gray", font=ctk.CTkFont(size=11)).grid(row=1, column=0, padx=15, pady=(0, 10), sticky="w")
+        
+        p1_action_frame = ctk.CTkFrame(p1, fg_color="transparent")
+        p1_action_frame.grid(row=2, column=0, padx=15, pady=(0, 15), sticky="ew")
+        
+        ctk.CTkLabel(p1_action_frame, text="Windows Drive:").pack(side="left", padx=(0, 5))
+        self.win_drive_dropdown = ctk.CTkOptionMenu(p1_action_frame, width=90, values=["C"])
+        self.win_drive_dropdown.pack(side="left", padx=(0, 10))
+        
+        btn_apply_bypass = ctk.CTkButton(
+            p1_action_frame, 
+            text="Apply Bypass", 
+            width=110,
+            fg_color="#b91c1c",
+            hover_color="#991b1b",
+            font=ctk.CTkFont(weight="bold"),
+            command=lambda: self.apply_utilman_bypass(self.win_drive_dropdown.get())
+        )
+        btn_apply_bypass.pack(side="left", padx=(0, 5))
+        
+        btn_restore_bypass = ctk.CTkButton(
+            p1_action_frame, 
+            text="Restore Original", 
+            width=110,
+            command=lambda: self.restore_utilman(self.win_drive_dropdown.get())
+        )
+        btn_restore_bypass.pack(side="left")
+        
+        # Panel 2: Lossless Disk File System & Partition Style Converters
+        p2 = ctk.CTkFrame(left_column, corner_radius=10)
+        p2.grid(row=1, column=0, padx=5, pady=8, sticky="ew")
+        p2.grid_columnconfigure(0, weight=1)
+        
+        ctk.CTkLabel(p2, text="💽 Lossless Drive & Disk Style Converters", font=ctk.CTkFont(size=14, weight="bold")).grid(row=0, column=0, padx=15, pady=(10, 5), sticky="w")
+        ctk.CTkLabel(p2, text="Perform conversions of file systems and partition tables without losing any data.", text_color="gray", font=ctk.CTkFont(size=11)).grid(row=1, column=0, padx=15, pady=(0, 10), sticky="w")
+        
+        # Section A: FAT32 to NTFS
+        fs_frame = ctk.CTkFrame(p2, fg_color="transparent")
+        fs_frame.grid(row=2, column=0, padx=15, pady=(0, 10), sticky="ew")
+        ctk.CTkLabel(fs_frame, text="FAT32 Drive Letter:").pack(side="left", padx=(0, 5))
+        self.fat32_drive_dropdown = ctk.CTkOptionMenu(fs_frame, width=90, values=["D"])
+        self.fat32_drive_dropdown.pack(side="left", padx=(0, 10))
+        btn_conv_fs = ctk.CTkButton(
+            fs_frame,
+            text="Convert to NTFS",
+            command=lambda: self.run_fat32_to_ntfs(self.fat32_drive_dropdown.get())
+        )
+        btn_conv_fs.pack(side="left", fill="x", expand=True)
+        
+        # Section B: MBR to GPT
+        pt_frame = ctk.CTkFrame(p2, fg_color="transparent")
+        pt_frame.grid(row=3, column=0, padx=15, pady=(0, 15), sticky="ew")
+        ctk.CTkLabel(pt_frame, text="Select Disk Style:").pack(side="left", padx=(0, 5))
+        self.mbr_disk_dropdown = ctk.CTkOptionMenu(pt_frame, width=150, values=["Disk 0"])
+        self.mbr_disk_dropdown.pack(side="left", padx=(0, 10))
+        btn_conv_pt = ctk.CTkButton(
+            pt_frame,
+            text="Convert MBR to GPT",
+            fg_color="#059669",
+            hover_color="#047857",
+            font=ctk.CTkFont(weight="bold"),
+            command=lambda: self.run_mbr_to_gpt(self.mbr_disk_dropdown.get())
+        )
+        btn_conv_pt.pack(side="left", fill="x", expand=True)
+        
+        # Panel 3: Boot Sector & BCD Recovery Tools
+        p3 = ctk.CTkFrame(left_column, corner_radius=10)
+        p3.grid(row=2, column=0, padx=5, pady=8, sticky="ew")
+        p3.grid_columnconfigure(0, weight=1)
+        
+        ctk.CTkLabel(p3, text="🛠️ Boot Sector & BCD Recovery Suite", font=ctk.CTkFont(size=14, weight="bold")).grid(row=0, column=0, padx=15, pady=(10, 5), sticky="w")
+        ctk.CTkLabel(p3, text="Repair corrupt Boot Configuration Data (BCD), MBR boot records, and recreate bootloaders.", text_color="gray", font=ctk.CTkFont(size=11)).grid(row=1, column=0, padx=15, pady=(0, 10), sticky="w")
+        
+        # Simple commands
+        p3_cmds_frame = ctk.CTkFrame(p3, fg_color="transparent")
+        p3_cmds_frame.grid(row=2, column=0, padx=15, pady=(0, 10), sticky="ew")
+        p3_cmds_frame.grid_columnconfigure(0, weight=1)
+        p3_cmds_frame.grid_columnconfigure(1, weight=1)
+        p3_cmds_frame.grid_columnconfigure(2, weight=1)
+        
+        ctk.CTkButton(p3_cmds_frame, text="bootrec /fixmbr", command=lambda: self.run_boot_repair("fixmbr", None)).grid(row=0, column=0, padx=3, pady=5, sticky="ew")
+        ctk.CTkButton(p3_cmds_frame, text="bootrec /fixboot", command=lambda: self.run_boot_repair("fixboot", None)).grid(row=0, column=1, padx=3, pady=5, sticky="ew")
+        ctk.CTkButton(p3_cmds_frame, text="rebuildbcd", command=lambda: self.run_boot_repair("rebuildbcd", None)).grid(row=0, column=2, padx=3, pady=5, sticky="ew")
+        
+        # BCDBoot command builder
+        p3_bcdboot_frame = ctk.CTkFrame(p3, fg_color="transparent")
+        p3_bcdboot_frame.grid(row=3, column=0, padx=15, pady=(5, 15), sticky="ew")
+        
+        ctk.CTkLabel(p3_bcdboot_frame, text="Windows Part:").pack(side="left", padx=(0, 3))
+        self.bcd_win_dropdown = ctk.CTkOptionMenu(p3_bcdboot_frame, width=70, values=["C"])
+        self.bcd_win_dropdown.pack(side="left", padx=(0, 8))
+        
+        ctk.CTkLabel(p3_bcdboot_frame, text="Boot Part:").pack(side="left", padx=(0, 3))
+        self.bcd_boot_dropdown = ctk.CTkOptionMenu(p3_bcdboot_frame, width=70, values=["S"])
+        self.bcd_boot_dropdown.pack(side="left", padx=(0, 8))
+        
+        btn_bcdboot = ctk.CTkButton(
+            p3_bcdboot_frame,
+            text="Recreate Bootloader (BCDBoot)",
+            fg_color="#059669",
+            hover_color="#047857",
+            font=ctk.CTkFont(weight="bold"),
+            command=lambda: self.run_boot_repair("bcdboot", self.bcd_win_dropdown.get(), self.bcd_boot_dropdown.get())
+        )
+        btn_bcdboot.pack(side="left", fill="x", expand=True)
+        
+        # -------------------------------------------------------------
+        # Right Column: OS Installation Error Fixer
+        # -------------------------------------------------------------
+        right_column = ctk.CTkFrame(frame, fg_color="transparent")
+        right_column.grid(row=1, column=1, padx=10, pady=10, sticky="nsew")
+        right_column.grid_columnconfigure(0, weight=1)
+        
+        p4 = ctk.CTkFrame(right_column, corner_radius=10)
+        p4.grid(row=0, column=0, padx=5, pady=8, sticky="nsew")
+        p4.grid_columnconfigure(0, weight=1)
+        
+        ctk.CTkLabel(p4, text="🚀 OS Installation Error & Setup Fixer", font=ctk.CTkFont(size=15, weight="bold")).grid(row=0, column=0, padx=15, pady=(12, 5), sticky="w")
+        ctk.CTkLabel(p4, text="Select a common error encountered during Windows Setup to see diagnostics and launch fixes.", text_color="gray", font=ctk.CTkFont(size=11)).grid(row=1, column=0, padx=15, pady=(0, 15), sticky="w")
+        
+        # Error Dropdown Selection
+        self.os_errors = {
+            "Select an installation error to troubleshoot...": {
+                "desc": "Select an error from the dropdown to see detailed causes, guides, and automated scripting solutions.",
+                "fix_type": None
+            },
+            "MBR Mismatch: EFI system requires GPT partition style": {
+                "desc": "Cause: You booted the Windows installer in UEFI mode, but your hard drive is partitioned in the older MBR style.\n\n"
+                        "Solution 1 (Lossless): Use our 'Convert MBR to GPT' tool on the left to convert the disk without losing any files.\n\n"
+                        "Solution 2 (Destructive): Wipe the disk and convert to GPT via Diskpart. This will delete all partitions and data on the selected disk.",
+                "fix_type": "wipe_gpt"
+            },
+            "GPT Mismatch: Legacy BIOS requires MBR partition style": {
+                "desc": "Cause: You booted the Windows installer in Legacy/CSM BIOS mode, but your hard drive is partitioned in the GPT style.\n\n"
+                        "Solution: Wipe the disk and convert to MBR via Diskpart. This will delete all partitions and data on the selected disk.",
+                "fix_type": "wipe_mbr"
+            },
+            "Disk contains dynamic volumes (dynamic disks not supported)": {
+                "desc": "Cause: The target hard drive was converted to a dynamic disk, which Windows Setup cannot install to.\n\n"
+                        "Solution: Wipe the disk and convert it back to a basic partition style. WARNING: This deletes all data on the disk.",
+                "fix_type": "wipe_basic"
+            },
+            "Windows is unable to install (Error 0x80300024)": {
+                "desc": "Cause: This can happen if multiple hard drives are plugged in, causing drive number confusion, or if the partition layout is corrupt.\n\n"
+                        "Solution 1: Unplug all other internal/external hard drives except the target drive.\n\n"
+                        "Solution 2: Run a quick Diskpart clean on the target disk to reset its partition structure.",
+                "fix_type": "wipe_clean"
+            },
+            "Windows cannot install required files (Error 0x80070570)": {
+                "desc": "Cause: This error indicates file corruption, usually caused by bad sectors on the hard drive, corrupted USB installation files, or faulty RAM.\n\n"
+                        "Solution 1: Run a disk integrity check (chkdsk /f) on the target partition using the tool below to repair system sectors.\n\n"
+                        "Solution 2: Re-create your Windows bootable USB drive using a new USB stick or download.",
+                "fix_type": "chkdsk"
+            }
+        }
+        
+        self.error_dropdown = ctk.CTkOptionMenu(
+            p4, 
+            values=list(self.os_errors.keys()),
+            command=self.on_installation_error_select
+        )
+        self.error_dropdown.grid(row=2, column=0, padx=15, pady=(0, 15), sticky="ew")
+        
+        # Details Panel
+        self.details_textbox = ctk.CTkTextbox(p4, height=180, wrap="word", corner_radius=10)
+        self.details_textbox.grid(row=3, column=0, padx=15, pady=(0, 15), sticky="ew")
+        self.details_textbox.insert("1.0", "Select an error from the dropdown to see detailed causes, guides, and automated scripting solutions.")
+        self.details_textbox.configure(state="disabled")
+        
+        # Automated Fix Inputs Row
+        self.fix_inputs_frame = ctk.CTkFrame(p4, fg_color="transparent")
+        self.fix_inputs_frame.grid(row=4, column=0, padx=15, pady=(0, 15), sticky="ew")
+        
+        ctk.CTkLabel(self.fix_inputs_frame, text="Target Disk:").pack(side="left", padx=(0, 5))
+        self.install_disk_dropdown = ctk.CTkOptionMenu(self.fix_inputs_frame, width=120, values=["Disk 0"])
+        self.install_disk_dropdown.pack(side="left", padx=(0, 15))
+        
+        ctk.CTkLabel(self.fix_inputs_frame, text="Partition:").pack(side="left", padx=(0, 5))
+        self.install_partition_dropdown = ctk.CTkOptionMenu(self.fix_inputs_frame, width=90, values=["C"])
+        self.install_partition_dropdown.pack(side="left")
+        
+        # Apply Fix Button
+        self.btn_run_install_fix = ctk.CTkButton(
+            p4,
+            text="🔨 Apply Automated Setup Fix",
+            height=40,
+            fg_color="#b91c1c",
+            hover_color="#991b1b",
+            font=ctk.CTkFont(weight="bold"),
+            command=self.run_installation_error_fix
+        )
+        self.btn_run_install_fix.grid(row=5, column=0, padx=15, pady=(0, 15), sticky="ew")
+        
+        # Initial scan & population
+        self.refresh_disk_security_selectors()
+
+    def refresh_disk_security_selectors(self):
+        # 1. Detect drives containing Windows OS
+        win_drives = self.detect_windows_drives()
+        if not win_drives:
+            win_drives = ["C", "D", "E"]
+        self.win_drive_dropdown.configure(values=win_drives)
+        self.win_drive_dropdown.set(win_drives[0])
+        
+        # 2. Get all drive letters currently connected
+        all_drives = self.get_all_drive_letters()
+        if not all_drives:
+            all_drives = ["C", "D", "E"]
+        self.fat32_drive_dropdown.configure(values=all_drives)
+        self.fat32_drive_dropdown.set(all_drives[0])
+        
+        self.bcd_win_dropdown.configure(values=all_drives)
+        self.bcd_win_dropdown.set(all_drives[0])
+        
+        self.bcd_boot_dropdown.configure(values=all_drives)
+        self.bcd_boot_dropdown.set(all_drives[0])
+        
+        self.install_partition_dropdown.configure(values=all_drives)
+        self.install_partition_dropdown.set(all_drives[0])
+        
+        # 3. Get system physical disks
+        disks = self.get_system_disks()
+        if not disks:
+            disks = ["Disk 0: Local Disk (MBR)"]
+        self.mbr_disk_dropdown.configure(values=disks)
+        self.mbr_disk_dropdown.set(disks[0])
+        
+        self.install_disk_dropdown.configure(values=disks)
+        self.install_disk_dropdown.set(disks[0])
+
+    def detect_windows_drives(self):
+        import string
+        drives = []
+        for letter in string.ascii_uppercase:
+            path = f"{letter}:\\Windows\\System32\\utilman.exe"
+            if os.path.exists(path):
+                drives.append(letter)
+        return drives
+
+    def get_all_drive_letters(self):
+        import string
+        drives = []
+        for letter in string.ascii_uppercase:
+            if os.path.exists(f"{letter}:\\"):
+                drives.append(letter)
+        return drives
+
+    def get_system_disks(self):
+        try:
+            cmd = ["powershell", "-Command", "Get-Disk | Select-Object Number, FriendlyName, PartitionStyle | ConvertTo-Json"]
+            process = subprocess.run(cmd, capture_output=True, text=True)
+            output = process.stdout.strip()
+            if not output:
+                return []
+            data = json.loads(output)
+            if not isinstance(data, list):
+                data = [data]
+            disks = []
+            for d in data:
+                num = d.get("Number")
+                name = d.get("FriendlyName") or "Disk"
+                style = d.get("PartitionStyle") or "MBR"
+                disks.append(f"Disk {num}: {name} ({style})")
+            return disks
+        except Exception as e:
+            print(f"Error checking disks: {e}")
+            return []
+
+    def apply_utilman_bypass(self, win_drive):
+        if not win_drive or len(win_drive) != 1:
+            self.show_toast("❌ Error: Select a valid Windows drive letter!")
+            return
+            
+        def worker():
+            try:
+                utilman_path = f"{win_drive}:\\Windows\\System32\\utilman.exe"
+                cmd_path = f"{win_drive}:\\Windows\\System32\\cmd.exe"
+                utilman_bak = f"{win_drive}:\\Windows\\System32\\utilman.exe.bak"
+                
+                if not os.path.exists(utilman_path):
+                    self.show_toast(f"❌ Error: utilman.exe not found on {win_drive}:")
+                    return
+                    
+                self.show_toast("Taking ownership of utilman.exe...")
+                # Take ownership and grant permission (TrustedInstaller override)
+                subprocess.run(f'takeown /f "{utilman_path}"', shell=True, capture_output=True)
+                subprocess.run(f'icacls "{utilman_path}" /grant administrators:F', shell=True, capture_output=True)
+                
+                if os.path.exists(utilman_bak):
+                    os.remove(utilman_bak)
+                    
+                os.rename(utilman_path, utilman_bak)
+                shutil.copy2(cmd_path, utilman_path)
+                self.show_toast(f"✅ Success: utilman.exe bypass applied on drive {win_drive}:")
+            except Exception as e:
+                self.show_toast(f"❌ Error: {e}")
+        
+        threading.Thread(target=worker, daemon=True).start()
+
+    def restore_utilman(self, win_drive):
+        if not win_drive or len(win_drive) != 1:
+            self.show_toast("❌ Error: Select a valid Windows drive letter!")
+            return
+            
+        def worker():
+            try:
+                utilman_path = f"{win_drive}:\\Windows\\System32\\utilman.exe"
+                utilman_bak = f"{win_drive}:\\Windows\\System32\\utilman.exe.bak"
+                
+                if not os.path.exists(utilman_bak):
+                    self.show_toast(f"❌ Error: utilman.exe.bak not found on {win_drive}:")
+                    return
+                    
+                if os.path.exists(utilman_path):
+                    os.remove(utilman_path)
+                    
+                os.rename(utilman_bak, utilman_path)
+                self.show_toast(f"✅ Success: original utilman.exe restored on drive {win_drive}:")
+            except Exception as e:
+                self.show_toast(f"❌ Error: {e}")
+                
+        threading.Thread(target=worker, daemon=True).start()
+
+    def run_fat32_to_ntfs(self, drive_letter):
+        if not drive_letter or len(drive_letter) != 1:
+            self.show_toast("❌ Error: Select a target drive letter!")
+            return
+        # convert D: /FS:NTFS
+        self.run_cmd(f"start cmd /k convert {drive_letter}: /FS:NTFS", f"FAT32 to NTFS Converter on {drive_letter}:")
+
+    def run_mbr_to_gpt(self, disk_info):
+        if not disk_info or "Disk" not in disk_info:
+            self.show_toast("❌ Error: Select a target disk!")
+            return
+        disk_num = disk_info.split(":")[0].replace("Disk", "").strip()
+        # MBR2GPT lossless conversion
+        self.run_cmd(f"start cmd /k mbr2gpt /convert /disk:{disk_num} /allowFullOS", f"MBR to GPT Converter on Disk {disk_num}")
+
+    def run_boot_repair(self, action, win_drive, boot_drive=None):
+        if action == "fixmbr":
+            self.run_cmd("start cmd /k bootrec /fixmbr", "Write MBR")
+        elif action == "fixboot":
+            self.run_cmd("start cmd /k bootrec /fixboot", "Write Boot Sector")
+        elif action == "rebuildbcd":
+            self.run_cmd("start cmd /k bootrec /rebuildbcd", "Rebuild BCD")
+        elif action == "bcdboot":
+            if not win_drive or len(win_drive) != 1:
+                self.show_toast("❌ Error: Select target Windows drive!")
+                return
+            if not boot_drive or len(boot_drive) != 1:
+                self.show_toast("❌ Error: Select boot target partition drive!")
+                return
+            # bcdboot C:\Windows /s S: /f ALL
+            cmd = f"start cmd /k bcdboot {win_drive}:\\Windows /s {boot_drive}: /f ALL"
+            self.run_cmd(cmd, "BCDBoot Recovery")
+
+    def on_installation_error_select(self, val):
+        info = self.os_errors.get(val)
+        if info:
+            self.details_textbox.configure(state="normal")
+            self.details_textbox.delete("1.0", "end")
+            self.details_textbox.insert("1.0", info.get("desc", ""))
+            self.details_textbox.configure(state="disabled")
+
+    def run_installation_error_fix(self):
+        err = self.error_dropdown.get()
+        info = self.os_errors.get(err)
+        if not info or not info.get("fix_type"):
+            self.show_toast("❌ Error: No automated fix for this selection.")
+            return
+            
+        fix_type = info["fix_type"]
+        
+        if fix_type in ["wipe_gpt", "wipe_mbr", "wipe_basic", "wipe_clean"]:
+            disk_info = self.install_disk_dropdown.get()
+            if not disk_info or "Disk" not in disk_info:
+                self.show_toast("❌ Error: Select a target physical disk!")
+                return
+            disk_num = disk_info.split(":")[0].replace("Disk", "").strip()
+            
+            from tkinter import messagebox
+            confirm = messagebox.askyesno(
+                "CRITICAL WARNING",
+                f"You are about to completely WIPE Disk {disk_num} via Diskpart.\n"
+                "All partition structures, volumes, and files on this disk will be permanently DELETED.\n\n"
+                "Do you want to proceed?",
+                icon="warning"
+            )
+            if not confirm:
+                return
+                
+            style = "gpt" if fix_type == "wipe_gpt" else ("mbr" if fix_type == "wipe_mbr" else ("basic" if fix_type == "wipe_basic" else None))
+            self.run_diskpart_wipe_convert(disk_num, style)
+            
+        elif fix_type == "chkdsk":
+            drive = self.install_partition_dropdown.get()
+            if not drive or len(drive) != 1:
+                self.show_toast("❌ Error: Select a target partition drive letter!")
+                return
+            self.run_cmd(f"start cmd /k chkdsk {drive}: /f", f"chkdsk /f on {drive}:")
+
+    def run_diskpart_wipe_convert(self, disk_num, style=None):
+        import tempfile
+        script_content = f"select disk {disk_num}\nclean\n"
+        if style == "gpt":
+            script_content += "convert gpt\n"
+        elif style == "mbr" or style == "basic":
+            script_content += "convert mbr\n"
+            
+        try:
+            fd, path = tempfile.mkstemp(suffix=".txt", prefix="diskpart_")
+            with os.open(fd, os.O_WRONLY | os.O_CREAT) as f:
+                os.write(f, script_content.encode('utf-8'))
+            
+            # Execute diskpart with script
+            self.run_cmd(f"start cmd /k diskpart /s \"{path}\"", f"Wipe & Convert Disk {disk_num}")
+        except Exception as e:
+            self.show_toast(f"❌ Error creating diskpart script: {e}")
 
     def on_closing(self):
         self.telemetry_running = False
