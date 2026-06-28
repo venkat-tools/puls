@@ -4,6 +4,9 @@
  * Error Code Search matching, Test Page configuration, and localStorage Maintenance Logging.
  */
 
+// Hardcoded Default Gemini API Key (Replace empty string with your key to avoid entering it every time)
+const DEFAULT_GEMINI_API_KEY = "";
+
 // Global State
 let currentTheme = 'dark';
 let activeTab = 'dashboard';
@@ -2643,7 +2646,11 @@ function saveApiKey() {
 
 function loadApiKey() {
   const el = document.getElementById("ai-api-key");
-  const savedKey = localStorage.getItem("winpulse_gemini_api_key");
+  let savedKey = localStorage.getItem("winpulse_gemini_api_key");
+  if (!savedKey && DEFAULT_GEMINI_API_KEY) {
+    savedKey = DEFAULT_GEMINI_API_KEY;
+    localStorage.setItem("winpulse_gemini_api_key", savedKey);
+  }
   if (el && savedKey) {
     el.value = savedKey;
   }
@@ -2813,14 +2820,15 @@ function sendChatMessage() {
 }
 
 function executeOnlineAi(promptText, fileData, fileType, fileName, aiBubble, chatViewport) {
-  const apiKey = localStorage.getItem("winpulse_gemini_api_key") || "";
+  const apiKey = localStorage.getItem("winpulse_gemini_api_key") || DEFAULT_GEMINI_API_KEY || "";
   
   if (!apiKey) {
     aiBubble.innerHTML = `✕ <strong>Error:</strong> Please enter a Gemini API Key in the AI Configuration sidebar to run in Online Mode.`;
     return;
   }
 
-  const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + apiKey;
+  // Multi-model backup list to handle model-busy / rate-limits / server issues
+  const models = ["gemini-2.5-flash", "gemini-1.5-flash"];
   
   const systemInstruction = "You are the VenkatPulse AI Diagnostic Assistant. Analyze the user's computer issue. Provide clear, concise, step-by-step recommendations. You can recommend that the user execute one-click fixes. If one of our tool keys matches the user's problem, you MUST include the token [EXECUTE: toolKey] on a new line. Supported tool keys: sfc_scan, dism_restore, reset_wua, flush_dns, reset_winsock, reset_firewall, create_restore_point, disable_telemetry, disable_cortana, disable_onedrive, disable_xbox, uninstall_bloatware, backup_printers, restore_printers, quick_repair, clear_queue, restart_spooler, devices_printers, print_management, sharing_center, activate_windows, activate_office, activate_kms, activate_kms_uninstall.";
 
@@ -2852,34 +2860,51 @@ function executeOnlineAi(promptText, fileData, fileType, fileName, aiBubble, cha
     }
   };
 
-  fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  })
-  .then(res => {
-    if (!res.ok) return res.json().then(data => { throw new Error(data.error?.message || 'API request failed'); });
-    return res.json();
-  })
-  .then(data => {
-    let responseText = data.candidates?.[0]?.content?.parts?.[0]?.text || "No response received.";
-    
-    // Parse response for [EXECUTE: toolKey] cards
-    const parsedHtml = formatAiResponse(responseText);
-    
-    aiBubble.innerHTML = `
-      ${parsedHtml}
-      <span class="chat-bubble-meta">${new Date().toLocaleTimeString()}</span>
-    `;
-    chatViewport.scrollTop = chatViewport.scrollHeight;
-  })
-  .catch(err => {
-    aiBubble.innerHTML = `✕ <strong>Gemini API Error:</strong> ${err.message}`;
-    chatViewport.scrollTop = chatViewport.scrollHeight;
-  });
+  function tryRequest(modelIndex) {
+    const activeModel = models[modelIndex];
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${activeModel}:generateContent?key=${apiKey}`;
+
+    fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    .then(res => {
+      if (!res.ok) return res.json().then(data => { throw new Error(data.error?.message || 'API request failed'); });
+      return res.json();
+    })
+    .then(data => {
+      let responseText = data.candidates?.[0]?.content?.parts?.[0]?.text || "No response received.";
+      const parsedHtml = formatAiResponse(responseText);
+      
+      aiBubble.innerHTML = `
+        ${parsedHtml}
+        <span class="chat-bubble-meta">${new Date().toLocaleTimeString()}</span>
+      `;
+      chatViewport.scrollTop = chatViewport.scrollHeight;
+    })
+    .catch(err => {
+      console.warn(`[AI Assistant] Model ${activeModel} failed:`, err.message);
+      
+      if (modelIndex + 1 < models.length) {
+        // Fall back to backup model (e.g. Gemini 1.5 Flash)
+        aiBubble.innerHTML = `<span style="color: var(--state-warning);">⚠️ Primary AI (Gemini 2.5) was busy. Retrying with backup AI (Gemini 1.5)...</span>`;
+        tryRequest(modelIndex + 1);
+      } else {
+        // Fall back to offline diagnostics database if all online endpoints fail
+        aiBubble.innerHTML = `<span style="color: var(--state-warning);">⚠️ Online AI service is busy or offline. Switching to local diagnostics database...</span>`;
+        setTimeout(() => {
+          executeOfflineAi(promptText, fileData, fileType, fileName, aiBubble, chatViewport, true);
+        }, 1200);
+      }
+    });
+  }
+
+  // Start with primary model (index 0)
+  tryRequest(0);
 }
 
-function executeOfflineAi(promptText, fileData, fileType, fileName, aiBubble, chatViewport) {
+function executeOfflineAi(promptText, fileData, fileType, fileName, aiBubble, chatViewport, isFallback = false) {
   setTimeout(() => {
     let responseText = "";
     
@@ -2913,6 +2938,10 @@ function executeOfflineAi(promptText, fileData, fileType, fileName, aiBubble, ch
       } else {
         responseText = "I am running in **Offline Mode**. Describe your issue with keywords like 'spooler', 'slow', 'internet', or 'corrupt' so I can match them, or attach system log files to scan. Enable **Online AI Mode** to get full conversational support.";
       }
+    }
+
+    if (isFallback) {
+      responseText = "⚠️ **Note:** The online Gemini service was busy or rate-limited. I generated this report using our local offline diagnostics database:\n\n" + responseText;
     }
 
     const parsedHtml = formatAiResponse(responseText);
