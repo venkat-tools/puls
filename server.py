@@ -286,6 +286,49 @@ class PythonAdminServer(BaseHTTPRequestHandler):
                 self.wfile.write(json.dumps({"error": str(e)}).encode('utf-8'))
             return
 
+        # 2.5 API Endpoint: Get Disks and Partition Info
+        elif self.path == '/api/diskinfo':
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_cors_headers()
+            self.end_headers()
+            
+            win_drives = []
+            import string
+            for letter in string.ascii_uppercase:
+                if os.path.exists(f"{letter}:\\Windows\\System32\\utilman.exe"):
+                    win_drives.append(letter)
+            
+            all_drives = []
+            for letter in string.ascii_uppercase:
+                if os.path.exists(f"{letter}:\\"):
+                    all_drives.append(letter)
+            
+            disks = []
+            try:
+                cmd = ["powershell", "-Command", "Get-Disk | Select-Object Number, FriendlyName, PartitionStyle | ConvertTo-Json"]
+                process = subprocess.run(cmd, capture_output=True, text=True)
+                output = process.stdout.strip()
+                if output:
+                    data = json.loads(output)
+                    if not isinstance(data, list):
+                        data = [data]
+                    for d in data:
+                        num = d.get("Number")
+                        name = d.get("FriendlyName") or "Disk"
+                        style = d.get("PartitionStyle") or "MBR"
+                        disks.append({"Number": num, "Name": name, "Style": style})
+            except Exception:
+                pass
+                
+            info = {
+                "windowsDrives": win_drives,
+                "allDrives": all_drives,
+                "disks": disks
+            }
+            self.wfile.write(json.dumps(info).encode('utf-8'))
+            return
+
         # 3. API Endpoint: Geolocation Proxy
         elif self.path == '/api/geoip':
             self.send_response(200)
@@ -481,6 +524,68 @@ Start-Process -FilePath "$odtDir\\setup.exe" -ArgumentList "/configure $configXm
                     with open(ps_path, 'w', encoding='utf-8') as f:
                         f.write(script)
                     command = f'start powershell -NoExit -ExecutionPolicy Bypass -File "{ps_path}"'
+
+                # Disk Security and Boot recovery commands
+                if tool_key == 'apply_utilman_bypass':
+                    win_drive = payload.get("winDrive", "C")
+                    command = f'takeown /f "{win_drive}:\\Windows\\System32\\utilman.exe" && icacls "{win_drive}:\\Windows\\System32\\utilman.exe" /grant administrators:F && ren "{win_drive}:\\Windows\\System32\\utilman.exe" utilman.exe.bak && copy "{win_drive}:\\Windows\\System32\\cmd.exe" "{win_drive}:\\Windows\\System32\\utilman.exe"'
+                    
+                if tool_key == 'restore_utilman':
+                    win_drive = payload.get("winDrive", "C")
+                    command = f'del /f /q "{win_drive}:\\Windows\\System32\\utilman.exe" && ren "{win_drive}:\\Windows\\System32\\utilman.exe.bak" utilman.exe'
+                    
+                if tool_key == 'convert_fat32_to_ntfs':
+                    drive_letter = payload.get("driveLetter", "D")
+                    command = f'start cmd /k convert {drive_letter}: /FS:NTFS'
+                    
+                if tool_key == 'convert_mbr_to_gpt':
+                    disk_num = payload.get("diskNum", "0")
+                    command = f'start cmd /k mbr2gpt /convert /disk:{disk_num} /allowFullOS'
+                    
+                if tool_key == 'fixmbr':
+                    command = 'start cmd /k bootrec /fixmbr'
+                    
+                if tool_key == 'fixboot':
+                    command = 'start cmd /k bootrec /fixboot'
+                    
+                if tool_key == 'rebuildbcd':
+                    command = 'start cmd /k bootrec /rebuildbcd'
+                    
+                if tool_key == 'bcdboot_repair':
+                    win_drive = payload.get("winDrive", "C")
+                    boot_drive = payload.get("bootDrive", "S")
+                    command = f'start cmd /k bcdboot {win_drive}:\\Windows /s {boot_drive}: /f ALL'
+                    
+                if tool_key == 'wipe_disk':
+                    fix_type = payload.get("fixType")
+                    disk_num = payload.get("diskNum", "0")
+                    import tempfile
+                    script_content = f"select disk {disk_num}\nclean\n"
+                    if fix_type == "wipe_gpt":
+                        script_content += "convert gpt\n"
+                    elif fix_type == "wipe_mbr" or fix_type == "wipe_basic":
+                        script_content += "convert mbr\n"
+                    
+                    fd, path = tempfile.mkstemp(suffix=".txt", prefix="diskpart_")
+                    with os.open(fd, os.O_WRONLY | os.O_CREAT) as f:
+                        os.write(f, script_content.encode('utf-8'))
+                    command = f'start cmd /k diskpart /s "{path}"'
+                    
+                if tool_key == 'chkdsk_repair':
+                    drive_letter = payload.get("driveLetter", "C")
+                    command = f'start cmd /k chkdsk {drive_letter}: /f'
+                    
+                if tool_key == 'winre_enable':
+                    command = 'start cmd /k reagentc /enable'
+                    
+                if tool_key == 'winre_status':
+                    command = 'start cmd /k reagentc /info'
+                    
+                if tool_key == 'safemode_on':
+                    command = 'start cmd /k "bcdedit /set {default} safeboot minimal"'
+                    
+                if tool_key == 'safemode_off':
+                    command = 'start cmd /k "bcdedit /deletevalue {default} safeboot"'
 
                 if not command:
                     self.send_response(400)

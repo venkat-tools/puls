@@ -1504,6 +1504,49 @@ Write-Host 'Office Installation finished.'
         )
         self.btn_run_install_fix.grid(row=5, column=0, padx=15, pady=(0, 15), sticky="ew")
         
+        # Panel 5: System Recovery & Boot Management
+        p5 = ctk.CTkFrame(right_column, corner_radius=10)
+        p5.grid(row=1, column=0, padx=5, pady=8, sticky="ew")
+        p5.grid_columnconfigure(0, weight=1)
+        p5.grid_columnconfigure(1, weight=1)
+        
+        ctk.CTkLabel(p5, text="💾 System Recovery & Boot Management", font=ctk.CTkFont(size=14, weight="bold")).grid(row=0, column=0, columnspan=2, padx=15, pady=(10, 5), sticky="w")
+        ctk.CTkLabel(p5, text="Manage Windows Recovery Environment (WinRE) and advanced boot styles.", text_color="gray", font=ctk.CTkFont(size=11)).grid(row=1, column=0, columnspan=2, padx=15, pady=(0, 10), sticky="w")
+        
+        btn_winre_enable = ctk.CTkButton(
+            p5,
+            text="Enable WinRE",
+            command=lambda: self.run_system_recovery_command("winre_enable")
+        )
+        btn_winre_enable.grid(row=2, column=0, padx=10, pady=5, sticky="ew")
+        
+        btn_winre_status = ctk.CTkButton(
+            p5,
+            text="Check WinRE Status",
+            command=lambda: self.run_system_recovery_command("winre_status")
+        )
+        btn_winre_status.grid(row=2, column=1, padx=10, pady=5, sticky="ew")
+        
+        btn_safemode_on = ctk.CTkButton(
+            p5,
+            text="Boot to Safe Mode",
+            fg_color="#b91c1c",
+            hover_color="#991b1b",
+            font=ctk.CTkFont(weight="bold"),
+            command=lambda: self.run_system_recovery_command("safemode_on")
+        )
+        btn_safemode_on.grid(row=3, column=0, padx=10, pady=5, sticky="ew")
+        
+        btn_safemode_off = ctk.CTkButton(
+            p5,
+            text="Restore Normal Boot",
+            fg_color="#059669",
+            hover_color="#047857",
+            font=ctk.CTkFont(weight="bold"),
+            command=lambda: self.run_system_recovery_command("safemode_off")
+        )
+        btn_safemode_off.grid(row=3, column=1, padx=10, pady=5, sticky="ew")
+        
         # Initial scan & population
         self.refresh_disk_security_selectors()
 
@@ -1729,6 +1772,16 @@ Write-Host 'Office Installation finished.'
             self.run_cmd(f"start cmd /k diskpart /s \"{path}\"", f"Wipe & Convert Disk {disk_num}")
         except Exception as e:
             self.show_toast(f"❌ Error creating diskpart script: {e}")
+
+    def run_system_recovery_command(self, action):
+        if action == "winre_enable":
+            self.run_cmd("start cmd /k reagentc /enable", "Enable WinRE")
+        elif action == "winre_status":
+            self.run_cmd("start cmd /k reagentc /info", "WinRE Status")
+        elif action == "safemode_on":
+            self.run_cmd('start cmd /k "bcdedit /set {default} safeboot minimal"', "Enable Safe Mode")
+        elif action == "safemode_off":
+            self.run_cmd('start cmd /k "bcdedit /deletevalue {default} safeboot"', "Disable Safe Mode")
 
     def on_closing(self):
         self.telemetry_running = False

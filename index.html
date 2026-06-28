@@ -112,6 +112,10 @@
           <i data-lucide="printer"></i>
           <span>Printers</span>
         </button>
+        <button class="nav-tab" data-tab="disksecurity">
+          <i data-lucide="hard-drive"></i>
+          <span>Disk & Password</span>
+        </button>
         <button class="nav-tab" data-tab="auditlogs">
           <i data-lucide="list-ordered"></i>
           <span>Audit Logs</span>
@@ -1273,6 +1277,118 @@
                   <i data-lucide="send"></i>
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB: DISK & SECURITY TOOLS -->
+      <section id="disksecurity" class="tab-panel">
+        <div class="maintenance-layout">
+          <!-- Left Column -->
+          <div class="card form-card">
+            <h3>🔑 Offline Windows Password Recovery</h3>
+            <p class="subtitle">Bypasses the Windows Login screen by replacing Utility Manager (Ease of Access) with cmd.exe. You can boot into Windows, open cmd on lockscreen, and reset the password.</p>
+            
+            <div class="form-group">
+              <label for="ds-win-drive">Select Windows Partition:</label>
+              <select id="ds-win-drive" class="form-control">
+                <option value="C">C:</option>
+              </select>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+              <button class="btn btn-danger" onclick="runDiskSecurityCommand('apply_utilman_bypass')" style="flex: 1;">Apply Bypass</button>
+              <button class="btn btn-secondary" onclick="runDiskSecurityCommand('restore_utilman')" style="flex: 1;">Restore Original</button>
+            </div>
+            
+            <h3 style="margin-top: 30px;">💽 Lossless Drive & Disk Style Converters</h3>
+            <p class="subtitle">Convert partition styles or file systems without formatting or data loss.</p>
+            
+            <div class="form-group">
+              <label for="ds-fat32-drive">FAT32 Drive to Convert to NTFS:</label>
+              <div style="display: flex; gap: 10px;">
+                <select id="ds-fat32-drive" class="form-control" style="width: 100px;">
+                  <option value="D">D:</option>
+                </select>
+                <button class="btn" onclick="runDiskSecurityCommand('convert_fat32_to_ntfs')" style="flex: 1;">Convert to NTFS</button>
+              </div>
+            </div>
+            
+            <div class="form-group" style="margin-top: 20px;">
+              <label for="ds-disk-num">Select Physical Disk for MBR to GPT:</label>
+              <div style="display: flex; gap: 10px;">
+                <select id="ds-disk-num" class="form-control" style="flex: 1;">
+                  <option value="0">Disk 0</option>
+                </select>
+                <button class="btn btn-success" onclick="runDiskSecurityCommand('convert_mbr_to_gpt')" style="flex: 1;">Convert MBR to GPT</button>
+              </div>
+            </div>
+
+            <h3 style="margin-top: 30px;">🛠️ Boot Sector & BCD Recovery Suite</h3>
+            <p class="subtitle">Repair corrupt BCD configuration data, master boot records, and bootloaders.</p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+              <button class="btn" onclick="runDiskSecurityCommand('fixmbr')">Fix MBR</button>
+              <button class="btn" onclick="runDiskSecurityCommand('fixboot')">Fix Boot</button>
+              <button class="btn" onclick="runDiskSecurityCommand('rebuildbcd')">Rebuild BCD</button>
+            </div>
+            
+            <div class="form-group" style="margin-top: 20px;">
+              <label>Recreate Windows Bootloader (BCDBoot):</label>
+              <div style="display: flex; gap: 10px; align-items: center;">
+                <label>Win Partition:</label>
+                <select id="ds-bcd-win" class="form-control" style="width: 80px;"><option value="C">C:</option></select>
+                <label>Boot Partition:</label>
+                <select id="ds-bcd-boot" class="form-control" style="width: 80px;"><option value="S">S:</option></select>
+                <button class="btn btn-success" onclick="runDiskSecurityCommand('bcdboot_repair')" style="flex: 1;">Run BCDBoot</button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Right Column -->
+          <div class="card form-card">
+            <h3>🚀 OS Installation Error & Setup Fixer</h3>
+            <p class="subtitle">Select a common error encountered during Windows Setup to see diagnostics and launch fixes.</p>
+            
+            <div class="form-group">
+              <label for="ds-error-select">Troubleshoot Windows Setup Error:</label>
+              <select id="ds-error-select" class="form-control" onchange="onWebErrorSelect(this.value)">
+                <option value="Select an installation error to troubleshoot...">Select an installation error to troubleshoot...</option>
+                <option value="wipe_gpt">MBR Mismatch: EFI system requires GPT partition style</option>
+                <option value="wipe_mbr">GPT Mismatch: Legacy BIOS requires MBR partition style</option>
+                <option value="wipe_basic">Disk has dynamic volumes (dynamic disks not supported)</option>
+                <option value="wipe_clean">Windows is unable to install (Error 0x80300024)</option>
+                <option value="chkdsk">Windows cannot install required files (Error 0x80070570)</option>
+              </select>
+            </div>
+            
+            <div id="ds-error-desc" style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; font-size: 13px; line-height: 1.5; margin-bottom: 20px; min-height: 120px; white-space: pre-line;">
+              Select an error from the dropdown to see detailed causes, guides, and automated scripting solutions.
+            </div>
+            
+            <div class="form-group" style="display: flex; gap: 15px; align-items: center; margin-top: 15px;">
+              <label for="ds-target-disk">Target Disk:</label>
+              <select id="ds-target-disk" class="form-control" style="width: 120px;">
+                <option value="0">Disk 0</option>
+              </select>
+              
+              <label for="ds-target-part">Partition:</label>
+              <select id="ds-target-part" class="form-control" style="width: 100px;">
+                <option value="C">C:</option>
+              </select>
+            </div>
+            
+            <button class="btn btn-danger" id="ds-btn-fix" onclick="runWebInstallFix()" style="width: 100%; height: 40px; margin-top: 10px; font-weight: bold;">Apply Automated Setup Fix</button>
+            
+            <h3 style="margin-top: 35px;">💾 System Recovery & Boot Management</h3>
+            <p class="subtitle">Manage Windows Recovery Environment and Boot styles.</p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px;">
+              <button class="btn" onclick="runDiskSecurityCommand('winre_enable')">Enable Recovery Env (WinRE)</button>
+              <button class="btn" onclick="runDiskSecurityCommand('winre_status')">Check WinRE Status</button>
+              <button class="btn btn-danger" onclick="runDiskSecurityCommand('safemode_on')">Boot to Safe Mode next boot</button>
+              <button class="btn btn-success" onclick="runDiskSecurityCommand('safemode_off')">Restore normal boot</button>
             </div>
           </div>
         </div>

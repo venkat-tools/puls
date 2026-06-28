@@ -850,6 +850,8 @@ function switchTab(tabId) {
   } else if (tabId === 'aiassistant') {
     loadApiKey();
     toggleAiMode();
+  } else if (tabId === 'disksecurity') {
+    loadWebDiskInfo();
   }
 }
 
@@ -2982,6 +2984,8 @@ function formatAiResponse(text) {
   return formatted;
 }
 
+}
+
 // 15. Telemetry monitor simulation
 function startTelemetryMonitor() {
   setInterval(() => {
@@ -2998,4 +3002,175 @@ function startTelemetryMonitor() {
     if (cpuPct) cpuPct.innerText = cpuVal + "%";
     if (ramPct) ramPct.innerText = ramVal + "%";
   }, 3000);
+}
+
+// 16. Disk & Security Tools Integration
+function loadWebDiskInfo() {
+  fetch(API_BASE + '/api/diskinfo')
+    .then(res => res.json())
+    .then(data => {
+      // 1. Populate Windows drives
+      const winSelect = document.getElementById("ds-win-drive");
+      if (winSelect) {
+        winSelect.innerHTML = "";
+        if (data.windowsDrives && data.windowsDrives.length > 0) {
+          data.windowsDrives.forEach(drv => {
+            winSelect.innerHTML += `<option value="${drv}">${drv}:\\</option>`;
+          });
+        } else {
+          winSelect.innerHTML = `<option value="C">C:\\</option><option value="D">D:\\</option><option value="E">E:\\</option>`;
+        }
+      }
+
+      // 2. Populate all drive letters
+      const allSelects = ["ds-fat32-drive", "ds-bcd-win", "ds-bcd-boot", "ds-target-part"];
+      allSelects.forEach(id => {
+        const select = document.getElementById(id);
+        if (select) {
+          select.innerHTML = "";
+          if (data.allDrives && data.allDrives.length > 0) {
+            data.allDrives.forEach(drv => {
+              select.innerHTML += `<option value="${drv}">${drv}:\\</option>`;
+            });
+          } else {
+            select.innerHTML = `<option value="C">C:\\</option><option value="D">D:\\</option><option value="E">E:\\</option>`;
+          }
+        }
+      });
+
+      // 3. Populate disks
+      const diskSelects = ["ds-disk-num", "ds-target-disk"];
+      diskSelects.forEach(id => {
+        const select = document.getElementById(id);
+        if (select) {
+          select.innerHTML = "";
+          if (data.disks && data.disks.length > 0) {
+            data.disks.forEach(d => {
+              select.innerHTML += `<option value="${d.Number}">Disk ${d.Number}: ${d.Name} (${d.Style})</option>`;
+            });
+          } else {
+            select.innerHTML = `<option value="0">Disk 0</option><option value="1">Disk 1</option>`;
+          }
+        }
+      });
+    })
+    .catch(err => {
+      console.warn("Failed to load disk info: ", err);
+    });
+}
+
+function runDiskSecurityCommand(action) {
+  let bodyData = { toolKey: action };
+  
+  if (action === 'apply_utilman_bypass' || action === 'restore_utilman') {
+    bodyData.winDrive = document.getElementById("ds-win-drive").value;
+  } else if (action === 'convert_fat32_to_ntfs') {
+    bodyData.driveLetter = document.getElementById("ds-fat32-drive").value;
+  } else if (action === 'convert_mbr_to_gpt') {
+    bodyData.diskNum = document.getElementById("ds-disk-num").value;
+  } else if (action === 'bcdboot_repair') {
+    bodyData.winDrive = document.getElementById("ds-bcd-win").value;
+    bodyData.bootDrive = document.getElementById("ds-bcd-boot").value;
+  }
+
+  fetch(API_BASE + '/api/execute', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(bodyData)
+  })
+  .then(res => {
+    if (!res.ok) {
+      return res.json().then(data => { throw new Error(data.error || 'Execution failed'); });
+    }
+    return res.json();
+  })
+  .then(data => {
+    alert("Command executed successfully!");
+    logMaintenanceAction("Disk/Security Tool", "Success", `Action: ${action}`);
+  })
+  .catch(err => {
+    alert("Error: " + err.message);
+  });
+}
+
+const OS_INSTALL_ERRORS_WEB = {
+  "Select an installation error to troubleshoot...": {
+    "desc": "Select an error from the dropdown to see detailed causes, guides, and automated scripting solutions.",
+    "fix_type": null
+  },
+  "wipe_gpt": {
+    "desc": "Cause: You booted the Windows installer in UEFI mode, but your hard drive is partitioned in the older MBR style.\n\nSolution 1 (Lossless): Use our 'Convert MBR to GPT' tool on the left to convert the disk without losing any files.\n\nSolution 2 (Destructive): Wipe the disk and convert to GPT via Diskpart. This will delete all partitions and data on the selected disk.",
+    "fix_type": "wipe_gpt"
+  },
+  "wipe_mbr": {
+    "desc": "Cause: You booted the Windows installer in Legacy/CSM BIOS mode, but your hard drive is partitioned in the GPT style.\n\nSolution: Wipe the disk and convert to MBR via Diskpart. This will delete all partitions and data on the selected disk.",
+    "fix_type": "wipe_mbr"
+  },
+  "wipe_basic": {
+    "desc": "Cause: The target hard drive was converted to a dynamic disk, which Windows Setup cannot install to.\n\nSolution: Wipe the disk and convert it back to a basic partition style. WARNING: This deletes all data on the disk.",
+    "fix_type": "wipe_basic"
+  },
+  "wipe_clean": {
+    "desc": "Cause: This can happen if multiple hard drives are plugged in, causing drive number confusion, or if the partition layout is corrupt.\n\nSolution 1: Unplug all other internal/external hard drives except the target drive.\n\nSolution 2: Run a quick Diskpart clean on the target disk to reset its partition structure.",
+    "fix_type": "wipe_clean"
+  },
+  "chkdsk": {
+    "desc": "Cause: This error indicates file corruption, usually caused by bad sectors on the hard drive, corrupted USB installation files, or faulty RAM.\n\nSolution 1: Run a disk integrity check (chkdsk /f) on the target partition using the tool below to repair system sectors.\n\nSolution 2: Re-create your Windows bootable USB drive using a new USB stick or download.",
+    "fix_type": "chkdsk"
+  }
+};
+
+function onWebErrorSelect(val) {
+  const descEl = document.getElementById("ds-error-desc");
+  const info = OS_INSTALL_ERRORS_WEB[val] || OS_INSTALL_ERRORS_WEB["Select an installation error to troubleshoot..."];
+  if (descEl) {
+    descEl.innerText = info.desc;
+  }
+}
+
+function runWebInstallFix() {
+  const select = document.getElementById("ds-error-select");
+  const val = select.value;
+  const info = OS_INSTALL_ERRORS_WEB[val];
+  if (!info || !info.fix_type) {
+    alert("Please select a valid error to fix.");
+    return;
+  }
+
+  const fix_type = info.fix_type;
+  
+  if (["wipe_gpt", "wipe_mbr", "wipe_basic", "wipe_clean"].includes(fix_type)) {
+    const disk = document.getElementById("ds-target-disk").value;
+    if (!confirm(`CRITICAL WARNING: This will completely WIPE Disk ${disk} via Diskpart.\nAll files and partitions will be permanently deleted.\n\nDo you want to proceed?`)) {
+      return;
+    }
+    
+    fetch(API_BASE + '/api/execute', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ toolKey: "wipe_disk", fixType: fix_type, diskNum: disk })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.error) throw new Error(data.error);
+      alert("Disk wiped and converted successfully!");
+      logMaintenanceAction("Disk Fixer", "Success", `Wiped disk ${disk} and converted to ${fix_type}`);
+    })
+    .catch(err => alert("Error: " + err.message));
+    
+  } else if (fix_type === "chkdsk") {
+    const part = document.getElementById("ds-target-part").value;
+    fetch(API_BASE + '/api/execute', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ toolKey: "chkdsk_repair", driveLetter: part })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.error) throw new Error(data.error);
+      alert("chkdsk integrity scan launched!");
+      logMaintenanceAction("Disk Fixer", "Success", `Run chkdsk on drive ${part}:`);
+    })
+    .catch(err => alert("Error: " + err.message));
+  }
 }
