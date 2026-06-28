@@ -1311,7 +1311,7 @@
                 <select id="ds-fat32-drive" class="form-control" style="width: 100px;">
                   <option value="D">D:</option>
                 </select>
-                <button class="btn" onclick="runDiskSecurityCommand('convert_fat32_to_ntfs')" style="flex: 1;">Convert to NTFS</button>
+                <button class="btn btn-secondary" onclick="runDiskSecurityCommand('convert_fat32_to_ntfs')" style="flex: 1;">Convert to NTFS</button>
               </div>
             </div>
             
@@ -1329,9 +1329,9 @@
             <p class="subtitle">Repair corrupt BCD configuration data, master boot records, and bootloaders.</p>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
-              <button class="btn" onclick="runDiskSecurityCommand('fixmbr')">Fix MBR</button>
-              <button class="btn" onclick="runDiskSecurityCommand('fixboot')">Fix Boot</button>
-              <button class="btn" onclick="runDiskSecurityCommand('rebuildbcd')">Rebuild BCD</button>
+              <button class="btn btn-secondary" onclick="runDiskSecurityCommand('fixmbr')">Fix MBR</button>
+              <button class="btn btn-secondary" onclick="runDiskSecurityCommand('fixboot')">Fix Boot</button>
+              <button class="btn btn-secondary" onclick="runDiskSecurityCommand('rebuildbcd')">Rebuild BCD</button>
             </div>
             
             <div class="form-group" style="margin-top: 20px;">
@@ -1385,8 +1385,8 @@
             <p class="subtitle">Manage Windows Recovery Environment and Boot styles.</p>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px;">
-              <button class="btn" onclick="runDiskSecurityCommand('winre_enable')">Enable Recovery Env (WinRE)</button>
-              <button class="btn" onclick="runDiskSecurityCommand('winre_status')">Check WinRE Status</button>
+              <button class="btn btn-secondary" onclick="runDiskSecurityCommand('winre_enable')">Enable Recovery Env (WinRE)</button>
+              <button class="btn btn-secondary" onclick="runDiskSecurityCommand('winre_status')">Check WinRE Status</button>
               <button class="btn btn-danger" onclick="runDiskSecurityCommand('safemode_on')">Boot to Safe Mode next boot</button>
               <button class="btn btn-success" onclick="runDiskSecurityCommand('safemode_off')">Restore normal boot</button>
             </div>

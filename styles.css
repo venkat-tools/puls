@@ -3073,3 +3073,53 @@ body.light-theme .geo-clickable:hover {
   font-size: 0.75rem;
   color: var(--text-muted);
 }
+
+/* Theme-friendly styled select menus & inputs */
+.form-control {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-primary) !important;
+  padding: 10px 14px !important;
+  border-radius: var(--border-radius-md) !important;
+  font-family: inherit !important;
+  font-size: 0.9rem !important;
+  transition: all var(--transition-fast) !important;
+  outline: none !important;
+  box-sizing: border-box !important;
+  cursor: pointer;
+}
+
+body.light-theme .form-control {
+  background: rgba(0, 0, 0, 0.02) !important;
+  color: var(--text-primary) !important;
+}
+
+.form-control:focus {
+  border-color: var(--accent-indigo) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.15) !important;
+}
+
+.form-control option {
+  background: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Success Button Style */
+.btn-success {
+  background: rgba(16, 185, 129, 0.08) !important;
+  color: #10b981 !important;
+  border: 1px solid rgba(16, 185, 129, 0.4) !important;
+}
+
+.btn-success:hover {
+  background: rgba(16, 185, 129, 0.18) !important;
+  border-color: #10b981 !important;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.35) !important;
+  transform: translateY(-1px) !important;
+}
+
+.btn-success:active {
+  transform: translateY(0) !important;
+}
