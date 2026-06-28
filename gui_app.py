@@ -8,6 +8,7 @@ import threading
 import time
 import urllib.request
 import json
+import shutil
 from PIL import Image
 import customtkinter as ctk
 import psutil
@@ -104,7 +105,8 @@ class PrintPulseApp(ctk.CTk):
             ("AppDownloader", "📥 App Downloader"),
             ("OfficeActivation", "🔑 Office & Activation"),
             ("AdminTools", "🛠️ Admin Tools"),
-            ("AiAssistant", "💬 AI Assistant")
+            ("AiAssistant", "💬 AI Assistant"),
+            ("WinPEBuilder", "💾 WinPE USB Builder")
         ]
         
         for idx, (key, text) in enumerate(nav_items):
@@ -147,6 +149,7 @@ class PrintPulseApp(ctk.CTk):
         self.create_office_activation_frame()
         self.create_admin_tools_frame()
         self.create_ai_assistant_frame()
+        self.create_winpe_builder_frame()
         
         # Show Dashboard initially
         self.select_frame("Dashboard")
@@ -991,6 +994,297 @@ Write-Host 'Office Installation finished.'
                 json.dump(config, f, indent=4)
         except Exception as e:
             print(f"Error saving config: {e}")
+
+    def create_winpe_builder_frame(self):
+        frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.frames["WinPEBuilder"] = frame
+        
+        frame.grid_rowconfigure(8, weight=1)
+        frame.grid_columnconfigure(0, weight=1)
+        
+        # Title
+        title = ctk.CTkLabel(frame, text="Windows PE Bootable USB Builder", font=ctk.CTkFont(size=20, weight="bold"))
+        title.grid(row=0, column=0, padx=10, pady=(10, 5), sticky="w")
+        
+        desc = ctk.CTkLabel(
+            frame, 
+            text="Configure and build a standalone bootable WinPE USB diagnostics drive. Embeds PrintPulse tools to run offline.",
+            text_color="gray",
+            font=ctk.CTkFont(size=12)
+        )
+        desc.grid(row=1, column=0, padx=10, pady=(0, 20), sticky="w")
+        
+        # 1. Drive Selection Row
+        drive_frame = ctk.CTkFrame(frame, fg_color="transparent")
+        drive_frame.grid(row=2, column=0, padx=10, pady=10, sticky="ew")
+        
+        lbl_drive = ctk.CTkLabel(drive_frame, text="Select Target USB Drive:", font=ctk.CTkFont(weight="bold"))
+        lbl_drive.pack(side="left", padx=(0, 10))
+        
+        self.usb_dropdown = ctk.CTkOptionMenu(drive_frame, width=250, values=["Click Refresh to scan..."])
+        self.usb_dropdown.pack(side="left", padx=(0, 10))
+        
+        btn_refresh = ctk.CTkButton(drive_frame, text="🔄 Refresh Drives", width=120, command=self.refresh_usb_drives)
+        btn_refresh.pack(side="left")
+        
+        # 2. ISO Selection Row
+        iso_frame = ctk.CTkFrame(frame, fg_color="transparent")
+        iso_frame.grid(row=3, column=0, padx=10, pady=10, sticky="ew")
+        
+        lbl_iso = ctk.CTkLabel(iso_frame, text="Select WinPE Source ISO:", font=ctk.CTkFont(weight="bold"))
+        lbl_iso.pack(side="left", padx=(0, 10))
+        
+        self.iso_entry = ctk.CTkEntry(iso_frame, placeholder_text="Browse to path of a WinPE ISO...", width=400)
+        self.iso_entry.pack(side="left", fill="x", expand=True, padx=(0, 10))
+        
+        btn_browse = ctk.CTkButton(iso_frame, text="📁 Browse ISO", width=120, command=self.browse_iso)
+        btn_browse.pack(side="left")
+        
+        # 3. Checkbox options
+        options_frame = ctk.CTkFrame(frame, fg_color="transparent")
+        options_frame.grid(row=4, column=0, padx=10, pady=10, sticky="ew")
+        
+        self.embed_chk = ctk.CTkCheckBox(options_frame, text="Embed PrintPulse diagnostic suite on USB root", hover=True)
+        self.embed_chk.select()  # checked by default
+        self.embed_chk.pack(side="left")
+        
+        # 4. Progress Area
+        progress_frame = ctk.CTkFrame(frame, fg_color="transparent")
+        progress_frame.grid(row=5, column=0, padx=10, pady=15, sticky="ew")
+        
+        self.winpe_progress = ctk.CTkProgressBar(progress_frame, orientation="horizontal", height=15)
+        self.winpe_progress.set(0)
+        self.winpe_progress.pack(fill="x", expand=True, pady=(0, 5))
+        
+        self.lbl_winpe_status = ctk.CTkLabel(progress_frame, text="Ready to build.", font=ctk.CTkFont(size=12))
+        self.lbl_winpe_status.pack(side="left")
+        
+        # 5. Build Button Row
+        build_btn_frame = ctk.CTkFrame(frame, fg_color="transparent")
+        build_btn_frame.grid(row=6, column=0, padx=10, pady=10, sticky="ew")
+        
+        self.btn_build_winpe = ctk.CTkButton(
+            build_btn_frame, 
+            text="🚀 Build Bootable USB", 
+            height=45, 
+            fg_color=["#10b981", "#059669"],
+            hover_color=["#059669", "#047857"],
+            font=ctk.CTkFont(size=14, weight="bold"),
+            command=self.start_winpe_build
+        )
+        self.btn_build_winpe.pack(fill="x", expand=True)
+        
+        # 6. Log Console
+        lbl_logs = ctk.CTkLabel(frame, text="Build Output & Logs:", font=ctk.CTkFont(weight="bold"))
+        lbl_logs.grid(row=7, column=0, padx=10, pady=(15, 5), sticky="w")
+        
+        self.winpe_log_text = ctk.CTkTextbox(frame, height=180, wrap="word", corner_radius=10, state="disabled")
+        self.winpe_log_text.grid(row=8, column=0, padx=10, pady=(0, 10), sticky="nsew")
+        
+        # Initial drive scan
+        self.refresh_usb_drives()
+
+    def browse_iso(self):
+        from tkinter import filedialog
+        path = filedialog.askopenfilename(
+            title="Select Windows PE ISO Image",
+            filetypes=[("ISO Files", "*.iso")]
+        )
+        if path:
+            self.iso_entry.delete(0, "end")
+            self.iso_entry.insert(0, path)
+
+    def refresh_usb_drives(self):
+        drives = self.get_usb_drives()
+        if not drives:
+            drives = ["No USB Drives Detected"]
+        
+        self.usb_dropdown.configure(values=drives)
+        self.usb_dropdown.set(drives[0])
+
+    def get_usb_drives(self):
+        try:
+            cmd = ["powershell", "-Command", "Get-Volume | Select-Object DriveLetter, FileSystemLabel, DriveType | ConvertTo-Json"]
+            process = subprocess.run(cmd, capture_output=True, text=True)
+            output = process.stdout.strip()
+            if not output:
+                return []
+                
+            data = json.loads(output)
+            if not isinstance(data, list):
+                data = [data]
+                
+            system_drive = os.environ.get("SystemDrive", "C").replace(":", "").upper()
+            drives = []
+            for vol in data:
+                letter = vol.get("DriveLetter")
+                if letter and letter.upper() != system_drive:
+                    label = vol.get("FileSystemLabel") or "External Disk"
+                    dtype = vol.get("DriveType") or "Unknown"
+                    drives.append(f"{letter}: [{label}] ({dtype})")
+            return drives
+        except Exception as e:
+            print(f"Error checking USB drives: {e}")
+            return []
+
+    def log_build(self, text):
+        def append():
+            self.winpe_log_text.configure(state="normal")
+            self.winpe_log_text.insert("end", f"{text}\n")
+            self.winpe_log_text.configure(state="disabled")
+            self.winpe_log_text.see("end")
+        self.after(0, append)
+
+    def start_winpe_build(self):
+        usb_val = self.usb_dropdown.get()
+        if usb_val == "No USB Drives Detected" or not usb_val:
+            self.show_toast("❌ Error: No valid target USB drive selected!")
+            return
+            
+        iso_val = self.iso_entry.get().strip()
+        if not iso_val or not os.path.exists(iso_val):
+            self.show_toast("❌ Error: WinPE ISO file not found! Please browse to a valid file.")
+            return
+            
+        usb_letter = usb_val.split(":")[0].strip()
+        embed_tool = self.embed_chk.get()
+        
+        # Disable inputs
+        self.btn_build_winpe.configure(state="disabled", text="🔨 Building USB...")
+        self.usb_dropdown.configure(state="disabled")
+        self.iso_entry.configure(state="disabled")
+        self.embed_chk.configure(state="disabled")
+        
+        self.winpe_progress.set(0.0)
+        self.lbl_winpe_status.configure(text="Build starting...")
+        
+        # Clear logs
+        self.winpe_log_text.configure(state="normal")
+        self.winpe_log_text.delete("1.0", "end")
+        self.winpe_log_text.configure(state="disabled")
+        
+        # Start build thread
+        threading.Thread(
+            target=self.build_winpe_worker, 
+            args=(usb_letter, iso_val, embed_tool), 
+            daemon=True
+        ).start()
+
+    def build_winpe_worker(self, usb_letter, iso_path, embed_tool):
+        self.log_build("=== WINPE USB BUILD STARTED ===")
+        self.log_build(f"Target USB: {usb_letter}:")
+        self.log_build(f"Source ISO: {iso_path}")
+        self.log_build(f"Embed Tools: {embed_tool}")
+        
+        try:
+            # 1. Format USB to FAT32
+            self.after(0, lambda: self.lbl_winpe_status.configure(text="Step 1/5: Formatting USB drive..."))
+            self.winpe_progress.set(0.1)
+            self.log_build("\n[1/5] Formatting volume as FAT32 (Quick format)...")
+            
+            # Format using standard Quick Format
+            fmt_cmd = f"format {usb_letter}: /FS:FAT32 /Q /V:WINPE /Y"
+            self.log_build(f"> Running command: {fmt_cmd}")
+            proc = subprocess.run(fmt_cmd, shell=True, capture_output=True, text=True)
+            self.log_build(proc.stdout)
+            if proc.returncode != 0:
+                raise Exception(f"Format failed: {proc.stderr}")
+            self.log_build("USB Formatted successfully.")
+            
+            # 2. Mount ISO
+            self.after(0, lambda: self.lbl_winpe_status.configure(text="Step 2/5: Mounting source ISO image..."))
+            self.winpe_progress.set(0.3)
+            self.log_build("\n[2/5] Mounting source WinPE ISO...")
+            
+            mount_cmd = ["powershell", "-Command", f"(Mount-DiskImage -ImagePath '{iso_path}' -PassThru | Get-Volume).DriveLetter"]
+            self.log_build(f"> Running: Mount-DiskImage")
+            proc = subprocess.run(mount_cmd, capture_output=True, text=True)
+            iso_letter = proc.stdout.strip()
+            
+            if not iso_letter or len(iso_letter) != 1:
+                raise Exception(f"Failed to retrieve mounted ISO drive letter. Output: {proc.stdout}")
+                
+            self.log_build(f"ISO mounted successfully as drive letter: {iso_letter}:")
+            
+            # 3. Copy Files using Robocopy
+            self.after(0, lambda: self.lbl_winpe_status.configure(text="Step 3/5: Copying WinPE boot files..."))
+            self.winpe_progress.set(0.5)
+            self.log_build("\n[3/5] Copying all files from ISO to USB via Robocopy (this might take a minute)...")
+            
+            # Robocopy E:\ F:\ /E /R:2 /W:2 /MT:8
+            robocopy_cmd = f"robocopy {iso_letter}:\\ {usb_letter}:\\ /E /R:2 /W:2 /MT:8"
+            self.log_build(f"> Running command: {robocopy_cmd}")
+            # Robocopy exits with code 1 or 3 on success (which indicate files copied successfully)
+            proc = subprocess.run(robocopy_cmd, shell=True, capture_output=True, text=True)
+            self.log_build(f"Robocopy finished (Exit Code: {proc.returncode})")
+            
+            if proc.returncode > 7:  # Robocopy return codes 0-7 are success/minor warnings, >=8 is failure
+                raise Exception(f"Robocopy failed with exit code {proc.returncode}: {proc.stderr}")
+                
+            self.log_build("Files copied successfully.")
+            
+            # 4. Dismount ISO
+            self.after(0, lambda: self.lbl_winpe_status.configure(text="Step 4/5: Dismounting ISO image..."))
+            self.winpe_progress.set(0.8)
+            self.log_build("\n[4/5] Dismounting WinPE ISO image...")
+            
+            dismount_cmd = ["powershell", "-Command", f"Dismount-DiskImage -ImagePath '{iso_path}'"]
+            self.log_build(f"> Running: Dismount-DiskImage")
+            proc = subprocess.run(dismount_cmd, capture_output=True, text=True)
+            self.log_build("ISO Dismounted successfully.")
+            
+            # 5. Embed PrintPulse tools
+            if embed_tool:
+                self.after(0, lambda: self.lbl_winpe_status.configure(text="Step 5/5: Embedding PrintPulse tools..."))
+                self.winpe_progress.set(0.9)
+                self.log_build("\n[5/5] Embedding PrintPulse diagnostics suite to the USB...")
+                
+                dest_dir = os.path.join(f"{usb_letter}:\\", "PrintPulse")
+                os.makedirs(dest_dir, exist_ok=True)
+                
+                # Check for executable files in dist/ or root
+                src_pulse = "dist/PrintPulse.exe" if os.path.exists("dist/PrintPulse.exe") else "PrintPulse.exe"
+                if os.path.exists(src_pulse):
+                    self.log_build(f"Copying {src_pulse} to {dest_dir}...")
+                    shutil.copy2(src_pulse, os.path.join(dest_dir, "PrintPulse.exe"))
+                else:
+                    self.log_build("Warning: PrintPulse.exe executable not found. Please build it first.")
+                    
+                # Copy web server and assets
+                for file_name in ["main.exe", "index.html", "app.js", "styles.css", "logo.png"]:
+                    src_path = os.path.join("dist", file_name) if os.path.exists(os.path.join("dist", file_name)) else file_name
+                    if os.path.exists(src_path):
+                        self.log_build(f"Copying {file_name} to {dest_dir}...")
+                        shutil.copy2(src_path, os.path.join(dest_dir, file_name))
+                
+                self.log_build("PrintPulse diagnostics suite embedded successfully!")
+                
+            self.winpe_progress.set(1.0)
+            self.after(0, lambda: self.lbl_winpe_status.configure(text="Completed! WinPE bootable USB created successfully."))
+            self.log_build("\n=== WINPE USB BUILD COMPLETED SUCCESSFULLY ===")
+            self.after(0, lambda: self.show_toast("✅ Success: WinPE bootable USB created successfully!"))
+            
+        except Exception as e:
+            self.winpe_progress.set(0.0)
+            self.after(0, lambda: self.lbl_winpe_status.configure(text="Failed! See logs."))
+            self.log_build(f"\n❌ ERROR: {e}")
+            self.log_build("\n=== WINPE USB BUILD FAILED ===")
+            self.after(0, lambda: self.show_toast(f"❌ Error: Build failed: {e}"))
+            
+            # Make sure we try to dismount the ISO in case of error
+            try:
+                subprocess.run(["powershell", "-Command", f"Dismount-DiskImage -ImagePath '{iso_path}'"], capture_output=True)
+            except:
+                pass
+                
+        finally:
+            # Re-enable inputs
+            def enable_inputs():
+                self.btn_build_winpe.configure(state="normal", text="🚀 Build Bootable USB")
+                self.usb_dropdown.configure(state="normal")
+                self.iso_entry.configure(state="normal")
+                self.embed_chk.configure(state="normal")
+            self.after(0, enable_inputs)
 
     def on_closing(self):
         self.telemetry_running = False
