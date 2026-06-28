@@ -5,7 +5,7 @@
  */
 
 // Hardcoded Default Gemini API Key (Replace empty string with your key to avoid entering it every time)
-const DEFAULT_GEMINI_API_KEY = "";
+const DEFAULT_GEMINI_API_KEY = "AQ.Ab8RN6LR7pTxNb8J3H4ffw4MS_wdIt3yL53of1EOauvrlylhrA";
 
 // Global State
 let currentTheme = 'dark';
