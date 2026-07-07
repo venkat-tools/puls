@@ -40,12 +40,12 @@ def resource_path(relative_path):
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("green")
 
-class PrintPulseApp(ctk.CTk):
+class VenkatPulseApp(ctk.CTk):
     def __init__(self):
         super().__init__()
         
         # Window configuration
-        self.title("VenkatPulse AI // Windows Repair & Optimization Suite")
+        self.title("Venkat Pulse AI OS Recovery Suite")
         self.geometry("1100x680")
         self.minsize(950, 600)
         
@@ -107,7 +107,8 @@ class PrintPulseApp(ctk.CTk):
             ("AdminTools", "🛠️ Admin Tools"),
             ("AiAssistant", "💬 AI Assistant"),
             ("WinPEBuilder", "💾 WinPE USB Builder"),
-            ("DiskSecurity", "💾 Disk & Password Tools")
+            ("DiskSecurity", "💾 Disk & Password Tools"),
+            ("StandaloneTools", "🧰 Standalone Tools")
         ]
         
         for idx, (key, text) in enumerate(nav_items):
@@ -152,6 +153,7 @@ class PrintPulseApp(ctk.CTk):
         self.create_ai_assistant_frame()
         self.create_winpe_builder_frame()
         self.create_disk_security_frame()
+        self.create_standalone_tools_frame()
         
         # Show Dashboard initially
         self.select_frame("Dashboard")
@@ -483,14 +485,104 @@ class PrintPulseApp(ctk.CTk):
         ctk.CTkButton(
             g4, 
             text="Backup Installed Printers", 
-            command=lambda: self.run_cmd('start cmd /k C:\\Windows\\System32\\Spool\\Tools\\PrintBrm.exe -b -f C:\\Users\\Public\\Documents\\PrinterBackup.printerExport', "Printer Backup")
+            command=lambda: self.run_cmd('start cmd /k "if not exist C:\\PulseBackup mkdir C:\\PulseBackup && C:\\Windows\\System32\\Spool\\Tools\\PrintBrm.exe -b -f C:\\PulseBackup\\PrinterBackup.printerExport"', "Printer Backup")
         ).grid(row=1, column=0, padx=15, pady=8, sticky="ew")
         
         ctk.CTkButton(
             g4, 
             text="Restore Printer Backup", 
-            command=lambda: self.run_cmd('start cmd /k C:\\Windows\\System32\\Spool\\Tools\\PrintBrm.exe -r -f C:\\Users\\Public\\Documents\\PrinterBackup.printerExport', "Printer Restore")
+            command=lambda: self.run_cmd('start cmd /k C:\\Windows\\System32\\Spool\\Tools\\PrintBrm.exe -r -f C:\\PulseBackup\\PrinterBackup.printerExport', "Printer Restore")
         ).grid(row=2, column=0, padx=15, pady=8, sticky="ew")
+
+        # Group 5: Full PC Migration & App Backup
+        g5 = ctk.CTkFrame(frame, corner_radius=10)
+        g5.grid(row=4, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
+        g5.grid_columnconfigure(0, weight=1)
+        
+        ctk.CTkLabel(g5, text="Full PC Migration & App Backup", font=ctk.CTkFont(size=15, weight="bold")).grid(row=0, column=0, columnspan=2, padx=15, pady=15, sticky="w")
+        
+        # Path Entry and Browse button
+        path_frame = ctk.CTkFrame(g5, fg_color="transparent")
+        path_frame.grid(row=1, column=0, columnspan=2, padx=15, pady=5, sticky="ew")
+        path_frame.grid_columnconfigure(0, weight=1)
+        
+        dest_entry = ctk.CTkEntry(path_frame, placeholder_text="Enter Backup Destination Directory (e.g. C:\\PulseBackup)...")
+        dest_entry.grid(row=0, column=0, padx=(0, 10), sticky="ew")
+        dest_entry.insert(0, "C:\\PulseBackup")
+        
+        def browse_dest():
+            from tkinter import filedialog
+            selected = filedialog.askdirectory(title="Select Backup Destination")
+            if selected:
+                dest_entry.delete(0, "end")
+                dest_entry.insert(0, selected)
+                
+        ctk.CTkButton(path_frame, text="Browse", width=80, command=browse_dest).grid(row=0, column=1, sticky="e")
+        
+        # Action buttons
+        btn_frame = ctk.CTkFrame(g5, fg_color="transparent")
+        btn_frame.grid(row=2, column=0, columnspan=2, padx=15, pady=(10, 15), sticky="ew")
+        btn_frame.grid_columnconfigure(0, weight=1)
+        btn_frame.grid_columnconfigure(1, weight=1)
+        btn_frame.grid_columnconfigure(2, weight=1)
+        
+        def run_profile_backup():
+            path = dest_entry.get().strip()
+            if not path:
+                from tkinter import messagebox
+                messagebox.showerror("Error", "Please select a backup destination path first.")
+                return
+            # Robocopy script to copy User folders: Desktop, Documents, Downloads, Pictures, Music, Videos
+            cmd = f'start cmd /k powershell -NoExit -Command "$dest = \'{path}\'; $folders = @(\'Desktop\', \'Documents\', \'Downloads\', \'Pictures\', \'Music\', \'Videos\'); foreach ($f in $folders) {{ $src = Join-Path $env:USERPROFILE $f; $tgt = Join-Path $dest $f; if (Test-Path $src) {{ robocopy $src $tgt /E /MT:8 /R:1 /W:1 /XJD }} }}"'
+            self.run_cmd(cmd, "User Profile Backup")
+            
+        def run_winget_export():
+            path = dest_entry.get().strip()
+            if not path:
+                export_path = "C:\\PulseBackup\\winget_apps.json"
+            else:
+                export_path = f"{path}\\winget_apps.json"
+            
+            import os
+            dir_path = os.path.dirname(export_path)
+            if not os.path.exists(dir_path):
+                try:
+                    os.makedirs(dir_path, exist_ok=True)
+                except Exception:
+                    pass
+            
+            cmd = f'start cmd /k winget export -o "{export_path}" --accept-source-agreements'
+            self.run_cmd(cmd, "Winget Apps Export")
+            
+        def run_winget_import():
+            from tkinter import filedialog
+            selected_file = filedialog.askopenfilename(
+                title="Select Winget Apps JSON File",
+                filetypes=[("JSON Files", "*.json"), ("All Files", "*.*")]
+            )
+            if selected_file:
+                cmd = f'start cmd /k winget import -i "{selected_file}" --accept-package-agreements --accept-source-agreements'
+                self.run_cmd(cmd, "Winget Apps Import")
+        
+        ctk.CTkButton(
+            btn_frame, 
+            text="Backup User Profile", 
+            command=run_profile_backup,
+            fg_color="#7c3aed",
+            hover_color="#6d28d9"
+        ).grid(row=0, column=0, padx=5, sticky="ew")
+        
+        ctk.CTkButton(
+            btn_frame, 
+            text="Export Apps List", 
+            command=run_winget_export
+        ).grid(row=0, column=1, padx=5, sticky="ew")
+        
+        ctk.CTkButton(
+            btn_frame, 
+            text="Import Apps List", 
+            command=run_winget_import
+        ).grid(row=0, column=2, padx=5, sticky="ew")
 
     # --- 3. WINDOWS DEBLOATER FRAME ---
     def create_debloater_frame(self):
@@ -602,7 +694,7 @@ class PrintPulseApp(ctk.CTk):
 
     # --- 5. OFFICE & ACTIVATION FRAME ---
     def create_office_activation_frame(self):
-        frame = ctk.CTkFrame(self, fg_color="transparent")
+        frame = ctk.CTkScrollableFrame(self, fg_color="transparent")
         self.frames["OfficeActivation"] = frame
         
         frame.grid_columnconfigure(0, weight=1)
@@ -672,6 +764,70 @@ class PrintPulseApp(ctk.CTk):
             text="Uninstall KMS Activations",
             command=lambda: self.run_cmd('start powershell -NoExit -Command "& ([ScriptBlock]::Create((irm https://get.activated.win))) /K-Uninstall"', "KMS Activation Uninstall")
         ).grid(row=4, column=0, padx=15, pady=8, sticky="ew")
+
+        # Bottom Panel: Windows Edition Changer
+        edition_card = ctk.CTkFrame(frame, corner_radius=12)
+        edition_card.grid(row=2, column=0, columnspan=2, padx=10, pady=15, sticky="nsew")
+        edition_card.grid_columnconfigure(0, weight=1)
+        edition_card.grid_columnconfigure(1, weight=2)
+        edition_card.grid_columnconfigure(2, weight=1)
+        
+        ctk.CTkLabel(edition_card, text="Windows Edition Changer", font=ctk.CTkFont(size=15, weight="bold")).grid(row=0, column=0, columnspan=3, padx=15, pady=10, sticky="w")
+        
+        # Options mapping
+        edition_keys = {
+            "Windows 10/11 Pro": "VK7JG-NPHTM-C97JM-9MPGT-3V66T",
+            "Windows 10/11 Enterprise": "XGVPP-NMH47-7TTHJ-W3FW7-8DEC2",
+            "Windows 10/11 Pro Education": "6TP4R-GNPTD-KYYHQ-7B7DP-F4A3C",
+            "Windows 10/11 Education": "NW6C2-QMPVW-D7KKK-3GKT6-VCFB2",
+            "Custom Product Key...": ""
+        }
+        
+        # Dropdown
+        edition_combo = ctk.CTkComboBox(
+            edition_card, 
+            values=list(edition_keys.keys()),
+            width=220
+        )
+        edition_combo.grid(row=1, column=0, padx=15, pady=15, sticky="ew")
+        edition_combo.set("Windows 10/11 Pro")
+        
+        # Product key text box
+        key_entry = ctk.CTkEntry(
+            edition_card,
+            placeholder_text="Product Key (XXXXX-XXXXX-XXXXX-XXXXX-XXXXX)",
+            font=ctk.CTkFont(family="Consolas")
+        )
+        key_entry.grid(row=1, column=1, padx=10, pady=15, sticky="ew")
+        key_entry.insert(0, edition_keys["Windows 10/11 Pro"])
+        
+        # Combo selection callback
+        def on_edition_combo_change(val):
+            key = edition_keys.get(val, "")
+            key_entry.delete(0, "end")
+            if val == "Custom Product Key...":
+                key_entry.configure(placeholder_text="Enter custom product key...")
+            else:
+                key_entry.insert(0, key)
+                
+        edition_combo.configure(command=on_edition_combo_change)
+        
+        def run_edition_change():
+            from tkinter import messagebox
+            key = key_entry.get().strip()
+            if not key or len(key) < 20:
+                messagebox.showerror("Error", "Please enter a valid 25-character Windows Product Key.")
+                return
+            if messagebox.askyesno("Confirm Edition Change", f"Are you sure you want to change your Windows edition? This will invoke the Windows upgrade wizard using the key: {key}. Your PC might restart during the process."):
+                self.run_cmd(f"start changepk.exe /ProductKey {key}", "Windows Edition Changer")
+                
+        ctk.CTkButton(
+            edition_card,
+            text="Change Edition",
+            command=run_edition_change,
+            fg_color="#7c3aed",
+            hover_color="#6d28d9"
+        ).grid(row=1, column=2, padx=15, pady=15, sticky="ew")
 
     # Helper function to deploy Office 2021 silently via ODT
     def deploy_office_2021(self):
@@ -830,6 +986,42 @@ Write-Host 'Office Installation finished.'
             text="Restart Windows File Explorer",
             command=lambda: self.run_cmd('start cmd /c "taskkill /f /im explorer.exe && start explorer.exe"', "Explorer Restart")
         ).grid(row=6, column=0, padx=15, pady=8, sticky="ew")
+
+        # Row 2, span both columns: Windows Update Manager
+        c3 = ctk.CTkFrame(frame, corner_radius=10)
+        c3.grid(row=2, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
+        c3.grid_columnconfigure(0, weight=1)
+        c3.grid_columnconfigure(1, weight=1)
+        c3.grid_columnconfigure(2, weight=1)
+        
+        ctk.CTkLabel(c3, text="Windows Update Manager", font=ctk.CTkFont(size=15, weight="bold")).grid(row=0, column=0, columnspan=3, padx=15, pady=10, sticky="w")
+        
+        # Stop updates button
+        ctk.CTkButton(
+            c3,
+            text="🛑 Stop Windows Updates",
+            fg_color="#b91c1c",
+            hover_color="#991b1b",
+            font=ctk.CTkFont(weight="bold"),
+            command=lambda: self.run_cmd('start powershell -NoExit -Command "Write-Host \'Stopping and disabling Windows Update services...\'; Stop-Service -Name wuauserv, bits, UsoSvc -Force; Set-Service -Name wuauserv, bits, UsoSvc -StartupType Disabled; reg add \\"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU\\" /v NoAutoUpdate /t REG_DWORD /d 1 /f; reg add \\"HKLM\\SYSTEM\\CurrentControlSet\\Services\\WaaSMedicSvc\\" /v Start /t REG_DWORD /d 4 /f; Write-Host \'Windows Updates have been fully disabled.\'"', "Stop Updates")
+        ).grid(row=1, column=0, padx=15, pady=15, sticky="ew")
+        
+        # Resume updates button
+        ctk.CTkButton(
+            c3,
+            text="▶️ Resume Windows Updates",
+            fg_color="#059669",
+            hover_color="#047857",
+            font=ctk.CTkFont(weight="bold"),
+            command=lambda: self.run_cmd('start powershell -NoExit -Command "Write-Host \'Enabling and restarting Windows Update services...\'; reg delete \\"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU\\" /v NoAutoUpdate /f; reg add \\"HKLM\\SYSTEM\\CurrentControlSet\\Services\\WaaSMedicSvc\\" /v Start /t REG_DWORD /d 3 /f; Set-Service -Name wuauserv, bits, UsoSvc -StartupType Manual; Start-Service -Name wuauserv, bits, UsoSvc; Write-Host \'Windows Updates have been enabled and restarted.\'"', "Resume Updates")
+        ).grid(row=1, column=1, padx=15, pady=15, sticky="ew")
+        
+        # Security updates only button
+        ctk.CTkButton(
+            c3,
+            text="🛡️ Security Updates Only",
+            command=lambda: self.run_cmd('start powershell -NoExit -Command "Write-Host \'Configuring Windows Update for Security Patches Only...\'; reg add \\"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\" /v ExcludeWUDriversInQualityUpdate /t REG_DWORD /d 1 /f; reg add \\"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\" /v DeferFeatureUpdates /t REG_DWORD /d 1 /f; reg add \\"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\" /v DeferFeatureUpdatesPeriodInDays /t REG_DWORD /d 365 /f; reg add \\"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\" /v DeferQualityUpdates /t REG_DWORD /d 1 /f; reg add \\"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\" /v DeferQualityUpdatesPeriodInDays /t REG_DWORD /d 4 /f; reg delete \\"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU\\" /v NoAutoUpdate /f; reg add \\"HKLM\\SYSTEM\\CurrentControlSet\\Services\\WaaSMedicSvc\\" /v Start /t REG_DWORD /d 3 /f; Set-Service -Name wuauserv, bits, UsoSvc -StartupType Manual; Start-Service -Name wuauserv, bits, UsoSvc; Write-Host \'Windows Update configured for Security Updates Only (Features deferred 365 days, drivers disabled, updates enabled).\'"', "Security Updates Only")
+        ).grid(row=1, column=2, padx=15, pady=15, sticky="ew")
 
     # --- 7. AI ASSISTANT FRAME ---
     def create_ai_assistant_frame(self):
@@ -1010,7 +1202,7 @@ Write-Host 'Office Installation finished.'
         
         desc = ctk.CTkLabel(
             frame, 
-            text="Configure and build a standalone bootable WinPE USB diagnostics drive. Embeds PrintPulse tools to run offline.",
+            text="Configure and build a standalone bootable WinPE USB diagnostics drive. Embeds VenkatPulse tools to run offline.",
             text_color="gray",
             font=ctk.CTkFont(size=12)
         )
@@ -1046,7 +1238,7 @@ Write-Host 'Office Installation finished.'
         options_frame = ctk.CTkFrame(frame, fg_color="transparent")
         options_frame.grid(row=4, column=0, padx=10, pady=10, sticky="ew")
         
-        self.embed_chk = ctk.CTkCheckBox(options_frame, text="Embed PrintPulse diagnostic suite on USB root", hover=True)
+        self.embed_chk = ctk.CTkCheckBox(options_frame, text="Embed VenkatPulse diagnostic suite on USB root", hover=True)
         self.embed_chk.select()  # checked by default
         self.embed_chk.pack(side="left")
         
@@ -1106,7 +1298,29 @@ Write-Host 'Office Installation finished.'
 
     def get_usb_drives(self):
         try:
-            cmd = ["powershell", "-Command", "Get-Volume | Select-Object DriveLetter, FileSystemLabel, DriveType | ConvertTo-Json"]
+            ps_script = (
+                "$drives = @(); "
+                "$volumes = Get-Volume | Where-Object { $_.DriveLetter -and ($_.DriveType -eq 'Removable' -or (Get-Partition -DriveLetter $_.DriveLetter -ErrorAction SilentlyContinue | Get-Disk -ErrorAction SilentlyContinue | Where-Object { $_.BusType -eq 'USB' })) }; "
+                "foreach ($v in $volumes) { "
+                "    if ($v.DriveLetter) { "
+                "        $label = $v.FileSystemLabel; "
+                "        if (!$label) { $label = 'External Disk' }; "
+                "        $drives += [PSCustomObject]@{ Letter = [string]$v.DriveLetter; Label = [string]$label; Type = 'Removable' }; "
+                "    } "
+                "}; "
+                "$usbDisks = Get-Disk | Where-Object { $_.BusType -eq 'USB' -or $_.FriendlyName -like '*USB*' -or $_.FriendlyName -like '*SanDisk*' }; "
+                "foreach ($d in $usbDisks) { "
+                "    $parts = Get-Partition -DiskNumber $d.Number -ErrorAction SilentlyContinue | Where-Object { $_.DriveLetter }; "
+                "    if (!$parts) { "
+                "        $freeLetter = (69..90 | ForEach-Object { [char]$_ } | Where-Object { !(Get-Volume -DriveLetter $_ -ErrorAction SilentlyContinue) })[0]; "
+                "        if ($freeLetter) { "
+                "            $drives += [PSCustomObject]@{ Letter = [string]$freeLetter; Label = 'Unpartitioned: ' + $d.FriendlyName; Type = 'Removable' }; "
+                "        } "
+                "    } "
+                "}; "
+                "$drives | ConvertTo-Json"
+            )
+            cmd = ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", ps_script]
             process = subprocess.run(cmd, capture_output=True, text=True)
             output = process.stdout.strip()
             if not output:
@@ -1116,13 +1330,12 @@ Write-Host 'Office Installation finished.'
             if not isinstance(data, list):
                 data = [data]
                 
-            system_drive = os.environ.get("SystemDrive", "C").replace(":", "").upper()
             drives = []
             for vol in data:
-                letter = vol.get("DriveLetter")
-                if letter and letter.upper() != system_drive:
-                    label = vol.get("FileSystemLabel") or "External Disk"
-                    dtype = vol.get("DriveType") or "Unknown"
+                letter = vol.get("Letter")
+                label = vol.get("Label") or "External Disk"
+                dtype = vol.get("Type") or "Removable"
+                if letter:
                     drives.append(f"{letter}: [{label}] ({dtype})")
             return drives
         except Exception as e:
@@ -1138,39 +1351,46 @@ Write-Host 'Office Installation finished.'
         self.after(0, append)
 
     def start_winpe_build(self):
-        usb_val = self.usb_dropdown.get()
-        if usb_val == "No USB Drives Detected" or not usb_val:
-            self.show_toast("❌ Error: No valid target USB drive selected!")
-            return
+        try:
+            usb_val = self.usb_dropdown.get()
+            if usb_val == "No USB Drives Detected" or not usb_val:
+                self.show_toast("❌ Error: No valid target USB drive selected!")
+                return
+                
+            iso_val = self.iso_entry.get().strip()
+            if not iso_val or not os.path.exists(iso_val):
+                self.show_toast("❌ Error: WinPE ISO file not found! Please browse to a valid file.")
+                return
+                
+            usb_letter = usb_val.split(":")[0].strip()
+            embed_tool = self.embed_chk.get()
             
-        iso_val = self.iso_entry.get().strip()
-        if not iso_val or not os.path.exists(iso_val):
-            self.show_toast("❌ Error: WinPE ISO file not found! Please browse to a valid file.")
-            return
+            # Disable inputs
+            self.btn_build_winpe.configure(state="disabled", text="🔨 Building USB...")
+            self.usb_dropdown.configure(state="disabled")
+            self.iso_entry.configure(state="disabled")
+            self.embed_chk.configure(state="disabled")
             
-        usb_letter = usb_val.split(":")[0].strip()
-        embed_tool = self.embed_chk.get()
-        
-        # Disable inputs
-        self.btn_build_winpe.configure(state="disabled", text="🔨 Building USB...")
-        self.usb_dropdown.configure(state="disabled")
-        self.iso_entry.configure(state="disabled")
-        self.embed_chk.configure(state="disabled")
-        
-        self.winpe_progress.set(0.0)
-        self.lbl_winpe_status.configure(text="Build starting...")
-        
-        # Clear logs
-        self.winpe_log_text.configure(state="normal")
-        self.winpe_log_text.delete("1.0", "end")
-        self.winpe_log_text.configure(state="disabled")
-        
-        # Start build thread
-        threading.Thread(
-            target=self.build_winpe_worker, 
-            args=(usb_letter, iso_val, embed_tool), 
-            daemon=True
-        ).start()
+            self.winpe_progress.set(0.0)
+            self.lbl_winpe_status.configure(text="Build starting...")
+            
+            # Clear logs
+            self.winpe_log_text.configure(state="normal")
+            self.winpe_log_text.delete("1.0", "end")
+            self.winpe_log_text.configure(state="disabled")
+            
+            # Start build thread
+            threading.Thread(
+                target=self.build_winpe_worker, 
+                args=(usb_letter, iso_val, embed_tool), 
+                daemon=True
+            ).start()
+        except Exception as e:
+            import traceback
+            err_msg = traceback.format_exc()
+            self.show_toast(f"❌ Launch Error: {e}")
+            from tkinter import messagebox
+            messagebox.showerror("Launch Error", f"An error occurred while starting the build:\n\n{err_msg}")
 
     def build_winpe_worker(self, usb_letter, iso_path, embed_tool):
         self.log_build("=== WINPE USB BUILD STARTED ===")
@@ -1179,18 +1399,107 @@ Write-Host 'Office Installation finished.'
         self.log_build(f"Embed Tools: {embed_tool}")
         
         try:
+            # Pre-check: Terminate any running diagnostic processes to release file locks
+            self.log_build("\nChecking for running diagnostic processes to prevent file lock...")
+            try:
+                import psutil
+                current_pid = os.getpid()
+                for proc in psutil.process_iter(['pid', 'name']):
+                    try:
+                        pid = proc.info['pid']
+                        name = proc.info['name']
+                        if name:
+                            name_lower = name.lower()
+                            if name_lower == "main.exe" or (name_lower == "venkatpulse.exe" and pid != current_pid):
+                                self.log_build(f"Terminating process {name} (PID: {pid})...")
+                                proc.kill()
+                                proc.wait(timeout=2)
+                    except Exception:
+                        pass
+                time.sleep(1) # wait for process resource cleanup
+            except Exception as e:
+                self.log_build(f"Warning process termination: {e}")
+
+            # Get the disk number and size of the target USB drive before doing anything
+            disk_number = None
+            disk_size_gb = 0
+            try:
+                # Query disk number of partition if it exists
+                cmd = ["powershell", "-Command", f"(Get-Partition -DriveLetter {usb_letter} -ErrorAction SilentlyContinue).DiskNumber"]
+                proc = subprocess.run(cmd, capture_output=True, text=True)
+                if proc.returncode == 0 and proc.stdout.strip().isdigit():
+                    disk_number = int(proc.stdout.strip())
+                else:
+                    # If partition does not exist, look for first USB physical disk
+                    cmd_disk = ["powershell", "-Command", "Get-Disk | Where-Object { $_.BusType -eq 'USB' } | Select-Object -ExpandProperty Number"]
+                    proc_disk = subprocess.run(cmd_disk, capture_output=True, text=True)
+                    if proc_disk.returncode == 0:
+                        numbers = [int(n) for n in proc_disk.stdout.split() if n.strip().isdigit()]
+                        if numbers:
+                            disk_number = numbers[0]
+                
+                if disk_number is not None:
+                    cmd_size = ["powershell", "-Command", f"(Get-Disk -Number {disk_number}).Size"]
+                    proc_size = subprocess.run(cmd_size, capture_output=True, text=True)
+                    if proc_size.returncode == 0 and proc_size.stdout.strip().isdigit():
+                        disk_size_gb = int(proc_size.stdout.strip()) / (1024 * 1024 * 1024)
+            except Exception as e:
+                self.log_build(f"Warning: could not resolve disk number: {e}")
+
             # 1. Format USB to FAT32
             self.after(0, lambda: self.lbl_winpe_status.configure(text="Step 1/5: Formatting USB drive..."))
             self.winpe_progress.set(0.1)
-            self.log_build("\n[1/5] Formatting volume as FAT32 (Quick format)...")
+            self.log_build("\n[1/5] Formatting USB drive using Diskpart (partitioning to 32GB FAT32)...")
             
-            # Format using standard Quick Format
-            fmt_cmd = f"format {usb_letter}: /FS:FAT32 /Q /V:WINPE /Y"
-            self.log_build(f"> Running command: {fmt_cmd}")
-            proc = subprocess.run(fmt_cmd, shell=True, capture_output=True, text=True)
-            self.log_build(proc.stdout)
-            if proc.returncode != 0:
-                raise Exception(f"Format failed: {proc.stderr}")
+            format_success = False
+            
+            if disk_number is not None:
+                self.log_build(f"USB Disk {disk_number} resolved (Size: {disk_size_gb:.1f} GB).")
+                try:
+                    size_param = "size=32000" if disk_size_gb > 32 else ""
+                    script_path = os.path.join(os.environ["TEMP"], "diskpart_pulse.txt")
+                    with open(script_path, "w") as f:
+                        f.write(
+                            f"select disk {disk_number}\n"
+                            "clean\n"
+                            "convert mbr\n"
+                            f"create partition primary {size_param}\n"
+                            "format fs=fat32 quick label=\"WINPE\"\n"
+                            f"assign letter={usb_letter}\n"
+                            "active\n"
+                        )
+                    self.log_build("> Running Diskpart script...")
+                    proc = subprocess.run(f"diskpart /s \"{script_path}\"", shell=True, capture_output=True, text=True)
+                    output_log_dp = (proc.stdout or "") + (proc.stderr or "")
+                    self.log_build(output_log_dp)
+                    
+                    # Verify partition exists
+                    test_part = subprocess.run(["powershell", "-Command", f"Get-Partition -DriveLetter {usb_letter} -ErrorAction SilentlyContinue"], capture_output=True, text=True)
+                    if test_part.returncode == 0:
+                        format_success = True
+                    else:
+                        self.log_build("Diskpart partition verification failed.")
+                except Exception as dp_err:
+                    self.log_build(f"Diskpart partitioning failed: {dp_err}")
+            
+            if not format_success:
+                self.log_build("\n[!] Diskpart partitioning failed or disk number not resolved. Attempting standard quick format fallback...")
+                fmt_cmd = f"format {usb_letter}: /FS:FAT32 /Q /V:WINPE /Y"
+                self.log_build(f"> Running command: {fmt_cmd}")
+                proc = subprocess.run(fmt_cmd, shell=True, capture_output=True, text=True)
+                output_log = (proc.stdout or "") + (proc.stderr or "")
+                self.log_build(output_log)
+                
+                format_failed = proc.returncode != 0 or "failed" in output_log.lower() or "too big" in output_log.lower()
+                if format_failed:
+                    self.log_build("\n[!] FAT32 formatting failed. Attempting fallback to NTFS formatting...")
+                    fmt_cmd_ntfs = f"format {usb_letter}: /FS:NTFS /Q /V:WINPE /Y"
+                    self.log_build(f"> Running command: {fmt_cmd_ntfs}")
+                    proc = subprocess.run(fmt_cmd_ntfs, shell=True, capture_output=True, text=True)
+                    output_log_ntfs = (proc.stdout or "") + (proc.stderr or "")
+                    self.log_build(output_log_ntfs)
+                    if proc.returncode != 0 or "failed" in output_log_ntfs.lower():
+                        raise Exception(f"Format failed: {output_log_ntfs}")
             self.log_build("USB Formatted successfully.")
             
             # 2. Mount ISO
@@ -1225,6 +1534,75 @@ Write-Host 'Office Installation finished.'
                 
             self.log_build("Files copied successfully.")
             
+            # Patch boot.wim on USB to auto-launch PrintPulse
+            try:
+                self.log_build("\nUpdating boot.wim on USB to auto-launch PrintPulse on boot...")
+                usb_wim = os.path.join(f"{usb_letter}:\\", "sources", "boot.wim")
+                mount_dir = os.path.join(os.environ.get("TEMP", "C:\\temp"), "PrintPulse_Mount")
+                
+                # Clean up old mount directory
+                if os.path.exists(mount_dir):
+                    subprocess.run(["dism.exe", "/Cleanup-Mountpoints"], capture_output=True)
+                    shutil.rmtree(mount_dir, ignore_errors=True)
+                os.makedirs(mount_dir, exist_ok=True)
+                
+                # Mount boot.wim
+                self.log_build("> Mounting USB boot.wim...")
+                mount_cmd = ["dism.exe", "/Mount-Image", f"/ImageFile:{usb_wim}", "/Index:1", f"/MountDir:{mount_dir}"]
+                proc = subprocess.run(mount_cmd, capture_output=True, text=True)
+                self.log_build(proc.stdout)
+                
+                # Update startnet.cmd
+                startnet_path = os.path.join(mount_dir, "Windows", "System32", "startnet.cmd")
+                if os.path.exists(startnet_path):
+                    self.log_build("> Modifying startnet.cmd inside boot.wim...")
+                    startnet_content = (
+                        "wpeinit\n"
+                        "@echo off\n"
+                        "echo ========================================================\n"
+                        "echo   PrintPulse AI OS Recovery Suite - Auto-Launch\n"
+                        "echo ========================================================\n"
+                        "echo.\n"
+                        "echo Searching for PrintPulse.exe on external drives...\n"
+                        "for %%d in (C D E F G H I J K L M N O P Q R S T U V W X Y Z) do (\n"
+                        "    if exist %%d:\\PrintPulse\\PrintPulse.exe (\n"
+                        "        echo Found PrintPulse on drive %%d:\n"
+                        "        cd /d %%d:\\PrintPulse\n"
+                        "        PrintPulse.exe\n"
+                        "        echo.\n"
+                        "        echo PrintPulse exited. Error Level: %%errorlevel%%\n"
+                        "        pause\n"
+                        "    )\n"
+                        "    if exist %%d:\\VenkatPulse\\VenkatPulse.exe (\n"
+                        "        echo Found VenkatPulse on drive %%d:\n"
+                        "        cd /d %%d:\\VenkatPulse\n"
+                        "        VenkatPulse.exe\n"
+                        "        echo.\n"
+                        "        echo VenkatPulse exited. Error Level: %%errorlevel%%\n"
+                        "        pause\n"
+                        "    )\n"
+                        ")\n"
+                        "echo.\n"
+                        "echo WARNING: PrintPulse.exe was not found or has exited.\n"
+                        "echo You can run commands manually below.\n"
+                        "cmd.exe\n"
+                    )
+                    with open(startnet_path, "w") as f:
+                        f.write(startnet_content)
+                        
+                # Unmount and commit
+                self.log_build("> Unmounting and committing USB boot.wim...")
+                unmount_cmd = ["dism.exe", "/Unmount-Image", f"/MountDir:{mount_dir}", "/Commit"]
+                proc = subprocess.run(unmount_cmd, capture_output=True, text=True)
+                self.log_build(proc.stdout)
+                
+                # Clean up mount directory
+                shutil.rmtree(mount_dir, ignore_errors=True)
+                self.log_build("boot.wim successfully patched!")
+            except Exception as patch_err:
+                self.log_build(f"Warning: Failed to patch boot.wim for auto-launch: {patch_err}")
+                self.log_build("You can still boot and run it manually from the Command Prompt.")
+            
             # 4. Dismount ISO
             self.after(0, lambda: self.lbl_winpe_status.configure(text="Step 4/5: Dismounting ISO image..."))
             self.winpe_progress.set(0.8)
@@ -1235,31 +1613,43 @@ Write-Host 'Office Installation finished.'
             proc = subprocess.run(dismount_cmd, capture_output=True, text=True)
             self.log_build("ISO Dismounted successfully.")
             
-            # 5. Embed PrintPulse tools
+            # 5. Embed PrintPulse / VenkatPulse tools
             if embed_tool:
-                self.after(0, lambda: self.lbl_winpe_status.configure(text="Step 5/5: Embedding PrintPulse tools..."))
+                self.after(0, lambda: self.lbl_winpe_status.configure(text="Step 5/5: Embedding tools..."))
                 self.winpe_progress.set(0.9)
-                self.log_build("\n[5/5] Embedding PrintPulse diagnostics suite to the USB...")
+                self.log_build("\n[5/5] Embedding diagnostics suite to the USB...")
                 
-                dest_dir = os.path.join(f"{usb_letter}:\\", "PrintPulse")
-                os.makedirs(dest_dir, exist_ok=True)
-                
-                # Check for executable files in dist/ or root
-                src_pulse = "dist/PrintPulse.exe" if os.path.exists("dist/PrintPulse.exe") else "PrintPulse.exe"
-                if os.path.exists(src_pulse):
-                    self.log_build(f"Copying {src_pulse} to {dest_dir}...")
-                    shutil.copy2(src_pulse, os.path.join(dest_dir, "PrintPulse.exe"))
-                else:
-                    self.log_build("Warning: PrintPulse.exe executable not found. Please build it first.")
+                # Check for any source executable
+                src_exe = None
+                for candidate in ["dist/PrintPulse.exe", "PrintPulse.exe", "dist/VenkatPulse.exe", "VenkatPulse.exe"]:
+                    if os.path.exists(candidate):
+                        src_exe = candidate
+                        break
+                        
+                for folder_name, exe_name in [("PrintPulse", "PrintPulse.exe"), ("VenkatPulse", "VenkatPulse.exe")]:
+                    dest_dir = os.path.join(f"{usb_letter}:\\", folder_name)
+                    os.makedirs(dest_dir, exist_ok=True)
                     
-                # Copy web server and assets
-                for file_name in ["main.exe", "index.html", "app.js", "styles.css", "logo.png"]:
-                    src_path = os.path.join("dist", file_name) if os.path.exists(os.path.join("dist", file_name)) else file_name
-                    if os.path.exists(src_path):
-                        self.log_build(f"Copying {file_name} to {dest_dir}...")
-                        shutil.copy2(src_path, os.path.join(dest_dir, file_name))
+                    if src_exe:
+                        self.log_build(f"Copying {src_exe} to {dest_dir}\\{exe_name}...")
+                        try:
+                            shutil.copy2(src_exe, os.path.join(dest_dir, exe_name))
+                        except Exception as ce:
+                            self.log_build(f"Warning: Could not copy {exe_name} ({ce}).")
+                    else:
+                        self.log_build("Warning: Diagnostics executable not found. Please build PrintPulse first.")
+                        
+                    # Copy web server and assets
+                    for file_name in ["main.exe", "index.html", "app.js", "styles.css", "logo.png"]:
+                        src_path = os.path.join("dist", file_name) if os.path.exists(os.path.join("dist", file_name)) else file_name
+                        if os.path.exists(src_path):
+                            self.log_build(f"Copying {file_name} to {dest_dir}...")
+                            try:
+                                shutil.copy2(src_path, os.path.join(dest_dir, file_name))
+                            except Exception as ce:
+                                self.log_build(f"Warning: Could not copy {file_name} ({ce}).")
                 
-                self.log_build("PrintPulse diagnostics suite embedded successfully!")
+                self.log_build("Diagnostics suite embedded successfully!")
                 
             self.winpe_progress.set(1.0)
             self.after(0, lambda: self.lbl_winpe_status.configure(text="Completed! WinPE bootable USB created successfully."))
@@ -1550,6 +1940,174 @@ Write-Host 'Office Installation finished.'
         # Initial scan & population
         self.refresh_disk_security_selectors()
 
+    def create_standalone_tools_frame(self):
+        frame = ctk.CTkScrollableFrame(self, fg_color="transparent")
+        self.frames["StandaloneTools"] = frame
+        
+        frame.grid_columnconfigure(0, weight=1)
+        frame.grid_columnconfigure(1, weight=1)
+        
+        title = ctk.CTkLabel(frame, text="🧰 Standalone Diagnostic & Recovery Utilities", font=ctk.CTkFont(size=20, weight="bold"))
+        title.grid(row=0, column=0, columnspan=2, padx=10, pady=10, sticky="w")
+        
+        subtitle = ctk.CTkLabel(frame, text="Quick-launch portable diagnostics, hardware monitors, and file/password recovery tools.", text_color="gray", font=ctk.CTkFont(size=12))
+        subtitle.grid(row=1, column=0, columnspan=2, padx=10, pady=(0, 15), sticky="w")
+        
+        self.tool_buttons = {}
+        
+        left_col = ctk.CTkFrame(frame, fg_color="transparent")
+        left_col.grid(row=2, column=0, padx=10, pady=5, sticky="nsew")
+        left_col.grid_columnconfigure(0, weight=1)
+        
+        right_col = ctk.CTkFrame(frame, fg_color="transparent")
+        right_col.grid(row=2, column=1, padx=10, pady=5, sticky="nsew")
+        right_col.grid_columnconfigure(0, weight=1)
+        
+        tools_list = [
+            ("NTPWEdit Password Editor", "recovery", "NTPWEdit\\ntpwedit64.exe", "NTPWEdit", "Edit Windows local SAM passwords offline."),
+            ("Recuva Data Recovery", "recovery", "Recuva\\recuva64.exe", "Recuva", "Recover deleted files, photos, and archives."),
+            ("WizTree Disk Space Analyzer", "diag", "WizTree\\WizTree64.exe", "WizTree", "Ultra-fast disk usage visualizer."),
+            ("CPU-Z System Hardware Info", "diag", "CPU-Z\\cpuz_x64.exe", "CPU-Z", "Detailed processor and RAM specifications."),
+            ("HWMonitor Sensor Monitor", "diag", "HWMonitor\\HWMonitor_x64.exe", "HWMonitor", "Live temperature, voltage, and fan speed monitor."),
+            ("CrystalDiskInfo HDD/SSD Health", "diag", "CrystalDiskInfo\\CrystalDiskInfoPortable.exe", "CrystalDiskInfo", "Check hard drive S.M.A.R.T. health and temperature."),
+            ("Angry IP Scanner", "net", "Angry_IP_Scanner.exe", "AngryIPScanner", "Network device and IP scanner."),
+            ("Notepad++ Code Editor", "net", "NotepadPlusPlus\\notepad++.exe", "NotepadPlusPlus", "Advanced portable text and code editor."),
+            ("Rufus USB Formatter", "net", "Rufus_Portable.exe", "Rufus", "Create bootable USB drives from ISO files.")
+        ]
+        
+        self.panels = {
+            "recovery": ctk.CTkFrame(left_col, corner_radius=10),
+            "net": ctk.CTkFrame(left_col, corner_radius=10),
+            "diag": ctk.CTkFrame(right_col, corner_radius=10)
+        }
+        
+        self.panels["recovery"].pack(fill="x", pady=8)
+        self.panels["net"].pack(fill="x", pady=8)
+        self.panels["diag"].pack(fill="both", expand=True, pady=8)
+        
+        ctk.CTkLabel(self.panels["recovery"], text="🔑 Password & File Recovery", font=ctk.CTkFont(size=14, weight="bold")).pack(anchor="w", padx=15, pady=(10, 5))
+        ctk.CTkLabel(self.panels["net"], text="🌐 Network & Text Utilities", font=ctk.CTkFont(size=14, weight="bold")).pack(anchor="w", padx=15, pady=(10, 5))
+        ctk.CTkLabel(self.panels["diag"], text="📊 Hardware & Disk Diagnostics", font=ctk.CTkFont(size=14, weight="bold")).pack(anchor="w", padx=15, pady=(10, 5))
+        
+        for name, cat, rel_path, dl_key, desc in tools_list:
+            panel = self.panels[cat]
+            
+            tool_frame = ctk.CTkFrame(panel, fg_color="transparent")
+            tool_frame.pack(fill="x", padx=15, pady=8)
+            
+            text_frame = ctk.CTkFrame(tool_frame, fg_color="transparent")
+            text_frame.pack(side="left", fill="x", expand=True)
+            
+            lbl_name = ctk.CTkLabel(text_frame, text=name, font=ctk.CTkFont(size=12, weight="bold"))
+            lbl_name.pack(anchor="w")
+            lbl_desc = ctk.CTkLabel(text_frame, text=desc, text_color="gray", font=ctk.CTkFont(size=11))
+            lbl_desc.pack(anchor="w")
+            
+            btn = ctk.CTkButton(tool_frame, width=120, text="Launch")
+            btn.pack(side="right", padx=(10, 0))
+            
+            self.tool_buttons[dl_key] = {
+                "button": btn,
+                "rel_path": rel_path,
+                "dl_key": dl_key,
+                "name": name
+            }
+            
+        self.refresh_standalone_tools_ui()
+        
+    def refresh_standalone_tools_ui(self):
+        base_dir = os.path.dirname(sys.executable) if getattr(sys, 'frozen', False) else os.path.dirname(os.path.abspath(__file__))
+        tools_dir = os.path.join(base_dir, "tools")
+        
+        for dl_key, info in self.tool_buttons.items():
+            full_path = os.path.join(tools_dir, info["rel_path"])
+            btn = info["button"]
+            
+            if os.path.exists(full_path):
+                btn.configure(
+                    text="🚀 Launch",
+                    fg_color="#059669",
+                    hover_color="#047857",
+                    command=lambda p=full_path, n=info["name"]: self.launch_standalone_tool(p, n)
+                )
+            else:
+                btn.configure(
+                    text="📥 Download",
+                    fg_color="#d97706",
+                    hover_color="#b45309",
+                    command=lambda k=dl_key: self.start_tool_download(k)
+                )
+                
+    def launch_standalone_tool(self, path, name):
+        self.log_build(f"Launching {name} from {path}...")
+        try:
+            # Run in a detached process so it doesn't block the GUI
+            subprocess.Popen(f'"{path}"', shell=True)
+        except Exception as e:
+            self.show_toast(f"❌ Failed to launch {name}: {e}")
+            
+    def start_tool_download(self, tool_name):
+        threading.Thread(target=self.download_tool_worker, args=(tool_name,), daemon=True).start()
+        
+    def download_tool_worker(self, tool_name):
+        self.show_toast(f"⏳ Downloading {tool_name}...")
+        try:
+            import urllib.request
+            import ssl
+            import zipfile
+            context = ssl._create_unverified_context()
+            
+            base_dir = os.path.dirname(sys.executable) if getattr(sys, 'frozen', False) else os.path.dirname(os.path.abspath(__file__))
+            tools_dir = os.path.join(base_dir, "tools")
+            os.makedirs(tools_dir, exist_ok=True)
+            
+            links = {
+                "NTPWEdit": ("http://cdslow.org.ru/files/ntpwedit/ntpwed07.zip", "ntpwedit.zip", "NTPWEdit"),
+                "CrystalDiskInfo": ("https://downloads.sourceforge.net/portableapps/CrystalDiskInfoPortable_9.3.0.paf.exe", "cdi_setup.exe", "CrystalDiskInfo"),
+                "WizTree": ("https://diskanalyzer.com/files/wiztree_4_20_portable.zip", "wiztree.zip", "WizTree"),
+                "CPU-Z": ("https://download.cpuid.com/cpu-z/cpu-z_2.09-en.zip", "cpuz.zip", "CPU-Z"),
+                "HWMonitor": ("https://download.cpuid.com/hwmonitor/hwmonitor_1.52.zip", "hwmonitor.zip", "HWMonitor"),
+                "NotepadPlusPlus": ("https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v8.6.8/npp.8.6.8.portable.x64.zip", "npp.zip", "NotepadPlusPlus"),
+                "Recuva": ("https://download.ccleaner.com/rcsetup154.exe", "rcsetup.exe", "Recuva"),
+                "Rufus": ("https://github.com/pbatard/rufus/releases/download/v4.5/rufus-4.5.exe", "Rufus_Portable.exe", ""),
+                "AngryIPScanner": ("https://github.com/angryip/ipscan/releases/download/3.9.1/ipscan-win64-3.9.1.exe", "Angry_IP_Scanner.exe", "")
+            }
+            
+            if tool_name not in links:
+                return
+                
+            url, filename, folder = links[tool_name]
+            file_path = os.path.join(tools_dir, filename)
+            
+            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+            with urllib.request.urlopen(req, context=context) as response:
+                with open(file_path, 'wb') as out_file:
+                    out_file.write(response.read())
+            
+            if folder:
+                dest_dir = os.path.join(tools_dir, folder)
+                os.makedirs(dest_dir, exist_ok=True)
+                
+                if filename.endswith(".zip"):
+                    with zipfile.ZipFile(file_path, 'r') as zip_ref:
+                        zip_ref.extractall(dest_dir)
+                    os.remove(file_path)
+                elif filename.endswith(".exe") and tool_name == "Recuva":
+                    sz_path = "C:\\Program Files\\7-Zip\\7z.exe"
+                    if os.path.exists(sz_path):
+                        subprocess.run(f'"{sz_path}" x "{file_path}" -o"{dest_dir}" -y', shell=True, capture_output=True)
+                    os.remove(file_path)
+                elif filename.endswith(".exe") and tool_name == "CrystalDiskInfo":
+                    sz_path = "C:\\Program Files\\7-Zip\\7z.exe"
+                    if os.path.exists(sz_path):
+                        subprocess.run(f'"{sz_path}" x "{file_path}" -o"{dest_dir}" -y', shell=True, capture_output=True)
+                    os.remove(file_path)
+            
+            self.show_toast(f"✅ {tool_name} downloaded successfully!")
+            self.after(0, self.refresh_standalone_tools_ui)
+        except Exception as e:
+            self.show_toast(f"❌ Failed to download {tool_name}: {e}")
+
     def refresh_disk_security_selectors(self):
         # 1. Detect drives containing Windows OS
         win_drives = self.detect_windows_drives()
@@ -1788,6 +2346,6 @@ Write-Host 'Office Installation finished.'
         self.destroy()
 
 if __name__ == "__main__":
-    app = PrintPulseApp()
+    app = VenkatPulseApp()
     app.protocol("WM_DELETE_WINDOW", app.on_closing)
     app.mainloop()

@@ -1,5 +1,8 @@
 __pycache__/
 build/
+dist/
+tools/
 *.old
 *.old_*
-
+*.iso
+*.spec

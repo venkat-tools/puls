@@ -1255,14 +1255,14 @@ function loadMaintenanceLogs() {
       
       let badgeClass = "badge-success";
       if (log.status === "Improved") badgeClass = "badge-warning";
-      if (log.status === "Unresolved") badgeClass = "badge-danger";
+      if (log.status === "Unresolved" || log.status === "Failed") badgeClass = "badge-danger";
 
       tr.innerHTML = `
         <td style="font-weight:600;">${log.date}</td>
         <td>${log.model}</td>
         <td>${log.action}</td>
         <td><span class="badge ${badgeClass}">${log.status}</span></td>
-        <td style="max-width:250px; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;" title="${log.notes || ''}">
+        <td style="max-width:250px; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; cursor:pointer; color:var(--primary-color); text-decoration:underline;" title="Click to view details" onclick="showLogDetails('${log.id}')">
           ${log.notes || '—'}
         </td>
         <td>
@@ -1279,6 +1279,36 @@ function loadMaintenanceLogs() {
   // Update dashboard timeline compact view
   updateDashboardTimeline(logs);
   lucide.createIcons();
+}
+
+function showLogDetails(logId) {
+  const logs = getLogs();
+  const log = logs.find(l => l.id === logId);
+  if (!log) return;
+
+  document.getElementById("log-detail-date").innerText = log.date;
+  
+  const statusEl = document.getElementById("log-detail-status");
+  statusEl.innerText = log.status;
+  if (log.status === "Resolved") {
+    statusEl.style.color = "#34d399";
+  } else if (log.status === "Improved") {
+    statusEl.style.color = "#fbbf24";
+  } else {
+    statusEl.style.color = "#f87171";
+  }
+  
+  document.getElementById("log-detail-model").innerText = log.model;
+  document.getElementById("log-detail-action").innerText = log.action;
+  document.getElementById("log-detail-notes").innerText = log.notes || "—";
+
+  const modal = document.getElementById("log-details-modal");
+  if (modal) modal.style.display = "flex";
+}
+
+function closeLogDetailsModal() {
+  const modal = document.getElementById("log-details-modal");
+  if (modal) modal.style.display = "none";
 }
 
 function updateDashboardTimeline(logs) {
@@ -1313,8 +1343,42 @@ function updateDashboardTimeline(logs) {
   });
 }
 
-function logMaintenanceAction(actionName, status = "Resolved", notesText = "Triggered from system calibration utility") {
-  const model = "Generic Printer Device";
+function logMaintenanceAction(actionName, status = "Resolved", notesText = "Triggered from system calibration utility", customModel = null) {
+  let model = customModel;
+  
+  if (!model) {
+    const actionLower = actionName.toLowerCase();
+    if (actionLower.includes("driver")) {
+      model = "Windows Device Driver";
+    } else if (actionLower.includes("dns") || actionLower.includes("network") || actionLower.includes("subnet") || actionLower.includes("ip") || actionLower.includes("rdp") || actionLower.includes("adapter")) {
+      model = "Network Adapter Interface";
+    } else if (actionLower.includes("disk") || actionLower.includes("chkdsk") || actionLower.includes("trim") || actionLower.includes("defrag") || actionLower.includes("volume")) {
+      model = "Local Disk Drive";
+    } else if (actionLower.includes("office") || actionLower.includes("outlook") || actionLower.includes("word") || actionLower.includes("excel") || actionLower.includes("powerpoint") || actionLower.includes("pst")) {
+      model = "Microsoft Office Suite";
+    } else if (actionLower.includes("user") || actionLower.includes("account") || actionLower.includes("policy") || actionLower.includes("gpedit") || actionLower.includes("godmode")) {
+      model = "System Policy Manager";
+    } else if (actionLower.includes("robocopy") || actionLower.includes("backup") || actionLower.includes("migration") || actionLower.includes("appdata")) {
+      model = "Data Migration Hub";
+    } else if (actionLower.includes("winget") || actionLower.includes("install")) {
+      model = "Software Package Manager";
+    } else if (actionLower.includes("tally") || actionLower.includes("temp") || actionLower.includes("cache") || actionLower.includes("explorer") || actionLower.includes("icon")) {
+      model = "System Service Manager";
+    } else if (actionLower.includes("debloat") || actionLower.includes("tweak")) {
+      model = "Windows Performance Tweaker";
+    } else if (actionLower.includes("nirsoft")) {
+      model = "NirSoft Diagnostic Suite";
+    } else {
+      // Try to read active printer model from wizard context if it exists
+      const printerSelect = document.getElementById("log-printer-model");
+      if (printerSelect && printerSelect.value && printerSelect.value.trim() !== "") {
+        model = printerSelect.value;
+      } else {
+        model = "Generic Printer Device";
+      }
+    }
+  }
+
   const date = new Date().toISOString().split('T')[0];
   const newLog = {
     id: "log-" + Date.now(),
@@ -1511,6 +1575,24 @@ const TOOLBOX_DATA = {
     codeType: "CMD (Run as Admin)",
     code: "netsh advfirewall reset"
   },
+  stop_updates: {
+    title: "Stop Windows Updates",
+    description: "Fully disables and stops the Windows Update Service (wuauserv), Background Intelligent Transfer Service (bits), and Update Orchestrator (UsoSvc) to block automatic updates.",
+    codeType: "PowerShell (Run as Admin)",
+    code: "Stop-Service -Name wuauserv, bits, UsoSvc -Force\nSet-Service -Name wuauserv -StartupType Disabled\nSet-Service -Name bits -StartupType Disabled\nSet-Service -Name UsoSvc -StartupType Disabled\nreg add \"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU\" /v NoAutoUpdate /t REG_DWORD /d 1 /f\nreg add \"HKLM\\SYSTEM\\CurrentControlSet\\Services\\WaaSMedicSvc\" /v Start /t REG_DWORD /d 4 /f"
+  },
+  resume_updates: {
+    title: "Resume Windows Updates",
+    description: "Enables and restarts all Windows Update core background services and clears policy registry flags to default states.",
+    codeType: "PowerShell (Run as Admin)",
+    code: "reg delete \"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU\" /v NoAutoUpdate /f\nreg add \"HKLM\\SYSTEM\\CurrentControlSet\\Services\\WaaSMedicSvc\" /v Start /t REG_DWORD /d 3 /f\nSet-Service -Name wuauserv -StartupType Manual\nSet-Service -Name bits -StartupType Manual\nSet-Service -Name UsoSvc -StartupType Manual\nStart-Service -Name wuauserv, bits, UsoSvc"
+  },
+  security_only_updates: {
+    title: "Enable Security Updates Only",
+    description: "Configures Windows Updates to bypass driver offers, defer Feature Updates by 365 days, and Quality Updates by 4 days. Restricts updates to security and definition patches only.",
+    codeType: "PowerShell (Run as Admin)",
+    code: "reg add \"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\" /v ExcludeWUDriversInQualityUpdate /t REG_DWORD /d 1 /f\nreg add \"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\" /v DeferFeatureUpdates /t REG_DWORD /d 1 /f\nreg add \"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\" /v DeferFeatureUpdatesPeriodInDays /t REG_DWORD /d 365 /f\nreg add \"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\" /v DeferQualityUpdates /t REG_DWORD /d 1 /f\nreg add \"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\" /v DeferQualityUpdatesPeriodInDays /t REG_DWORD /d 4 /f\nreg delete \"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU\" /v NoAutoUpdate /f\nreg add \"HKLM\\SYSTEM\\CurrentControlSet\\Services\\WaaSMedicSvc\" /v Start /t REG_DWORD /d 3 /f\nSet-Service -Name wuauserv -StartupType Manual\nSet-Service -Name bits -StartupType Manual\nSet-Service -Name UsoSvc -StartupType Manual\nStart-Service -Name wuauserv, bits, UsoSvc"
+  },
 
   // Windows Debloater
   create_restore_point: {
@@ -1541,7 +1623,7 @@ const TOOLBOX_DATA = {
     title: "Disable Xbox Services",
     description: "Stops and disables Xbox game monitoring and live authentication services in the background.",
     codeType: "PowerShell (Run as Admin)",
-    code: "Stop-Service XblAuthManager,XblGameSave,XboxNetApiSvc; Set-Service XblAuthManager,XblGameSave,XboxNetApiSvc -StartupType Disabled"
+    code: "Stop-Service XblAuthManager,XblGameSave,XboxNetApiSvc; Set-Service XblAuthManager -StartupType Disabled; Set-Service XblGameSave -StartupType Disabled; Set-Service XboxNetApiSvc -StartupType Disabled"
   },
   uninstall_bloatware: {
     title: "Uninstall Preinstalled Bloatware Apps",
@@ -1591,15 +1673,15 @@ const TOOLBOX_DATA = {
   // Migration Tools
   backup_printers: {
     title: "Export Printer Drivers & Queues",
-    description: "Runs PrintBrm printer migration to backup all printer settings to Public Documents.",
+    description: "Runs PrintBrm printer migration to backup all printer settings to C:\\PulseBackup.",
     codeType: "CMD (Run as Admin)",
-    code: "start cmd /k C:\\Windows\\System32\\Spool\\Tools\\PrintBrm.exe -b -f C:\\Users\\Public\\Documents\\PrinterBackup.printerExport"
+    code: "start cmd /k \"if not exist C:\\PulseBackup mkdir C:\\PulseBackup && C:\\Windows\\System32\\Spool\\Tools\\PrintBrm.exe -b -f C:\\PulseBackup\\PrinterBackup.printerExport\""
   },
   restore_printers: {
     title: "Import Printer Drivers & Queues",
-    description: "Restores print configurations and drivers from Public Documents using PrintBrm.",
+    description: "Restores print configurations and drivers from C:\\PulseBackup using PrintBrm.",
     codeType: "CMD (Run as Admin)",
-    code: "start cmd /k C:\\Windows\\System32\\Spool\\Tools\\PrintBrm.exe -r -f C:\\Users\\Public\\Documents\\PrinterBackup.printerExport"
+    code: "if not exist C:\\PulseBackup\\PrinterBackup.printerExport (echo Backup file C:\\PulseBackup\\PrinterBackup.printerExport not found!) else (C:\\Windows\\System32\\Spool\\Tools\\PrintBrm.exe -r -f C:\\PulseBackup\\PrinterBackup.printerExport)"
   },
   activate_windows: {
     title: "Windows HWID Activation",
@@ -1627,9 +1709,9 @@ const TOOLBOX_DATA = {
   },
   download_nirsoft: {
     title: "Download & Extract NirLauncher Suite",
-    description: "Downloads the NirSoft utilities bundle zip file from launcher.nirsoft.net and extracts it to C:\\NirLauncher using 7-Zip or Explorer fallback.",
-    codeType: "PowerShell (Run as Admin)",
-    code: `powershell -NoExit -Command "$url = 'https://launcher.nirsoft.net/downloads/nirsoft_package_enc_1.30.24.zip'; $tempDir = Join-Path $env:TEMP 'NirLauncher'; New-Item -ItemType Directory -Path $tempDir -Force; $zipFile = Join-Path $tempDir 'nirsoft.zip'; Invoke-WebRequest -Uri $url -OutFile $zipFile; Write-Host 'Download complete. NirSoft package is password-protected (password: nirsoft9876$). Extracting...'; if (Test-Path 'C:\\Program Files\\7-Zip\\7z.exe') { & 'C:\\Program Files\\7-Zip\\7z.exe' x $zipFile -p'nirsoft9876$' -o'C:\\NirLauncher' -y } else { Write-Host '7-Zip is required for password-protected ZIP extraction. Launching extraction explorer window...'; Start-Process explorer.exe $tempDir }"`
+    description: "Downloads the NirSoft utilities bundle zip file and extracts it to C:\\NirLauncher automatically.",
+    codeType: "Python / Command (Run as Admin)",
+    code: "start cmd /k python install_nirsoft.py download"
   },
   launch_nirsoft: {
     title: "Launch NirLauncher Suite",
@@ -1640,8 +1722,8 @@ const TOOLBOX_DATA = {
   download_mailpv: {
     title: "Download & Run MailPassView",
     description: "Downloads and extracts NirSoft MailPassView tool to recover mail credentials, then runs it.",
-    codeType: "PowerShell (Run as Admin)",
-    code: `powershell -NoExit -Command "$url = 'https://www.nirsoft.net/tools/mailpv.zip'; $temp = Join-Path $env:TEMP 'mailpv'; New-Item -ItemType Directory -Path $temp -Force; $zip = Join-Path $temp 'mailpv.zip'; Invoke-WebRequest -Uri $url -OutFile $zip; if (Test-Path 'C:\\Program Files\\7-Zip\\7z.exe') { & 'C:\\Program Files\\7-Zip\\7z.exe' x $zip -p'nirsoft9876$' -o'C:\\NirLauncher\\mailpv' -y; start C:\\NirLauncher\\mailpv\\mailpv.exe } else { start explorer.exe $temp }"`
+    codeType: "Python / Command (Run as Admin)",
+    code: "start cmd /k python install_nirsoft.py mailpv"
   },
   launch_mailpv: {
     title: "Launch MailPassView",
@@ -1699,57 +1781,57 @@ const TOOLBOX_DATA = {
   },
   export_appdata: {
     title: "Export User Roaming AppData Profile Backup",
-    description: "Copies %APPDATA% directories to Public Documents AppDataBackup using multi-threaded Robocopy.",
+    description: "Copies %APPDATA% directories to C:\\PulseBackup\\AppDataBackup using multi-threaded Robocopy.",
     codeType: "PowerShell (Run as Admin)",
-    code: "powershell -NoExit -Command \"Robocopy $env:APPDATA C:\\Users\\Public\\Documents\\AppDataBackup /E /MT:8\""
+    code: "powershell -NoExit -Command \"Robocopy $env:APPDATA C:\\PulseBackup\\AppDataBackup /E /MT:8\""
   },
   import_appdata: {
     title: "Import User Roaming AppData Profile Backup",
-    description: "Restores user configurations from Public Documents AppDataBackup folder back to roaming app data directories.",
+    description: "Restores user configurations from C:\\PulseBackup\\AppDataBackup folder back to roaming app data directories.",
     codeType: "PowerShell (Run as Admin)",
-    code: "powershell -NoExit -Command \"Robocopy C:\\Users\\Public\\Documents\\AppDataBackup $env:APPDATA /E /MT:8\""
+    code: "powershell -NoExit -Command \"Robocopy C:\\PulseBackup\\AppDataBackup $env:APPDATA /E /MT:8\""
   },
   office_quick_repair: {
     title: "Office Suite Quick Repair Protocol",
     description: "Launches MS ClickToRun engine to scan and verify installation files offline without modifying network properties.",
     codeType: "PowerShell (Run as Admin)",
-    code: "powershell -NoExit -Command \"Start-Process 'C:\\Program Files\\Common Files\\microsoft shared\\ClickToRun\\OfficeClickToRun.exe' -ArgumentList 'scenario=Repair platform=x64 culture=en-us ForceAppShutdown=True' -Wait\""
+    code: "powershell -ExecutionPolicy Bypass -NoExit -Command \"$p = 'C:\\Program Files\\Common Files\\microsoft shared\\ClickToRun\\OfficeClickToRun.exe'; if (!(Test-Path $p)) { $p = 'C:\\Program Files (x86)\\Common Files\\microsoft shared\\ClickToRun\\OfficeClickToRun.exe' }; if (Test-Path $p) { Start-Process $p -ArgumentList 'scenario=Repair platform=x64 culture=en-us ForceAppShutdown=True' -Wait } else { Write-Host 'Error: Office ClickToRun service not found.' -ForegroundColor Red }\""
   },
   office_online_repair: {
     title: "Office Suite Online Repair Sweep",
     description: "Performs full download-based reinstall sweep of Office deployment resources to fix deep system registry breaks.",
     codeType: "PowerShell (Run as Admin)",
-    code: "powershell -NoExit -Command \"Start-Process 'C:\\Program Files\\Common Files\\microsoft shared\\ClickToRun\\OfficeClickToRun.exe' -ArgumentList 'scenario=Repair platform=x64 culture=en-us RepairType=FullRepair ForceAppShutdown=True' -Wait\""
+    code: "powershell -ExecutionPolicy Bypass -NoExit -Command \"$p = 'C:\\Program Files\\Common Files\\microsoft shared\\ClickToRun\\OfficeClickToRun.exe'; if (!(Test-Path $p)) { $p = 'C:\\Program Files (x86)\\Common Files\\microsoft shared\\ClickToRun\\OfficeClickToRun.exe' }; if (Test-Path $p) { Start-Process $p -ArgumentList 'scenario=Repair platform=x64 culture=en-us RepairType=FullRepair ForceAppShutdown=True' -Wait } else { Write-Host 'Error: Office ClickToRun service not found.' -ForegroundColor Red }\""
   },
   outlook_safe_mode: {
     title: "Start Microsoft Outlook in Safe Mode",
     description: "Launches Outlook with all add-ins and custom toolbars disabled to check configuration conflicts.",
-    codeType: "Windows Command",
-    code: "outlook.exe /safe"
+    codeType: "PowerShell",
+    code: "powershell -ExecutionPolicy Bypass -NoExit -Command \"try { Start-Process outlook.exe -ArgumentList '/safe' } catch { Write-Host 'Error: Outlook is not installed or registered on this machine.' -ForegroundColor Red }\""
   },
   outlook_reset_nav: {
     title: "Reset Outlook Navigation Pane Layout",
     description: "Clears and regenerates the navigation pane layout configuration settings.",
-    codeType: "Windows Command",
-    code: "outlook.exe /resetnavpane"
+    codeType: "PowerShell",
+    code: "powershell -ExecutionPolicy Bypass -NoExit -Command \"try { Start-Process outlook.exe -ArgumentList '/resetnavpane' } catch { Write-Host 'Error: Outlook is not installed.' -ForegroundColor Red }\""
   },
   outlook_reset_folders: {
     title: "Restore Outlook Default Folder Directories",
     description: "Restores missing default folders in the data store for the active profile.",
-    codeType: "Windows Command",
-    code: "outlook.exe /resetfolders"
+    codeType: "PowerShell",
+    code: "powershell -ExecutionPolicy Bypass -NoExit -Command \"try { Start-Process outlook.exe -ArgumentList '/resetfolders' } catch { Write-Host 'Error: Outlook is not installed.' -ForegroundColor Red }\""
   },
   outlook_reset_bar: {
     title: "Reset Outlook Shortcut Bar",
     description: "Clears custom shortcut entries from the Outlook bar layout configuration.",
-    codeType: "Windows Command",
-    code: "outlook.exe /resetoutlookbar"
+    codeType: "PowerShell",
+    code: "powershell -ExecutionPolicy Bypass -NoExit -Command \"try { Start-Process outlook.exe -ArgumentList '/resetoutlookbar' } catch { Write-Host 'Error: Outlook is not installed.' -ForegroundColor Red }\""
   },
   outlook_mail_setup: {
     title: "Outlook Mail Control Setup Console (mlcfg32)",
     description: "Launches the classic Office Mail Setup console to manage data files and active profiles directly.",
-    codeType: "Windows Command",
-    code: "control.exe mlcfg32.cpl"
+    codeType: "PowerShell",
+    code: "powershell -ExecutionPolicy Bypass -NoExit -Command \"try { Start-Process control.exe -ArgumentList 'mlcfg32.cpl' } catch { Write-Host 'Error: Mail Setup control panel (mlcfg32.cpl) could not be opened.' -ForegroundColor Red }\""
   },
   outlook_scanpst_auto: {
     title: "Run ScanPST (Automated File Recovery)",
@@ -1760,50 +1842,50 @@ const TOOLBOX_DATA = {
   outlook_scanpst_browse: {
     title: "Browse Outlook Installation Folder",
     description: "Opens Explorer window pointing to standard Office16 installation directories where ScanPST utility resides.",
-    codeType: "Windows Command",
-    code: "explorer.exe \"C:\\Program Files\\Microsoft Office\\root\\Office16\""
+    codeType: "PowerShell",
+    code: "powershell -ExecutionPolicy Bypass -NoExit -Command \"if (Test-Path 'C:\\Program Files\\Microsoft Office\\root\\Office16') { Start-Process explorer.exe 'C:\\Program Files\\Microsoft Office\\root\\Office16' } else { Write-Host 'Office16 folder not found.' -ForegroundColor Red }\""
   },
   outlook_open_data: {
     title: "Open Outlook Local Data Files Directory",
     description: "Opens user's Outlook Files folder containing PST/OST database archives.",
-    codeType: "Windows Command",
-    code: "explorer.exe \"%userprofile%\\Documents\\Outlook Files\""
+    codeType: "PowerShell",
+    code: "powershell -ExecutionPolicy Bypass -NoExit -Command \"if (Test-Path '$env:USERPROFILE\\Documents\\Outlook Files') { Start-Process explorer.exe '$env:USERPROFILE\\Documents\\Outlook Files' } else { Write-Host 'Outlook Files folder not found.' -ForegroundColor Red }\""
   },
   outlook_backup_pst: {
     title: "Backup Local Outlook Data Files",
-    description: "Performs quick file replication copy of OST and PST database storage to Public Documents folder.",
+    description: "Performs quick file replication copy of OST and PST database storage to C:\\PulseBackup\\OutlookBackup folder.",
     codeType: "PowerShell (Run as Admin)",
-    code: "powershell -NoExit -Command \"Copy-Item -Path $env:LOCALAPPDATA\\Microsoft\\Outlook\\* -Destination C:\\Users\\Public\\Documents\\OutlookBackup\\ -Force -ErrorAction SilentlyContinue\""
+    code: "powershell -NoExit -Command \"if (!(Test-Path C:\\PulseBackup\\OutlookBackup)) { New-Item -ItemType Directory -Path C:\\PulseBackup\\OutlookBackup -Force }; Copy-Item -Path $env:LOCALAPPDATA\\Microsoft\\Outlook\\* -Destination C:\\PulseBackup\\OutlookBackup\\ -Force -ErrorAction SilentlyContinue\""
   },
   outlook_backup_folder: {
     title: "Backup AppData Outlook Configurations",
-    description: "Copies Outlook profiles directories to Public Documents backup registry folders.",
+    description: "Copies Outlook profiles directories to C:\\PulseBackup\\OutlookDataBackup folder.",
     codeType: "PowerShell (Run as Admin)",
-    code: "powershell -NoExit -Command \"Copy-Item -Path $env:APPDATA\\Microsoft\\Outlook\\* -Destination C:\\Users\\Public\\Documents\\OutlookDataBackup\\ -Force -ErrorAction SilentlyContinue\""
+    code: "powershell -NoExit -Command \"if (!(Test-Path C:\\PulseBackup\\OutlookDataBackup)) { New-Item -ItemType Directory -Path C:\\PulseBackup\\OutlookDataBackup -Force }; Copy-Item -Path $env:APPDATA\\Microsoft\\Outlook\\* -Destination C:\\PulseBackup\\OutlookDataBackup\\ -Force -ErrorAction SilentlyContinue\""
   },
   outlook_new_profile: {
     title: "Create New Outlook Profile Configuration",
     description: "Opens mail setup control panel window to create a fresh profile database.",
-    codeType: "Windows Command",
-    code: "control.exe mlcfg32.cpl"
+    codeType: "PowerShell",
+    code: "powershell -ExecutionPolicy Bypass -NoExit -Command \"try { Start-Process control.exe -ArgumentList 'mlcfg32.cpl' } catch { Write-Host 'Error: Mail Setup control panel could not be opened.' -ForegroundColor Red }\""
   },
   winword_safe_mode: {
     title: "Launch Microsoft Word in Safe Mode",
     description: "Launches MS Word bypassing startup templates and registry load hooks.",
-    codeType: "Windows Command",
-    code: "winword.exe /safe"
+    codeType: "PowerShell",
+    code: "powershell -ExecutionPolicy Bypass -NoExit -Command \"try { Start-Process winword.exe -ArgumentList '/safe' } catch { Write-Host 'Error: Word is not installed.' -ForegroundColor Red }\""
   },
   excel_safe_mode: {
     title: "Launch Microsoft Excel in Safe Mode",
     description: "Launches MS Excel with plugins and macros loading disabled.",
-    codeType: "Windows Command",
-    code: "excel.exe /safe"
+    codeType: "PowerShell",
+    code: "powershell -ExecutionPolicy Bypass -NoExit -Command \"try { Start-Process excel.exe -ArgumentList '/safe' } catch { Write-Host 'Error: Excel is not installed.' -ForegroundColor Red }\""
   },
   powerpnt_safe_mode: {
     title: "Launch Microsoft PowerPoint in Safe Mode",
     description: "Launches MS PowerPoint to recover presentation layouts from crashing addons.",
-    codeType: "Windows Command",
-    code: "powerpnt.exe /safe"
+    codeType: "PowerShell",
+    code: "powershell -ExecutionPolicy Bypass -NoExit -Command \"try { Start-Process powerpnt.exe -ArgumentList '/safe' } catch { Write-Host 'Error: PowerPoint is not installed.' -ForegroundColor Red }\""
   },
   driver_scan: {
     title: "Scan Local Hardware Devices (PnpUtil)",
@@ -1815,19 +1897,19 @@ const TOOLBOX_DATA = {
     title: "Force Windows Update Driver Upgrades",
     description: "Uses PSWindowsUpdate modules to download and install missing vendor package updates.",
     codeType: "PowerShell (Run as Admin)",
-    code: "powershell -NoExit -Command \"Install-Module -Name PSWindowsUpdate -Force -SkipPublisherCheck; Get-WindowsUpdate -Install -AcceptAll -AutoReboot\""
+    code: "powershell -ExecutionPolicy Bypass -NoExit -Command \"try { Write-Host 'Setting up PSWindowsUpdate module...' -ForegroundColor Cyan; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Set-PSRepository -Name PSGallery -InstallationPolicy Trusted -ErrorAction SilentlyContinue; Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -ErrorAction SilentlyContinue; Install-Module -Name PSWindowsUpdate -Force -SkipPublisherCheck -ErrorAction SilentlyContinue; Import-Module PSWindowsUpdate -ErrorAction Stop; Write-Host 'Checking and installing driver updates...' -ForegroundColor Cyan; Get-WindowsUpdate -Category 'Drivers' -Install -AcceptAll -AutoReboot; } catch { Write-Host 'Error: ' $_.Exception.Message -ForegroundColor Red; Write-Host 'Failed to install or run PSWindowsUpdate. Make sure you are connected to the Internet.' -ForegroundColor Red; }\""
   },
   driver_backup: {
-    title: "Backup Hardware Drivers to Desktop",
-    description: "Exports all active third-party drivers to Desktop\\DriversBackup folder using DISM utility.",
+    title: "Backup Hardware Drivers to C:\\PulseBackup",
+    description: "Exports all active third-party drivers to C:\\PulseBackup\\DriversBackup folder using DISM utility.",
     codeType: "CMD (Run as Admin)",
-    code: "dism /online /export-driver /destination:\"%userprofile%\\Desktop\\DriversBackup\""
+    code: "if not exist C:\\PulseBackup\\DriversBackup (mkdir C:\\PulseBackup\\DriversBackup) && dism /online /export-driver /destination:\"C:\\PulseBackup\\DriversBackup\""
   },
   driver_restore: {
-    title: "Restore Hardware Drivers from Desktop",
-    description: "Imports and installs third-party drivers from drivers backup directories on Desktop.",
+    title: "Restore Hardware Drivers from C:\\PulseBackup",
+    description: "Imports and installs third-party drivers from drivers backup directories in C:\\PulseBackup.",
     codeType: "CMD (Run as Admin)",
-    code: "dism /online /add-driver /driver:\"%userprofile%\\Desktop\\DriversBackup\" /recurse"
+    code: "if not exist C:\\PulseBackup\\DriversBackup (echo Backup folder C:\\PulseBackup\\DriversBackup not found!) else (pnputil /add-driver \"C:\\PulseBackup\\DriversBackup\\*.inf\" /subdirs /install)"
   },
   user_netplwiz: {
     title: "Launch netplwiz Account Panel",
@@ -2374,6 +2456,53 @@ function executeActivation(type) {
   });
 }
 
+// 12c-2. Windows Edition Changer controller
+function onEditionSelectChange() {
+  const select = document.getElementById("edition-select");
+  const input = document.getElementById("edition-key-input");
+  if (select.value === "custom") {
+    input.value = "";
+    input.placeholder = "Enter 25-character key...";
+    input.focus();
+  } else {
+    input.value = select.value;
+  }
+}
+
+function executeChangeEdition() {
+  const keyInput = document.getElementById("edition-key-input");
+  const key = keyInput ? keyInput.value.trim() : "";
+  if (!key || key.length < 20) {
+    alert("Please enter a valid 25-character Windows Product Key.");
+    return;
+  }
+  
+  if (confirm(`Are you sure you want to change your Windows edition? This will invoke the Windows upgrade wizard using the key: ${key}. Your PC might restart during the process.`)) {
+    fetch(API_BASE + '/api/execute', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        toolKey: 'change_windows_edition',
+        productKey: key
+      })
+    })
+    .then(res => {
+      if (!res.ok) {
+        return res.json().then(data => { throw new Error(data.error || 'Failed to trigger edition change'); });
+      }
+      return res.json();
+    })
+    .then(data => {
+      alert("Edition change command initiated successfully. The Windows Upgrade wizard should open shortly.");
+      logMaintenanceAction("Change Edition: " + key, "Resolved", "Executed edition change successfully.");
+    })
+    .catch(err => {
+      alert("Edition change failed: " + err.message);
+      logMaintenanceAction("Change Edition: " + key, "Failed", err.message);
+    });
+  }
+}
+
 // 12d. Ninite installer controller
 function installNiniteBundle() {
   const card = document.getElementById("app-ninite");
@@ -2475,6 +2604,7 @@ function executeNirSoft(action) {
     btn.style.background = "var(--state-danger)";
     btn.innerHTML = `<i data-lucide="x" style="width:14px; height:14px; margin-right:4px; vertical-align: middle;"></i> Failed`;
     lucide.createIcons();
+    logMaintenanceAction("NirSoft: " + (action === 'download' ? "Download" : "Launch"), "Failed", "NirSoft task execution failed: " + err.message);
     alert("NirSoft Suite command failed: " + err.message);
     
     setTimeout(() => {
@@ -2554,6 +2684,336 @@ function runRobocopyEngine() {
       lucide.createIcons();
     }, 4000);
   });
+}
+
+// 12h. User Profile migration controller
+function runProfileMigrationBackup() {
+  const targetEl = document.getElementById("migration-target");
+  const btn = document.querySelector("#superadmin button[onclick='runProfileMigrationBackup()']");
+  
+  if (!targetEl || !btn) return;
+  const targetPath = targetEl.value.trim();
+  
+  if (!targetPath) {
+    alert("Please select or enter a target directory path for the migration backup.");
+    return;
+  }
+  
+  const originalHtml = btn.innerHTML;
+  btn.disabled = true;
+  btn.style.background = "var(--state-warning)";
+  btn.innerHTML = `<i class="lucide-spinner" style="animation: spin 1.5s linear infinite; width:14px; height:14px; margin-right:4px; vertical-align: middle; display: inline-block;"></i> Backing up...`;
+  
+  fetch(API_BASE + '/api/execute', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ 
+      toolKey: 'run_migration_backup', 
+      targetPath: targetPath 
+    })
+  })
+  .then(res => {
+    if (!res.ok) {
+      return res.json().then(data => { throw new Error(data.error || 'Backup failed'); });
+    }
+    return res.json();
+  })
+  .then(data => {
+    btn.style.background = "var(--state-success)";
+    btn.innerHTML = `<i data-lucide="check" style="width:14px; height:14px; margin-right:4px; vertical-align: middle;"></i> Backup Started!`;
+    lucide.createIcons();
+    logMaintenanceAction("Profile Backup", "Resolved", `Backed up user profile folders to "${targetPath}".`);
+    
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.style.background = "";
+      btn.innerHTML = originalHtml;
+      lucide.createIcons();
+    }, 4000);
+  })
+  .catch(err => {
+    alert("Error: " + err.message);
+    btn.disabled = false;
+    btn.style.background = "";
+    btn.innerHTML = originalHtml;
+    lucide.createIcons();
+  });
+}
+
+// 12i. Winget apps list export controller
+function runWingetExport() {
+  const targetEl = document.getElementById("migration-target");
+  const btn = document.querySelector("#superadmin button[onclick='runWingetExport()']");
+  
+  if (!btn) return;
+  const targetPath = targetEl ? targetEl.value.trim() : "";
+  
+  const originalHtml = btn.innerHTML;
+  btn.disabled = true;
+  btn.style.background = "var(--state-warning)";
+  btn.innerHTML = `<i class="lucide-spinner" style="animation: spin 1.5s linear infinite; width:14px; height:14px; margin-right:4px; vertical-align: middle; display: inline-block;"></i> Exporting...`;
+  
+  fetch(API_BASE + '/api/execute', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ 
+      toolKey: 'winget_export', 
+      targetPath: targetPath 
+    })
+  })
+  .then(res => {
+    if (!res.ok) {
+      return res.json().then(data => { throw new Error(data.error || 'Export failed'); });
+    }
+    return res.json();
+  })
+  .then(data => {
+    btn.style.background = "var(--state-success)";
+    btn.innerHTML = `<i data-lucide="check" style="width:14px; height:14px; margin-right:4px; vertical-align: middle;"></i> Export Started!`;
+    lucide.createIcons();
+    logMaintenanceAction("Winget Export", "Resolved", `Exported installed applications list to JSON.`);
+    
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.style.background = "";
+      btn.innerHTML = originalHtml;
+      lucide.createIcons();
+    }, 4000);
+  })
+  .catch(err => {
+    alert("Error: " + err.message);
+    btn.disabled = false;
+    btn.style.background = "";
+    btn.innerHTML = originalHtml;
+    lucide.createIcons();
+  });
+}
+
+// 12j. Winget apps list import controller
+async function runWingetImport() {
+  const btn = document.querySelector("#superadmin button[onclick='runWingetImport()']");
+  if (!btn) return;
+
+  try {
+    const response = await fetch(API_BASE + '/api/browse-file');
+    if (!response.ok) {
+      throw new Error('Failed to open file browser dialog');
+    }
+    const browseData = await response.json();
+    if (!browseData.success || !browseData.path) {
+      return;
+    }
+    const filePath = browseData.path;
+
+    const originalHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.style.background = "var(--state-warning)";
+    btn.innerHTML = `<i class="lucide-spinner" style="animation: spin 1.5s linear infinite; width:14px; height:14px; margin-right:4px; vertical-align: middle; display: inline-block;"></i> Importing...`;
+    
+    fetch(API_BASE + '/api/execute', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        toolKey: 'winget_import', 
+        filePath: filePath 
+      })
+    })
+    .then(res => {
+      if (!res.ok) {
+        return res.json().then(data => { throw new Error(data.error || 'Import failed'); });
+      }
+      return res.json();
+    })
+    .then(data => {
+      btn.style.background = "var(--state-success)";
+      btn.innerHTML = `<i data-lucide="check" style="width:14px; height:14px; margin-right:4px; vertical-align: middle;"></i> Import Started!`;
+      lucide.createIcons();
+      logMaintenanceAction("Winget Import", "Resolved", `Imported installed applications list from "${filePath}".`);
+      
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.style.background = "";
+        btn.innerHTML = originalHtml;
+        lucide.createIcons();
+      }, 4000);
+    })
+    .catch(err => {
+      alert("Error: " + err.message);
+      btn.disabled = false;
+      btn.style.background = "";
+      btn.innerHTML = originalHtml;
+      lucide.createIcons();
+    });
+
+  } catch (error) {
+    console.error('Error importing winget apps:', error);
+    alert('Failed to browse files or start import. Make sure the local server is running.');
+  }
+}
+
+// 12h_2. User Profile migration controller (Tab version)
+function runProfileMigrationBackupTab() {
+  const targetEl = document.getElementById("migration-target-tab");
+  const btn = document.getElementById("btn-backup-profile-tab");
+  
+  if (!targetEl || !btn) return;
+  const targetPath = targetEl.value.trim();
+  
+  if (!targetPath) {
+    alert("Please select or enter a target directory path for the migration backup.");
+    return;
+  }
+  
+  const originalHtml = btn.innerHTML;
+  btn.disabled = true;
+  btn.style.background = "var(--state-warning)";
+  btn.innerHTML = `<i class="lucide-spinner" style="animation: spin 1.5s linear infinite; width:14px; height:14px; margin-right:4px; vertical-align: middle; display: inline-block;"></i> Backing up...`;
+  
+  fetch(API_BASE + '/api/execute', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ 
+      toolKey: 'run_migration_backup', 
+      targetPath: targetPath 
+    })
+  })
+  .then(res => {
+    if (!res.ok) {
+      return res.json().then(data => { throw new Error(data.error || 'Backup failed'); });
+    }
+    return res.json();
+  })
+  .then(data => {
+    btn.style.background = "var(--state-success)";
+    btn.innerHTML = `<i data-lucide="check" style="width:14px; height:14px; margin-right:4px; vertical-align: middle;"></i> Backup Started!`;
+    lucide.createIcons();
+    logMaintenanceAction("Profile Backup", "Resolved", `Backed up user profile folders to "${targetPath}".`);
+    
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.style.background = "";
+      btn.innerHTML = originalHtml;
+      lucide.createIcons();
+    }, 4000);
+  })
+  .catch(err => {
+    alert("Error: " + err.message);
+    btn.disabled = false;
+    btn.style.background = "";
+    btn.innerHTML = originalHtml;
+    lucide.createIcons();
+  });
+}
+
+// 12i_2. Winget apps list export controller (Tab version)
+function runWingetExportTab() {
+  const targetEl = document.getElementById("migration-target-tab");
+  const btn = document.querySelector("button[onclick='runWingetExportTab()']");
+  
+  if (!btn) return;
+  const targetPath = targetEl ? targetEl.value.trim() : "";
+  
+  const originalHtml = btn.innerHTML;
+  btn.disabled = true;
+  btn.style.background = "var(--state-warning)";
+  btn.innerHTML = `<i class="lucide-spinner" style="animation: spin 1.5s linear infinite; width:14px; height:14px; margin-right:4px; vertical-align: middle; display: inline-block;"></i> Exporting...`;
+  
+  fetch(API_BASE + '/api/execute', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ 
+      toolKey: 'winget_export', 
+      targetPath: targetPath 
+    })
+  })
+  .then(res => {
+    if (!res.ok) {
+      return res.json().then(data => { throw new Error(data.error || 'Export failed'); });
+    }
+    return res.json();
+  })
+  .then(data => {
+    btn.style.background = "var(--state-success)";
+    btn.innerHTML = `<i data-lucide="check" style="width:14px; height:14px; margin-right:4px; vertical-align: middle;"></i> Export Started!`;
+    lucide.createIcons();
+    logMaintenanceAction("Winget Export", "Resolved", `Exported installed applications list to JSON.`);
+    
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.style.background = "";
+      btn.innerHTML = originalHtml;
+      lucide.createIcons();
+    }, 4000);
+  })
+  .catch(err => {
+    alert("Error: " + err.message);
+    btn.disabled = false;
+    btn.style.background = "";
+    btn.innerHTML = originalHtml;
+    lucide.createIcons();
+  });
+}
+
+// 12j_2. Winget apps list import controller (Tab version)
+async function runWingetImportTab() {
+  const btn = document.querySelector("button[onclick='runWingetImportTab()']");
+  if (!btn) return;
+
+  try {
+    const response = await fetch(API_BASE + '/api/browse-file');
+    if (!response.ok) {
+      throw new Error('Failed to open file browser dialog');
+    }
+    const browseData = await response.json();
+    if (!browseData.success || !browseData.path) {
+      return;
+    }
+    const filePath = browseData.path;
+
+    const originalHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.style.background = "var(--state-warning)";
+    btn.innerHTML = `<i class="lucide-spinner" style="animation: spin 1.5s linear infinite; width:14px; height:14px; margin-right:4px; vertical-align: middle; display: inline-block;"></i> Importing...`;
+    
+    fetch(API_BASE + '/api/execute', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        toolKey: 'winget_import', 
+        filePath: filePath 
+      })
+    })
+    .then(res => {
+      if (!res.ok) {
+        return res.json().then(data => { throw new Error(data.error || 'Import failed'); });
+      }
+      return res.json();
+    })
+    .then(data => {
+      btn.style.background = "var(--state-success)";
+      btn.innerHTML = `<i data-lucide="check" style="width:14px; height:14px; margin-right:4px; vertical-align: middle;"></i> Import Started!`;
+      lucide.createIcons();
+      logMaintenanceAction("Winget Import", "Resolved", `Imported installed applications list from "${filePath}".`);
+      
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.style.background = "";
+        btn.innerHTML = originalHtml;
+        lucide.createIcons();
+      }, 4000);
+    })
+    .catch(err => {
+      alert("Error: " + err.message);
+      btn.disabled = false;
+      btn.style.background = "";
+      btn.innerHTML = originalHtml;
+      lucide.createIcons();
+    });
+
+  } catch (error) {
+    console.error('Error importing winget apps:', error);
+    alert('Failed to browse files or start import. Make sure the local server is running.');
+  }
 }
 
 // 13. System Debloater loop controller
@@ -2832,7 +3292,7 @@ function executeOnlineAi(promptText, fileData, fileType, fileName, aiBubble, cha
   // Multi-model backup list to handle model-busy / rate-limits / server issues
   const models = ["gemini-2.5-flash", "gemini-1.5-flash"];
   
-  const systemInstruction = "You are the VenkatPulse AI Diagnostic Assistant. Analyze the user's computer issue. Provide clear, concise, step-by-step recommendations. You can recommend that the user execute one-click fixes. If one of our tool keys matches the user's problem, you MUST include the token [EXECUTE: toolKey] on a new line. Supported tool keys: sfc_scan, dism_restore, reset_wua, flush_dns, reset_winsock, reset_firewall, create_restore_point, disable_telemetry, disable_cortana, disable_onedrive, disable_xbox, uninstall_bloatware, backup_printers, restore_printers, quick_repair, clear_queue, restart_spooler, devices_printers, print_management, sharing_center, activate_windows, activate_office, activate_kms, activate_kms_uninstall.";
+  const systemInstruction = "You are the VenkatPulse AI Diagnostic Assistant. Analyze the user's computer issue. Provide clear, concise, step-by-step recommendations. You can recommend that the user execute one-click fixes. If one of our tool keys matches the user's problem, you MUST include the token [EXECUTE: toolKey] on a new line. Supported tool keys: sfc_scan, dism_restore, reset_wua, flush_dns, reset_winsock, reset_firewall, create_restore_point, disable_telemetry, disable_cortana, disable_onedrive, disable_xbox, uninstall_bloatware, backup_printers, restore_printers, quick_repair, clear_queue, restart_spooler, devices_printers, print_management, sharing_center, activate_windows, activate_office, activate_kms, activate_kms_uninstall, run_migration_backup, winget_export, winget_import.";
 
   const contents = [];
   const parts = [];
