@@ -1,10 +1,10 @@
 # Build-WinPE-ISO.ps1
 # Run this script as Administrator in PowerShell to build a custom PrintPulse WinPE ISO
 
-# 1. Check if running as Admin
+# 1. Check if running as Admin (Self-elevate if not)
 $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 if (!$isAdmin) {
-    Write-Error "Please run this script in an elevated PowerShell console (Run as Administrator)!"
+    Start-Process powershell -ArgumentList "-NoExit -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
     Exit
 }
 
