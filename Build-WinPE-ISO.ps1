@@ -158,13 +158,17 @@ for %%d in (C D E F G H I J K L M N O P Q R S T U V W X Y Z) do (
     if exist %%d:\VenkatPulse\VenkatPulse.exe (
         echo Found VenkatPulse on drive %%d:
         cd /d %%d:\VenkatPulse
-        start VenkatPulse.exe
+        VenkatPulse.exe
+        echo.
+        echo VenkatPulse exited. Error Level: %%errorlevel%%
+        pause
         exit
     )
 )
 echo WARNING: VenkatPulse.exe was not found on any external drive!
 echo You can run it manually if you know its location.
 cmd.exe
+
 "@
     Set-Content -Path $startnetPath -Value $startnetContent -Force
 } else {
@@ -181,7 +185,7 @@ Remove-Item -Path $mountDir -Recurse -Force -ErrorAction SilentlyContinue
 # 6. Copy VenkatPulse files
 Write-Host "Copying VenkatPulse program files..." -ForegroundColor Cyan
 $currentDir = Get-Location
-Copy-Item "$currentDir\*" "$tempDir\media\VenkatPulse" -Recurse -Exclude "dist","build",".git" -Force
+Copy-Item "$currentDir\*" "$tempDir\media\VenkatPulse" -Recurse -Exclude "dist","build",".git","*.iso","*.old","*.old_*","*.spec" -Force
 
 # 7. Generate bootable ISO using oscdimg
 Write-Host "Compiling bootable WinPE ISO image (UEFI & BIOS Dual Mode)..." -ForegroundColor Cyan
