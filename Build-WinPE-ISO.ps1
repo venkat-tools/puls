@@ -105,8 +105,22 @@ if (!(Test-Path "$tempDir\media\EFI\Microsoft\Boot\BCD")) {
     New-Item -ItemType Directory -Path "$tempDir\media\EFI\Microsoft\Boot" -Force | Out-Null
     
     # Copy UEFI and BIOS BCD databases
-    Copy-Item "C:\Windows\Boot\DVD\EFI\BCD" "$tempDir\media\EFI\Microsoft\Boot\BCD" -Force -ErrorAction SilentlyContinue
-    Copy-Item "C:\Windows\Boot\DVD\PCAT\BCD" "$tempDir\media\boot\BCD" -Force -ErrorAction SilentlyContinue
+    $bcdUEFI = "$tempDir\media\EFI\Microsoft\Boot\BCD"
+    $bcdBIOS = "$tempDir\media\boot\BCD"
+    Copy-Item "C:\Windows\Boot\DVD\EFI\BCD" $bcdUEFI -Force -ErrorAction SilentlyContinue
+    Copy-Item "C:\Windows\Boot\DVD\PCAT\BCD" $bcdBIOS -Force -ErrorAction SilentlyContinue
+    
+    # Configure the template BCDs to resolve the boot device correctly
+    Write-Host "Configuring BCD template devices to boot..." -ForegroundColor Cyan
+    & bcdedit.exe /store $bcdUEFI /set '{bootmgr}' device boot
+    & bcdedit.exe /store $bcdUEFI /set '{default}' device "ramdisk=[boot]\sources\boot.wim,{76127c59-ac0e-44a3-9543-25a12d0865c0}"
+    & bcdedit.exe /store $bcdUEFI /set '{default}' osdevice "ramdisk=[boot]\sources\boot.wim,{76127c59-ac0e-44a3-9543-25a12d0865c0}"
+    & bcdedit.exe /store $bcdUEFI /set '{76127c59-ac0e-44a3-9543-25a12d0865c0}' ramdisksdidevice boot
+    
+    & bcdedit.exe /store $bcdBIOS /set '{bootmgr}' device boot
+    & bcdedit.exe /store $bcdBIOS /set '{default}' device "ramdisk=[boot]\sources\boot.wim,{76127c59-ac0e-44a3-9543-25a12d0865c0}"
+    & bcdedit.exe /store $bcdBIOS /set '{default}' osdevice "ramdisk=[boot]\sources\boot.wim,{76127c59-ac0e-44a3-9543-25a12d0865c0}"
+    & bcdedit.exe /store $bcdBIOS /set '{76127c59-ac0e-44a3-9543-25a12d0865c0}' ramdisksdidevice boot
 }
 
 # Double check critical boot files exist
