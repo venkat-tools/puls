@@ -1087,6 +1087,55 @@
               </div>
             </label>
           </div>
+
+          <h3 style="margin-top: 30px; margin-bottom: 15px; font-size: 1.2rem; display: flex; align-items: center; gap: 8px;">
+            <i data-lucide="zap" style="color: var(--accent-cyan); width: 20px; height: 20px;"></i>
+            <span>System Performance & Maintenance Tweaks</span>
+          </h3>
+          <div class="debloat-card-list">
+            <div class="debloat-card" style="cursor: default; display: flex; justify-content: space-between; align-items: center; gap: 15px;">
+              <div class="debloat-info" style="flex: 1;">
+                <span class="debloat-title">Enable Ultimate Performance Plan</span>
+                <span class="debloat-desc">Unlocks hidden high-performance power plan for maximum CPU/GPU throughput.</span>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="openToolModal('ultimate_performance')" style="flex-shrink: 0;"><i data-lucide="play"></i> Run</button>
+            </div>
+            <div class="debloat-card" style="cursor: default; display: flex; justify-content: space-between; align-items: center; gap: 15px;">
+              <div class="debloat-info" style="flex: 1;">
+                <span class="debloat-title">Disable Start Menu Bing Search</span>
+                <span class="debloat-desc">Stops Start Menu search from showing Bing suggestions, boosting local search speed.</span>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="openToolModal('disable_bing_search')" style="flex-shrink: 0;"><i data-lucide="play"></i> Run</button>
+            </div>
+            <div class="debloat-card" style="cursor: default; display: flex; justify-content: space-between; align-items: center; gap: 15px;">
+              <div class="debloat-info" style="flex: 1;">
+                <span class="debloat-title">Optimize Visual Effects</span>
+                <span class="debloat-desc">Reduces window animations and menu hover delays for snappier responses.</span>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="openToolModal('optimize_visual_effects')" style="flex-shrink: 0;"><i data-lucide="play"></i> Run</button>
+            </div>
+            <div class="debloat-card" style="cursor: default; display: flex; justify-content: space-between; align-items: center; gap: 15px;">
+              <div class="debloat-info" style="flex: 1;">
+                <span class="debloat-title">Deep Temporary Cache Cleaner</span>
+                <span class="debloat-desc">Purges user Temp, System Temp, and Prefetch caches to free storage.</span>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="openToolModal('deep_temp_clean')" style="flex-shrink: 0;"><i data-lucide="play"></i> Run</button>
+            </div>
+            <div class="debloat-card" style="cursor: default; display: flex; justify-content: space-between; align-items: center; gap: 15px;">
+              <div class="debloat-info" style="flex: 1;">
+                <span class="debloat-title">Reset Windows Update Cache</span>
+                <span class="debloat-desc">Wipes SoftwareDistribution component directories to resolve update service errors.</span>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="openToolModal('reset_update_cache')" style="flex-shrink: 0;"><i data-lucide="play"></i> Run</button>
+            </div>
+            <div class="debloat-card" style="cursor: default; display: flex; justify-content: space-between; align-items: center; gap: 15px;">
+              <div class="debloat-info" style="flex: 1;">
+                <span class="debloat-title">Network Socket & DNS Flush Reset</span>
+                <span class="debloat-desc">Resets network configurations, Winsock catalog, and flushes local DNS.</span>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="openToolModal('network_reset_dns')" style="flex-shrink: 0;"><i data-lucide="play"></i> Run</button>
+            </div>
+          </div>
         </div>
       </section>
 

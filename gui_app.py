@@ -645,6 +645,53 @@ class VenkatPulseApp(ctk.CTk):
             command=lambda: self.run_cmd('start powershell -NoExit -Command "@(\'*XboxApp*\', \'*ZuneMusic*\', \'*BingNews*\', \'*Office.OneNote*\', \'*SolitaireCollection*\') | ForEach-Object { Get-AppxPackage -AllUsers $_ | Remove-AppxPackage -ErrorAction SilentlyContinue }"', "Uninstall Bloatware")
         ).grid(row=2, column=1, padx=25, pady=15, sticky="ew")
 
+        # Performance Optimizer Card
+        opt_title = ctk.CTkLabel(frame, text="Performance & Maintenance Tweaks", font=ctk.CTkFont(size=16, weight="bold"))
+        opt_title.grid(row=3, column=0, columnspan=2, padx=10, pady=(20, 5), sticky="w")
+        
+        card2 = ctk.CTkFrame(frame, corner_radius=12)
+        card2.grid(row=4, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
+        card2.grid_columnconfigure(0, weight=1)
+        card2.grid_columnconfigure(1, weight=1)
+        
+        # Left column of Performance Tweaks
+        ctk.CTkButton(
+            card2,
+            text="Enable Ultimate Performance Power Plan",
+            command=lambda: self.run_cmd('powercfg -duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61 && powercfg -setactive e9a42b02-d5df-448d-aa00-03f14749eb61', "Enable Ultimate Performance")
+        ).grid(row=0, column=0, padx=25, pady=15, sticky="ew")
+        
+        ctk.CTkButton(
+            card2,
+            text="Disable Bing Suggestions in Start Search",
+            command=lambda: self.run_cmd('reg add "HKCU\\Software\\Policies\\Microsoft\\Windows\\Explorer" /v DisableSearchBoxSuggestions /t REG_DWORD /d 1 /f && reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Search" /v BingSearchEnabled /t REG_DWORD /d 0 /f', "Disable Bing Start Search")
+        ).grid(row=1, column=0, padx=25, pady=15, sticky="ew")
+        
+        ctk.CTkButton(
+            card2,
+            text="Optimize Visual Effects (Responsive UI)",
+            command=lambda: self.run_cmd('reg add "HKCU\\Control Panel\\Desktop" /v MenuShowDelay /t REG_SZ /d 0 /f && reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VisualEffects" /v VisualFXSetting /t REG_DWORD /d 2 /f', "Optimize Visual Effects")
+        ).grid(row=2, column=0, padx=25, pady=15, sticky="ew")
+        
+        # Right column of Performance Tweaks
+        ctk.CTkButton(
+            card2,
+            text="Deep Temporary Cache Cleaner",
+            command=lambda: self.run_cmd('start cmd /k powershell -NoExit -Command "Write-Host \'Cleaning Temporary folders...\'; Remove-Item -Path $env:TEMP\\* -Recurse -Force -ErrorAction SilentlyContinue; Remove-Item -Path \'C:\\Windows\\Temp\\*\' -Recurse -Force -ErrorAction SilentlyContinue; Remove-Item -Path \'C:\\Windows\\Prefetch\\*\' -Recurse -Force -ErrorAction SilentlyContinue; Write-Host \'Temporary folders cleared successfully!\'"', "Deep Temp Clean")
+        ).grid(row=0, column=1, padx=25, pady=15, sticky="ew")
+        
+        ctk.CTkButton(
+            card2,
+            text="Reset Windows Update Components Cache",
+            command=lambda: self.run_cmd('start cmd /k powershell -NoExit -Command "Write-Host \'Stopping Windows Update services...\'; Stop-Service -Name wuauserv, bits, cryptsvc -Force; Write-Host \'Clearing cache...\'; Remove-Item -Path \'C:\\Windows\\SoftwareDistribution\\*\' -Recurse -Force -ErrorAction SilentlyContinue; Write-Host \'Restarting services...\'; Start-Service -Name wuauserv, bits, cryptsvc; Write-Host \'Windows Update Cache reset successfully!\'"', "Reset Update Cache")
+        ).grid(row=1, column=1, padx=25, pady=15, sticky="ew")
+        
+        ctk.CTkButton(
+            card2,
+            text="Full Network Socket & DNS Flush Reset",
+            command=lambda: self.run_cmd('start cmd /k "ipconfig /release && ipconfig /renew && ipconfig /flushdns && netsh winsock reset && netsh int ip reset"', "Network Socket Reset")
+        ).grid(row=2, column=1, padx=25, pady=15, sticky="ew")
+
     # --- 4. APP DOWNLOADER FRAME ---
     def create_app_downloader_frame(self):
         frame = ctk.CTkFrame(self, fg_color="transparent")

@@ -1994,6 +1994,42 @@ const TOOLBOX_DATA = {
     description: "Runs multi-threaded Robocopy mirroring from source to target directory path.",
     codeType: "CMD (Run as Admin)",
     code: "robocopy \"[Source]\" \"[Target]\" /MIR /MT:8"
+  },
+  ultimate_performance: {
+    title: "Enable Ultimate Performance Plan",
+    description: "Unlocks and activates the hidden 'Ultimate Performance' power scheme on your computer for maximum CPU/GPU throughput.",
+    codeType: "CMD (Run as Admin)",
+    code: "powercfg -duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61 && powercfg -setactive e9a42b02-d5df-448d-aa00-03f14749eb61"
+  },
+  disable_bing_search: {
+    title: "Disable Start Menu Bing Search Suggestions",
+    description: "Modifies registry settings to disable Bing web search integration in Windows Search, accelerating local file and program queries.",
+    codeType: "Registry Script / CMD",
+    code: "reg add \"HKCU\\Software\\Policies\\Microsoft\\Windows\\Explorer\" /v DisableSearchBoxSuggestions /t REG_DWORD /d 1 /f && reg add \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Search\" /v BingSearchEnabled /t REG_DWORD /d 0 /f"
+  },
+  optimize_visual_effects: {
+    title: "Optimize Windows Visual Performance Settings",
+    description: "Reduces visual animations, fade effects, and menu delays to speed up system responsiveness and window drawing.",
+    codeType: "Registry Script / CMD",
+    code: "reg add \"HKCU\\Control Panel\\Desktop\" /v MenuShowDelay /t REG_SZ /d 0 /f && reg add \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VisualEffects\" /v VisualFXSetting /t REG_DWORD /d 2 /f"
+  },
+  deep_temp_clean: {
+    title: "Deep Temporary Cache Cleaner",
+    description: "Cleans temporary directories, system logs, cache folders, and prefetch storage to release disk space.",
+    codeType: "PowerShell (Run as Admin)",
+    code: "Remove-Item -Path $env:TEMP\\* -Recurse -Force; Remove-Item -Path 'C:\\Windows\\Temp\\*' -Recurse -Force; Remove-Item -Path 'C:\\Windows\\Prefetch\\*' -Recurse -Force"
+  },
+  reset_update_cache: {
+    title: "Reset Windows Update Cache Components",
+    description: "Stops wuauserv & BITS services, purges SoftwareDistribution components to resolve Windows Update errors, and restarts update engine.",
+    codeType: "PowerShell (Run as Admin)",
+    code: "Stop-Service -Name wuauserv, bits, cryptsvc -Force\nRemove-Item -Path 'C:\\Windows\\SoftwareDistribution\\*' -Recurse -Force\nStart-Service -Name wuauserv, bits, cryptsvc"
+  },
+  network_reset_dns: {
+    title: "Full Network Socket & DNS Flush Reset",
+    description: "Clears DNS cache, releases and renews IP lease, and resets TCP/IP stack and Winsock catalog sockets to fix packet drop problems.",
+    codeType: "CMD (Run as Admin)",
+    code: "ipconfig /release && ipconfig /renew && ipconfig /flushdns && netsh winsock reset && netsh int ip reset"
   }
 };
 

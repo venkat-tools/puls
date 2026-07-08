@@ -65,6 +65,12 @@ const COMMANDS = {
   disable_onedrive: `reg add "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\OneDrive" /v DisableFileSyncNGSC /t REG_DWORD /d 1 /f && taskkill /F /IM OneDrive.exe`,
   disable_xbox: `powershell -Command "Stop-Service -Name XblAuthManager,XblGameSave,XboxNetApiSvc -Force; Set-Service -Name XblAuthManager -StartupType Disabled; Set-Service -Name XblGameSave -StartupType Disabled; Set-Service -Name XboxNetApiSvc -StartupType Disabled"`,
   uninstall_bloatware: `start powershell -NoExit -Command "@('*XboxApp*', '*ZuneMusic*', '*BingNews*', '*Office.OneNote*', '*SolitaireCollection*') | ForEach-Object { Get-AppxPackage -AllUsers $_ | Remove-AppxPackage -ErrorAction SilentlyContinue }"`,
+  ultimate_performance: `powercfg -duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61 && powercfg -setactive e9a42b02-d5df-448d-aa00-03f14749eb61`,
+  disable_bing_search: `reg add "HKCU\\Software\\Policies\\Microsoft\\Windows\\Explorer" /v DisableSearchBoxSuggestions /t REG_DWORD /d 1 /f && reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Search" /v BingSearchEnabled /t REG_DWORD /d 0 /f`,
+  optimize_visual_effects: `reg add "HKCU\\Control Panel\\Desktop" /v MenuShowDelay /t REG_SZ /d 0 /f && reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VisualEffects" /v VisualFXSetting /t REG_DWORD /d 2 /f`,
+  deep_temp_clean: `start cmd /k powershell -NoExit -Command "Write-Host 'Cleaning Temporary folders...'; Remove-Item -Path $env:TEMP\\* -Recurse -Force -ErrorAction SilentlyContinue; Remove-Item -Path 'C:\\Windows\\Temp\\*' -Recurse -Force -ErrorAction SilentlyContinue; Remove-Item -Path 'C:\\Windows\\Prefetch\\*' -Recurse -Force -ErrorAction SilentlyContinue; Write-Host 'Temporary folders cleared successfully!'"`,
+  reset_update_cache: `start cmd /k powershell -NoExit -Command "Write-Host 'Stopping Windows Update services...'; Stop-Service -Name wuauserv, bits, cryptsvc -Force; Write-Host 'Clearing cache...'; Remove-Item -Path 'C:\\Windows\\SoftwareDistribution\\*' -Recurse -Force -ErrorAction SilentlyContinue; Write-Host 'Restarting services...'; Start-Service -Name wuauserv, bits, cryptsvc; Write-Host 'Windows Update Cache reset successfully!'"`,
+  network_reset_dns: `start cmd /k "ipconfig /release && ipconfig /renew && ipconfig /flushdns && netsh winsock reset && netsh int ip reset"`,
 
   // Administrative Shortcuts (User Tools)
   lusrmgr: `start lusrmgr.msc`,
