@@ -98,34 +98,15 @@ if (!$copiedBootloader) {
 
 # 4b. Ensure a valid BCD boot Configuration Data store exists
 if (!(Test-Path "$tempDir\media\EFI\Microsoft\Boot\BCD")) {
-    Write-Host "Creating fresh BCD store programmatically..." -ForegroundColor Cyan
+    Write-Host "Copying official BCD templates from Windows system directory..." -ForegroundColor Cyan
     
-    # Ensure folder structure exists
+    # Ensure folder structures exist
+    New-Item -ItemType Directory -Path "$tempDir\media\boot" -Force | Out-Null
     New-Item -ItemType Directory -Path "$tempDir\media\EFI\Microsoft\Boot" -Force | Out-Null
     
-    $bcdPath = "$tempDir\media\EFI\Microsoft\Boot\BCD"
-    if (Test-Path $bcdPath) { Remove-Item $bcdPath -Force }
-    
-    # Create the store using bcdedit.exe
-    & bcdedit.exe /createstore $bcdPath
-    & bcdedit.exe /store $bcdPath /create '{bootmgr}' /d "Windows Boot Manager"
-    & bcdedit.exe /store $bcdPath /set '{bootmgr}' device boot
-    & bcdedit.exe /store $bcdPath /create '{76127c59-ac0e-44a3-9543-25a12d0865c0}' /d "Ramdisk Options" /device
-    & bcdedit.exe /store $bcdPath /set '{76127c59-ac0e-44a3-9543-25a12d0865c0}' ramdisksdidevice boot
-    & bcdedit.exe /store $bcdPath /set '{76127c59-ac0e-44a3-9543-25a12d0865c0}' ramdisksdipath "\boot\boot.sdi"
-    
-    # Create the OS loader entry and parse its GUID
-    $createOutput = & bcdedit.exe /store $bcdPath /create /d "Windows PE" /application osloader
-    $guid = ($createOutput | Select-String -Pattern '{[a-f0-9-]{36}}').Matches.Value
-    
-    # Configure the OS loader entry
-    & bcdedit.exe /store $bcdPath /set $guid device "ramdisk=[boot]\sources\boot.wim,{76127c59-ac0e-44a3-9543-25a12d0865c0}"
-    & bcdedit.exe /store $bcdPath /set $guid osdevice "ramdisk=[boot]\sources\boot.wim,{76127c59-ac0e-44a3-9543-25a12d0865c0}"
-    & bcdedit.exe /store $bcdPath /set $guid path "\windows\system32\boot\winload.efi"
-    & bcdedit.exe /store $bcdPath /set $guid systemroot "\windows"
-    & bcdedit.exe /store $bcdPath /set $guid detecthal Yes
-    & bcdedit.exe /store $bcdPath /set $guid winpe Yes
-    & bcdedit.exe /store $bcdPath /displayorder $guid /addfirst
+    # Copy UEFI and BIOS BCD databases
+    Copy-Item "C:\Windows\Boot\DVD\EFI\BCD" "$tempDir\media\EFI\Microsoft\Boot\BCD" -Force -ErrorAction SilentlyContinue
+    Copy-Item "C:\Windows\Boot\DVD\PCAT\BCD" "$tempDir\media\boot\BCD" -Force -ErrorAction SilentlyContinue
 }
 
 # Double check critical boot files exist
