@@ -115,26 +115,26 @@ if (!(Test-Path "$tempDir\media\EFI\Microsoft\Boot\BCD")) {
     
     # Configure UEFI BCD
     & bcdedit.exe /store $bcdUEFI /set '{bootmgr}' device boot
-    & bcdedit.exe /store $bcdUEFI /set '{76127c59-ac0e-44a3-9543-25a12d0865c0}' ramdisksdidevice locate
+    & bcdedit.exe /store $bcdUEFI /set '{76127c59-ac0e-44a3-9543-25a12d0865c0}' ramdisksdidevice boot
     
     $enumUEFI = & bcdedit.exe /store $bcdUEFI /enum OSLOADER
-    $guidsUEFI = ($enumUEFI | Select-String -Pattern '{[a-f0-9-]{36}}' -AllMatches).Matches.Value | Select-Object -Unique
+    $guidsUEFI = ($enumUEFI | Select-String -Pattern '\{[a-zA-Z0-9-]+\}' -AllMatches).Matches.Value | Select-Object -Unique
     foreach ($g in $guidsUEFI) {
         Write-Host "Configuring UEFI OS Loader GUID: $g"
-        & bcdedit.exe /store $bcdUEFI /set $g device "ramdisk=[locate]\sources\boot.wim,{76127c59-ac0e-44a3-9543-25a12d0865c0}"
-        & bcdedit.exe /store $bcdUEFI /set $g osdevice "ramdisk=[locate]\sources\boot.wim,{76127c59-ac0e-44a3-9543-25a12d0865c0}"
+        & bcdedit.exe /store $bcdUEFI /set $g device "ramdisk=[boot]\sources\boot.wim,{76127c59-ac0e-44a3-9543-25a12d0865c0}"
+        & bcdedit.exe /store $bcdUEFI /set $g osdevice "ramdisk=[boot]\sources\boot.wim,{76127c59-ac0e-44a3-9543-25a12d0865c0}"
     }
     
     # Configure BIOS BCD
     & bcdedit.exe /store $bcdBIOS /set '{bootmgr}' device boot
-    & bcdedit.exe /store $bcdBIOS /set '{76127c59-ac0e-44a3-9543-25a12d0865c0}' ramdisksdidevice locate
+    & bcdedit.exe /store $bcdBIOS /set '{76127c59-ac0e-44a3-9543-25a12d0865c0}' ramdisksdidevice boot
     
     $enumBIOS = & bcdedit.exe /store $bcdBIOS /enum OSLOADER
-    $guidsBIOS = ($enumBIOS | Select-String -Pattern '{[a-f0-9-]{36}}' -AllMatches).Matches.Value | Select-Object -Unique
+    $guidsBIOS = ($enumBIOS | Select-String -Pattern '\{[a-zA-Z0-9-]+\}' -AllMatches).Matches.Value | Select-Object -Unique
     foreach ($g in $guidsBIOS) {
         Write-Host "Configuring BIOS OS Loader GUID: $g"
-        & bcdedit.exe /store $bcdBIOS /set $g device "ramdisk=[locate]\sources\boot.wim,{76127c59-ac0e-44a3-9543-25a12d0865c0}"
-        & bcdedit.exe /store $bcdBIOS /set $g osdevice "ramdisk=[locate]\sources\boot.wim,{76127c59-ac0e-44a3-9543-25a12d0865c0}"
+        & bcdedit.exe /store $bcdBIOS /set $g device "ramdisk=[boot]\sources\boot.wim,{76127c59-ac0e-44a3-9543-25a12d0865c0}"
+        & bcdedit.exe /store $bcdBIOS /set $g osdevice "ramdisk=[boot]\sources\boot.wim,{76127c59-ac0e-44a3-9543-25a12d0865c0}"
     }
 }
 
