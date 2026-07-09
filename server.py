@@ -8,7 +8,7 @@ import subprocess
 import time
 import webbrowser
 import urllib.request
-from http.server import HTTPServer, BaseHTTPRequestHandler
+from http.server import HTTPServer, ThreadingHTTPServer, BaseHTTPRequestHandler
 
 # 0. Background Watcher Process for Auto-Cleanup on Exit
 if "--watcher" in sys.argv:
@@ -291,14 +291,21 @@ class PythonAdminServer(BaseHTTPRequestHandler):
             $f.ShowNewFolderButton = $true
             $w = New-Object System.Windows.Forms.Form
             $w.TopMost = $true
+            $w.Width = 1
+            $w.Height = 1
+            $w.WindowState = 'Minimized'
+            $w.Show()
+            $w.Activate()
             if ($f.ShowDialog($w) -eq 'OK') {
                 Write-Output $f.SelectedPath
             }
+            $w.Close()
             """
             try:
                 out = subprocess.check_output(
                     ['powershell', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', script],
-                    text=True
+                    text=True,
+                    timeout=30
                 ).strip()
                 self.wfile.write(json.dumps({"success": True, "path": out}).encode('utf-8'))
             except Exception as e:
@@ -319,14 +326,21 @@ class PythonAdminServer(BaseHTTPRequestHandler):
             $f.Title = "Select Winget Apps JSON File"
             $w = New-Object System.Windows.Forms.Form
             $w.TopMost = $true
+            $w.Width = 1
+            $w.Height = 1
+            $w.WindowState = 'Minimized'
+            $w.Show()
+            $w.Activate()
             if ($f.ShowDialog($w) -eq 'OK') {
                 Write-Output $f.FileName
             }
+            $w.Close()
             """
             try:
                 out = subprocess.check_output(
                     ['powershell', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', script],
-                    text=True
+                    text=True,
+                    timeout=30
                 ).strip()
                 self.wfile.write(json.dumps({"success": True, "path": out}).encode('utf-8'))
             except Exception as e:
@@ -803,7 +817,7 @@ if __name__ == "__main__":
 
     # Start HTTP Web Server
     server_address = ('', PORT)
-    httpd = HTTPServer(server_address, PythonAdminServer)
+    httpd = ThreadingHTTPServer(server_address, PythonAdminServer)
     
     print("======================================================================")
     print("            Starting PrintPulse AI Python Admin Web Server            ")

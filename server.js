@@ -210,12 +210,18 @@ const server = http.createServer((req, res) => {
       $f.ShowNewFolderButton = $true
       $w = New-Object System.Windows.Forms.Form
       $w.TopMost = $true
+      $w.Width = 1
+      $w.Height = 1
+      $w.WindowState = 'Minimized'
+      $w.Show()
+      $w.Activate()
       if ($f.ShowDialog($w) -eq 'OK') {
         Write-Output $f.SelectedPath
       }
+      $w.Close()
     `;
     
-    execFile('powershell', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', script], (error, stdout, stderr) => {
+    execFile('powershell', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', script], { timeout: 30000 }, (error, stdout, stderr) => {
       if (error) {
         console.error(`[API Server] Folder browser error:`, error);
         res.writeHead(500, { 'Content-Type': 'application/json' });
@@ -240,12 +246,18 @@ const server = http.createServer((req, res) => {
       $f.Title = "Select Winget Apps JSON File"
       $w = New-Object System.Windows.Forms.Form
       $w.TopMost = $true
+      $w.Width = 1
+      $w.Height = 1
+      $w.WindowState = 'Minimized'
+      $w.Show()
+      $w.Activate()
       if ($f.ShowDialog($w) -eq 'OK') {
         Write-Output $f.FileName
       }
+      $w.Close()
     `;
     
-    execFile('powershell', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', script], (error, stdout, stderr) => {
+    execFile('powershell', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', script], { timeout: 30000 }, (error, stdout, stderr) => {
       if (error) {
         console.error(`[API Server] File browser error:`, error);
         res.writeHead(500, { 'Content-Type': 'application/json' });
