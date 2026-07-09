@@ -1122,6 +1122,82 @@ Write-Host 'Office Installation finished.'
             command=lambda: self.run_cmd("start https://github.com/lostindark/DriverStoreExplorer/releases", "Download Rapr")
         ).grid(row=2, column=2, padx=15, pady=(0, 15), sticky="ew")
 
+        # Row 4, span both columns: Advanced System & Security Tools
+        c5 = ctk.CTkFrame(frame, corner_radius=10)
+        c5.grid(row=4, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
+        c5.grid_columnconfigure(0, weight=1)
+        c5.grid_columnconfigure(1, weight=1)
+        c5.grid_columnconfigure(2, weight=1)
+        
+        ctk.CTkLabel(c5, text="Advanced System & Security Utilities", font=ctk.CTkFont(size=15, weight="bold")).grid(row=0, column=0, columnspan=3, padx=15, pady=10, sticky="w")
+        
+        # Defender Disable / Enable
+        ctk.CTkButton(
+            c5,
+            text="🛡️ Disable Defender Realtime",
+            fg_color="#dc2626",
+            hover_color="#b91c1c",
+            command=lambda: self.run_cmd('start powershell -NoExit -Command "Write-Host \'Disabling Windows Defender Real-time Monitoring...\' -ForegroundColor Yellow; Set-MpPreference -DisableRealtimeMonitoring $true; Write-Host \'Real-time monitoring temporarily disabled.\' -ForegroundColor Green"', "Disable Defender")
+        ).grid(row=1, column=0, padx=15, pady=15, sticky="ew")
+        
+        ctk.CTkButton(
+            c5,
+            text="🛡️ Enable Defender Realtime",
+            fg_color="#2563eb",
+            hover_color="#1d4ed8",
+            command=lambda: self.run_cmd('start powershell -NoExit -Command "Write-Host \'Enabling Windows Defender Real-time Monitoring...\' -ForegroundColor Cyan; Set-MpPreference -DisableRealtimeMonitoring $false; Write-Host \'Real-time monitoring re-enabled.\' -ForegroundColor Green"', "Enable Defender")
+        ).grid(row=1, column=1, padx=15, pady=15, sticky="ew")
+        
+        # Scan Listening Ports
+        ctk.CTkButton(
+            c5,
+            text="🔌 Scan Active Listening Ports",
+            command=lambda: self.run_cmd('start cmd /k "echo Scanning active listening network ports... && echo. && netstat -ano | findstr LISTENING && echo. && echo Port list complete. Locate the PID inside Windows Task Manager details. && pause"', "Port Scanner")
+        ).grid(row=1, column=2, padx=15, pady=15, sticky="ew")
+        
+        # Row 2 inside c5
+        # Browser Cache Purge
+        ctk.CTkButton(
+            c5,
+            text="🧹 Purge Browser Caches (Edge/Chrome)",
+            command=lambda: self.run_cmd('start powershell -NoExit -Command "Write-Host \'Closing active browser processes...\' -ForegroundColor Yellow; Stop-Process -Name chrome, msedge, firefox -Force -ErrorAction SilentlyContinue; Start-Sleep -Seconds 1; Write-Host \'Purging Google Chrome local temporary cache...\' -ForegroundColor Cyan; Remove-Item -Path \'$env:LOCALAPPDATA\\Google\\Chrome\\User Data\\Default\\Cache\\*\' -Recurse -Force -ErrorAction SilentlyContinue; Write-Host \'Purging Microsoft Edge local temporary cache...\' -ForegroundColor Cyan; Remove-Item -Path \'$env:LOCALAPPDATA\\Microsoft\\Edge\\User Data\\Default\\Cache\\*\' -Recurse -Force -ErrorAction SilentlyContinue; Write-Host \'Cache purge complete!\' -ForegroundColor Green"', "Browser Cache Purge")
+        ).grid(row=2, column=0, padx=15, pady=(0, 15), sticky="ew")
+        
+        # Windows Sandbox & Hyper-V Toggles
+        ctk.CTkButton(
+            c5,
+            text="📦 Enable Windows Sandbox Feature",
+            command=lambda: self.run_cmd('start cmd /k "dism /online /Enable-Feature /FeatureName:Containers-DisposableVM /All /NoRestart && echo. && echo Windows Sandbox has been enabled successfully. Restart computer to apply changes. && pause"', "Enable Sandbox")
+        ).grid(row=2, column=1, padx=15, pady=(0, 15), sticky="ew")
+        
+        ctk.CTkButton(
+            c5,
+            text="💻 Enable Hyper-V Platform",
+            command=lambda: self.run_cmd('start cmd /k "dism /online /Enable-Feature /FeatureName:Microsoft-Hyper-V /All /NoRestart && echo. && echo Hyper-V Virtualization has been enabled successfully. Restart computer to apply changes. && pause"', "Enable Hyper-V")
+        ).grid(row=2, column=2, padx=15, pady=(0, 15), sticky="ew")
+        
+        # Row 3 inside c5
+        # Startup apps manager
+        ctk.CTkButton(
+            c5,
+            text="⚡ Launch Startup Apps Manager (TaskMgr)",
+            command=lambda: self.run_cmd("start taskmgr /0 /startup", "Startup Manager")
+        ).grid(row=3, column=0, padx=15, pady=(0, 15), sticky="ew")
+        
+        # Event Viewer
+        ctk.CTkButton(
+            c5,
+            text="📜 Open System Event Viewer Console",
+            command=lambda: self.run_cmd("start eventvwr.msc", "Event Viewer")
+        ).grid(row=3, column=1, padx=15, pady=(0, 15), sticky="ew")
+        
+        # DxDiag
+        ctk.CTkButton(
+            c5,
+            text="🎮 Open DirectX Diagnostics (DxDiag)",
+            command=lambda: self.run_cmd("start dxdiag.exe", "DxDiag")
+        ).grid(row=3, column=2, padx=15, pady=(0, 15), sticky="ew")
+
     # --- 7. AI ASSISTANT FRAME ---
     def create_ai_assistant_frame(self):
         frame = ctk.CTkFrame(self, fg_color="transparent")

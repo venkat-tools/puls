@@ -2055,6 +2055,60 @@ const TOOLBOX_DATA = {
     codeType: "GitHub Web URL",
     code: "https://github.com/lostindark/DriverStoreExplorer/releases",
     launchUri: "https://github.com/lostindark/DriverStoreExplorer/releases"
+  },
+  defender_disable: {
+    title: "Disable Windows Defender Real-time Protection",
+    description: "Temporarily disables Windows Defender Real-time monitoring using PowerShell cmdlets.",
+    codeType: "PowerShell (Run as Admin)",
+    code: "Set-MpPreference -DisableRealtimeMonitoring $true"
+  },
+  defender_enable: {
+    title: "Enable Windows Defender Real-time Protection",
+    description: "Re-enables Windows Defender Real-time monitoring to secure the system against threats.",
+    codeType: "PowerShell (Run as Admin)",
+    code: "Set-MpPreference -DisableRealtimeMonitoring $false"
+  },
+  net_port_scanner: {
+    title: "Active Listening Ports Scanner",
+    description: "Runs netstat to list all open ports and identifying process IDs currently listening on network interfaces.",
+    codeType: "CMD (Run as Admin)",
+    code: "netstat -ano | findstr LISTENING"
+  },
+  browser_cache_clean: {
+    title: "Purge Chrome & Edge Browser Caches",
+    description: "Closes Google Chrome and Microsoft Edge, then cleans their temporary caches to resolve website loading issues.",
+    codeType: "PowerShell (Run as Admin)",
+    code: "Stop-Process -Name chrome, msedge -Force; Remove-Item -Path $env:LOCALAPPDATA\\Google\\Chrome\\User Data\\Default\\Cache\\* -Recurse"
+  },
+  sandbox_enable: {
+    title: "Enable Windows Sandbox Feature",
+    description: "Uses DISM packages to enable Windows Sandbox container features for isolated application execution.",
+    codeType: "CMD (Run as Admin)",
+    code: "dism /online /Enable-Feature /FeatureName:Containers-DisposableVM /All /NoRestart"
+  },
+  hyperv_enable: {
+    title: "Enable Hyper-V Virtualization Features",
+    description: "Uses DISM packages to enable Hyper-V hypervisor platform features on this local machine.",
+    codeType: "CMD (Run as Admin)",
+    code: "dism /online /Enable-Feature /FeatureName:Microsoft-Hyper-V /All /NoRestart"
+  },
+  launch_startup_manager: {
+    title: "Launch Task Manager Startup Apps Manager",
+    description: "Opens Windows Task Manager directly to the Startup Apps dashboard to manage boot performance.",
+    codeType: "Windows Command",
+    code: "taskmgr /0 /startup"
+  },
+  launch_eventvwr: {
+    title: "Launch Windows Event Viewer Console",
+    description: "Opens Microsoft Management Console snap-in for viewing system logs and errors.",
+    codeType: "Windows Command",
+    code: "eventvwr.msc"
+  },
+  launch_dxdiag: {
+    title: "Launch DirectX Diagnostic Tool (DxDiag)",
+    description: "Opens DirectX diagnostics console detailing complete hardware, audio, and graphics configurations.",
+    codeType: "Windows Command",
+    code: "dxdiag.exe"
   }
 };
 
