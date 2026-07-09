@@ -17,7 +17,7 @@ let wizardState = {
 };
 
 // Local API Server Base URL (handles file:// and remote web hosting launches)
-const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? '' : 'http://localhost:3000';
+const API_BASE = (window.location.protocol === 'file:') ? 'http://localhost:3000' : window.location.origin;
 let isServerOnline = false;
 
 // Error Code Database
