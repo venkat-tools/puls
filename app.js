@@ -1901,15 +1901,15 @@ const TOOLBOX_DATA = {
   },
   driver_backup: {
     title: "Backup Hardware Drivers to C:\\PulseBackup",
-    description: "Exports all active third-party drivers to C:\\PulseBackup\\DriversBackup folder using DISM utility.",
+    description: "Exports all active third-party drivers to C:\\PulseBackup\\Drivers folder using pnputil utility.",
     codeType: "CMD (Run as Admin)",
-    code: "if not exist C:\\PulseBackup\\DriversBackup (mkdir C:\\PulseBackup\\DriversBackup) && dism /online /export-driver /destination:\"C:\\PulseBackup\\DriversBackup\""
+    code: "if not exist C:\\PulseBackup\\Drivers (mkdir C:\\PulseBackup\\Drivers) && pnputil /export-driver * \"C:\\PulseBackup\\Drivers\""
   },
   driver_restore: {
     title: "Restore Hardware Drivers from C:\\PulseBackup",
     description: "Imports and installs third-party drivers from drivers backup directories in C:\\PulseBackup.",
     codeType: "CMD (Run as Admin)",
-    code: "if not exist C:\\PulseBackup\\DriversBackup (echo Backup folder C:\\PulseBackup\\DriversBackup not found!) else (pnputil /add-driver \"C:\\PulseBackup\\DriversBackup\\*.inf\" /subdirs /install)"
+    code: "if not exist C:\\PulseBackup\\Drivers (echo Backup folder C:\\PulseBackup\\Drivers not found!) else (pnputil /add-driver \"C:\\PulseBackup\\Drivers\\*.inf\" /subdirs /install)"
   },
   user_netplwiz: {
     title: "Launch netplwiz Account Panel",
@@ -2030,6 +2030,31 @@ const TOOLBOX_DATA = {
     description: "Clears DNS cache, releases and renews IP lease, and resets TCP/IP stack and Winsock catalog sockets to fix packet drop problems.",
     codeType: "CMD (Run as Admin)",
     code: "ipconfig /release && ipconfig /renew && ipconfig /flushdns && netsh winsock reset && netsh int ip reset"
+  },
+  driver_backup: {
+    title: "Backup Existing System Drivers",
+    description: "Exports all active, third-party, and OEM drivers currently loaded in the operating system to C:\\PulseBackup\\Drivers using PnPutil.",
+    codeType: "CMD (Run as Admin)",
+    code: "mkdir C:\\PulseBackup\\Drivers\npnputil /export-driver * C:\\PulseBackup\\Drivers"
+  },
+  hardware_scan: {
+    title: "Scan for New Hardware Changes",
+    description: "Forces a full scan of local system components and PnP system controllers to detect newly connected or unconfigured device controllers.",
+    codeType: "CMD (Run as Admin)",
+    code: "pnputil /scan-devices"
+  },
+  launch_devmgmt: {
+    title: "Launch Windows Device Manager",
+    description: "Opens the Microsoft Management Console (MMC) snap-in for viewing, configuring, and updating local computer device drivers.",
+    codeType: "Windows Run Dialog (Win+R)",
+    code: "devmgmt.msc"
+  },
+  launch_rapr: {
+    title: "Download DriverStore Explorer (Rapr)",
+    description: "Opens the official GitHub download page for DriverStore Explorer (Rapr), which allows you to inspect and clean old, duplicate, or unused drivers.",
+    codeType: "GitHub Web URL",
+    code: "https://github.com/lostindark/DriverStoreExplorer/releases",
+    launchUri: "https://github.com/lostindark/DriverStoreExplorer/releases"
   }
 };
 

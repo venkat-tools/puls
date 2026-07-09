@@ -80,6 +80,14 @@ const COMMANDS = {
   gp_editor: `start gpedit.msc`,
   reg_editor: `start regedit.exe`,
 
+  // Driver & Hardware Management Tools
+  driver_scan: `pnputil /scan-devices`,
+  driver_upgrade: `start powershell -ExecutionPolicy Bypass -NoExit -Command "try { Write-Host 'Setting up PSWindowsUpdate module...' -ForegroundColor Cyan; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Set-PSRepository -Name PSGallery -InstallationPolicy Trusted -ErrorAction SilentlyContinue; Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -ErrorAction SilentlyContinue; Install-Module -Name PSWindowsUpdate -Force -SkipPublisherCheck -ErrorAction SilentlyContinue; Import-Module PSWindowsUpdate -ErrorAction Stop; Write-Host 'Checking and installing driver updates...' -ForegroundColor Cyan; Get-WindowsUpdate -Category 'Drivers' -Install -AcceptAll -AutoReboot; } catch { Write-Host 'Error: ' $_.Exception.Message -ForegroundColor Red; Write-Host 'Failed to install or run PSWindowsUpdate.' -ForegroundColor Red; }"`,
+  driver_backup: `start cmd /k "if not exist C:\\PulseBackup\\Drivers mkdir C:\\PulseBackup\\Drivers && pnputil /export-driver * C:\\PulseBackup\\Drivers && echo Drivers successfully backed up to C:\\PulseBackup\\Drivers && pause"`,
+  driver_restore: `start cmd /k "if not exist C:\\PulseBackup\\Drivers (echo Backup folder C:\\PulseBackup\\Drivers not found! && pause) else (pnputil /add-driver C:\\PulseBackup\\Drivers\\*.inf /subdirs /install /reboot)"`,
+  launch_devmgmt: `start devmgmt.msc`,
+  launch_rapr: `start https://github.com/lostindark/DriverStoreExplorer/releases`,
+
   // Migration Tools
   backup_printers: `start cmd /k "if not exist C:\\PulseBackup mkdir C:\\PulseBackup && C:\\Windows\\System32\\Spool\\Tools\\PrintBrm.exe -b -f C:\\PulseBackup\\PrinterBackup.printerExport"`,
   restore_printers: `start cmd /k \"if not exist C:\\PulseBackup\\PrinterBackup.printerExport (echo Backup file C:\\PulseBackup\\PrinterBackup.printerExport not found! && pause) else (C:\\Windows\\System32\\Spool\\Tools\\PrintBrm.exe -r -f C:\\PulseBackup\\PrinterBackup.printerExport)\"`,

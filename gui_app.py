@@ -1070,6 +1070,58 @@ Write-Host 'Office Installation finished.'
             command=lambda: self.run_cmd('start powershell -NoExit -Command "Write-Host \'Configuring Windows Update for Security Patches Only...\'; reg add \\"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\" /v ExcludeWUDriversInQualityUpdate /t REG_DWORD /d 1 /f; reg add \\"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\" /v DeferFeatureUpdates /t REG_DWORD /d 1 /f; reg add \\"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\" /v DeferFeatureUpdatesPeriodInDays /t REG_DWORD /d 365 /f; reg add \\"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\" /v DeferQualityUpdates /t REG_DWORD /d 1 /f; reg add \\"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\" /v DeferQualityUpdatesPeriodInDays /t REG_DWORD /d 4 /f; reg delete \\"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU\\" /v NoAutoUpdate /f; reg add \\"HKLM\\SYSTEM\\CurrentControlSet\\Services\\WaaSMedicSvc\\" /v Start /t REG_DWORD /d 3 /f; Set-Service -Name wuauserv, bits, UsoSvc -StartupType Manual; Start-Service -Name wuauserv, bits, UsoSvc; Write-Host \'Windows Update configured for Security Updates Only (Features deferred 365 days, drivers disabled, updates enabled).\'"', "Security Updates Only")
         ).grid(row=1, column=2, padx=15, pady=15, sticky="ew")
 
+        # Row 3, span both columns: Driver & Hardware Management
+        c4 = ctk.CTkFrame(frame, corner_radius=10)
+        c4.grid(row=3, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
+        c4.grid_columnconfigure(0, weight=1)
+        c4.grid_columnconfigure(1, weight=1)
+        c4.grid_columnconfigure(2, weight=1)
+        
+        ctk.CTkLabel(c4, text="Driver & Hardware Management", font=ctk.CTkFont(size=15, weight="bold")).grid(row=0, column=0, columnspan=3, padx=15, pady=10, sticky="w")
+        
+        # Scan for Driver Updates via Windows Update
+        ctk.CTkButton(
+            c4,
+            text="🔍 Scan Missing Drivers (PnP)",
+            command=lambda: self.run_cmd("pnputil /scan-devices", "Scan Missing Drivers")
+        ).grid(row=1, column=0, padx=15, pady=15, sticky="ew")
+        
+        # Backup System Drivers
+        ctk.CTkButton(
+            c4,
+            text="📦 Backup Drivers to C:\\PulseBackup",
+            command=lambda: self.run_cmd('start cmd /k "if not exist C:\\PulseBackup\\Drivers mkdir C:\\PulseBackup\\Drivers && pnputil /export-driver * C:\\PulseBackup\\Drivers && echo Drivers successfully backed up to C:\\PulseBackup\\Drivers && pause"', "Backup Drivers")
+        ).grid(row=1, column=1, padx=15, pady=15, sticky="ew")
+        
+        # Restore System Drivers
+        ctk.CTkButton(
+            c4,
+            text="🚚 Restore Drivers from Backup",
+            command=lambda: self.run_cmd('start cmd /k "if not exist C:\\PulseBackup\\Drivers (echo Backup folder C:\\PulseBackup\\Drivers not found! && pause) else (pnputil /add-driver C:\\PulseBackup\\Drivers\\*.inf /subdirs /install /reboot)"', "Restore Drivers")
+        ).grid(row=1, column=2, padx=15, pady=15, sticky="ew")
+        
+        # Row 2 inside c4: Device Manager & Rapr
+        ctk.CTkButton(
+            c4,
+            text="⚙ Launch Windows Device Manager",
+            command=lambda: self.run_cmd("start devmgmt.msc", "Launch Device Manager")
+        ).grid(row=2, column=0, padx=15, pady=(0, 15), sticky="ew")
+        
+        ctk.CTkButton(
+            c4,
+            text="📥 Force Install Driver Upgrades",
+            fg_color="#059669",
+            hover_color="#047857",
+            font=ctk.CTkFont(weight="bold"),
+            command=lambda: self.run_cmd('start powershell -ExecutionPolicy Bypass -NoExit -Command "try { Write-Host \'Setting up PSWindowsUpdate module...\' -ForegroundColor Cyan; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Set-PSRepository -Name PSGallery -InstallationPolicy Trusted -ErrorAction SilentlyContinue; Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -ErrorAction SilentlyContinue; Install-Module -Name PSWindowsUpdate -Force -SkipPublisherCheck -ErrorAction SilentlyContinue; Import-Module PSWindowsUpdate -ErrorAction Stop; Write-Host \'Checking and installing driver updates...\' -ForegroundColor Cyan; Get-WindowsUpdate -Category \'Drivers\' -Install -AcceptAll -AutoReboot; } catch { Write-Host \'Error: \' $_.Exception.Message -ForegroundColor Red; Write-Host \'Failed to install or run PSWindowsUpdate.\' -ForegroundColor Red; }"', "Force Driver Upgrades")
+        ).grid(row=2, column=1, padx=15, pady=(0, 15), sticky="ew")
+        
+        ctk.CTkButton(
+            c4,
+            text="🌐 Download DriverStore Explorer (Rapr)",
+            command=lambda: self.run_cmd("start https://github.com/lostindark/DriverStoreExplorer/releases", "Download Rapr")
+        ).grid(row=2, column=2, padx=15, pady=(0, 15), sticky="ew")
+
     # --- 7. AI ASSISTANT FRAME ---
     def create_ai_assistant_frame(self):
         frame = ctk.CTkFrame(self, fg_color="transparent")

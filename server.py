@@ -165,6 +165,13 @@ COMMANDS = {
     "gp_editor": "start gpedit.msc",
     "reg_editor": "start regedit.exe",
 
+    # Driver & Hardware Management Tools
+    "driver_scan": "pnputil /scan-devices",
+    "driver_backup": 'start cmd /k "if not exist C:\\PulseBackup\\Drivers mkdir C:\\PulseBackup\\Drivers && pnputil /export-driver * C:\\PulseBackup\\Drivers && echo Drivers successfully backed up to C:\\PulseBackup\\Drivers && pause"',
+    "driver_restore": 'start cmd /k "if not exist C:\\PulseBackup\\Drivers (echo Backup folder C:\\PulseBackup\\Drivers not found! && pause) else (pnputil /add-driver C:\\PulseBackup\\Drivers\\*.inf /subdirs /install /reboot)"',
+    "launch_devmgmt": "start devmgmt.msc",
+    "launch_rapr": "start https://github.com/lostindark/DriverStoreExplorer/releases",
+
     # Migration Tools
     "backup_printers": "start cmd /k \"if not exist C:\\PulseBackup mkdir C:\\PulseBackup && C:\\Windows\\System32\\Spool\\Tools\\PrintBrm.exe -b -f C:\\PulseBackup\\PrinterBackup.printerExport\"",
     "restore_printers": 'start cmd /k "if not exist C:\\PulseBackup\\PrinterBackup.printerExport (echo Backup file C:\\PulseBackup\\PrinterBackup.printerExport not found! && pause) else (C:\\Windows\\System32\\Spool\\Tools\\PrintBrm.exe -r -f C:\\PulseBackup\\PrinterBackup.printerExport)"',
