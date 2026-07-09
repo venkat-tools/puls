@@ -97,50 +97,74 @@ if (!$copiedBootloader) {
 }
 
 # 4b. Ensure a valid BCD boot Configuration Data store exists
-if (!(Test-Path "$tempDir\media\EFI\Microsoft\Boot\BCD")) {
-    Write-Host "Copying official BCD templates from Windows system directory..." -ForegroundColor Cyan
-    
-    # Ensure folder structures exist
-    New-Item -ItemType Directory -Path "$tempDir\media\boot" -Force | Out-Null
-    New-Item -ItemType Directory -Path "$tempDir\media\EFI\Microsoft\Boot" -Force | Out-Null
-    
-    # Copy UEFI and BIOS BCD databases
-    $bcdUEFI = "$tempDir\media\EFI\Microsoft\Boot\BCD"
-    $bcdBIOS = "$tempDir\media\boot\BCD"
-    Copy-Item "C:\Windows\Boot\DVD\EFI\BCD" $bcdUEFI -Force -ErrorAction SilentlyContinue
-    Copy-Item "C:\Windows\Boot\DVD\PCAT\BCD" $bcdBIOS -Force -ErrorAction SilentlyContinue
-    
-    # Configure the template BCDs to resolve the boot device correctly
-    Write-Host "Configuring BCD template devices to boot..." -ForegroundColor Cyan
-    
-    # Configure UEFI BCD
-    & bcdedit.exe /store $bcdUEFI /set '{bootmgr}' device boot
-    & bcdedit.exe /store $bcdUEFI /set '{76127c59-ac0e-44a3-9543-25a12d0865c0}' ramdisksdidevice boot
-    
-    $enumUEFI = & bcdedit.exe /store $bcdUEFI /enum OSLOADER
-    $guidsUEFI = ($enumUEFI | Select-String -Pattern '\{[a-zA-Z0-9-]+\}' -AllMatches).Matches.Value | Select-Object -Unique
-    foreach ($g in $guidsUEFI) {
-        Write-Host "Configuring UEFI OS Loader GUID: $g"
-        & bcdedit.exe /store $bcdUEFI /set $g device "ramdisk=[boot]\sources\boot.wim,{76127c59-ac0e-44a3-9543-25a12d0865c0}"
-        & bcdedit.exe /store $bcdUEFI /set $g osdevice "ramdisk=[boot]\sources\boot.wim,{76127c59-ac0e-44a3-9543-25a12d0865c0}"
-    }
-    
-    # Configure BIOS BCD
-    & bcdedit.exe /store $bcdBIOS /set '{bootmgr}' device boot
-    & bcdedit.exe /store $bcdBIOS /set '{76127c59-ac0e-44a3-9543-25a12d0865c0}' ramdisksdidevice boot
-    
-    $enumBIOS = & bcdedit.exe /store $bcdBIOS /enum OSLOADER
-    $guidsBIOS = ($enumBIOS | Select-String -Pattern '\{[a-zA-Z0-9-]+\}' -AllMatches).Matches.Value | Select-Object -Unique
-    foreach ($g in $guidsBIOS) {
-        Write-Host "Configuring BIOS OS Loader GUID: $g"
-        & bcdedit.exe /store $bcdBIOS /set $g device "ramdisk=[boot]\sources\boot.wim,{76127c59-ac0e-44a3-9543-25a12d0865c0}"
-        & bcdedit.exe /store $bcdBIOS /set $g osdevice "ramdisk=[boot]\sources\boot.wim,{76127c59-ac0e-44a3-9543-25a12d0865c0}"
-    }
-}
+$bcdUEFI = "$tempDir\media\EFI\Microsoft\Boot\BCD"
+$bcdBIOS = "$tempDir\media\boot\BCD"
+
+# Ensure folder structures exist
+New-Item -ItemType Directory -Path "$tempDir\media\boot" -Force | Out-Null
+New-Item -ItemType Directory -Path "$tempDir\media\EFI\Microsoft\Boot" -Force | Out-Null
+
+Write-Host "Recreating optimized BCD stores from scratch..." -ForegroundColor Cyan
+
+# --- Create UEFI BCD ---
+if (Test-Path $bcdUEFI) { Remove-Item $bcdUEFI -Force }
+& bcdedit.exe /createstore $bcdUEFI | Out-Null
+& bcdedit.exe /store $bcdUEFI /create '{bootmgr}' /d "Windows Boot Manager" | Out-Null
+& bcdedit.exe /store $bcdUEFI /set '{bootmgr}' device boot | Out-Null
+& bcdedit.exe /store $bcdUEFI /set '{bootmgr}' path "\EFI\Microsoft\Boot\bootmgfw.efi" | Out-Null
+& bcdedit.exe /store $bcdUEFI /set '{bootmgr}' timeout 5 | Out-Null
+
+& bcdedit.exe /store $bcdUEFI /create '{76127c59-ac0e-44a3-9543-25a12d0865c0}' /d "Ramdisk Options" /device | Out-Null
+& bcdedit.exe /store $bcdUEFI /set '{76127c59-ac0e-44a3-9543-25a12d0865c0}' ramdisksdidevice boot | Out-Null
+& bcdedit.exe /store $bcdUEFI /set '{76127c59-ac0e-44a3-9543-25a12d0865c0}' ramdisksdipath "\boot\boot.sdi" | Out-Null
+
+# Create Loader Entry for UEFI
+$uefiLoader = & bcdedit.exe /store $bcdUEFI /create /d "VenkatPulse AI OS Recovery Suite" /application osloader
+$uefiGuid = ($uefiLoader | Select-String -Pattern '\{[a-fA-F0-9-]{36}\}').Matches.Value
+
+& bcdedit.exe /store $bcdUEFI /set $uefiGuid device "ramdisk=[boot]\sources\boot.wim,{76127c59-ac0e-44a3-9543-25a12d0865c0}" | Out-Null
+& bcdedit.exe /store $bcdUEFI /set $uefiGuid osdevice "ramdisk=[boot]\sources\boot.wim,{76127c59-ac0e-44a3-9543-25a12d0865c0}" | Out-Null
+& bcdedit.exe /store $bcdUEFI /set $uefiGuid path "\windows\system32\boot\winload.efi" | Out-Null
+& bcdedit.exe /store $bcdUEFI /set $uefiGuid systemroot "\windows" | Out-Null
+& bcdedit.exe /store $bcdUEFI /set $uefiGuid detecthal Yes | Out-Null
+& bcdedit.exe /store $bcdUEFI /set $uefiGuid winpe Yes | Out-Null
+
+& bcdedit.exe /store $bcdUEFI /set '{bootmgr}' default $uefiGuid | Out-Null
+& bcdedit.exe /store $bcdUEFI /set '{bootmgr}' displayorder $uefiGuid | Out-Null
+
+# --- Create BIOS BCD ---
+if (Test-Path $bcdBIOS) { Remove-Item $bcdBIOS -Force }
+& bcdedit.exe /createstore $bcdBIOS | Out-Null
+& bcdedit.exe /store $bcdBIOS /create '{bootmgr}' /d "Windows Boot Manager" | Out-Null
+& bcdedit.exe /store $bcdBIOS /set '{bootmgr}' device boot | Out-Null
+& bcdedit.exe /store $bcdBIOS /set '{bootmgr}' path "\bootmgr" | Out-Null
+& bcdedit.exe /store $bcdBIOS /set '{bootmgr}' timeout 5 | Out-Null
+
+& bcdedit.exe /store $bcdBIOS /create '{76127c59-ac0e-44a3-9543-25a12d0865c0}' /d "Ramdisk Options" /device | Out-Null
+& bcdedit.exe /store $bcdBIOS /set '{76127c59-ac0e-44a3-9543-25a12d0865c0}' ramdisksdidevice boot | Out-Null
+& bcdedit.exe /store $bcdBIOS /set '{76127c59-ac0e-44a3-9543-25a12d0865c0}' ramdisksdipath "\boot\boot.sdi" | Out-Null
+
+# Create Loader Entry for BIOS
+$biosLoader = & bcdedit.exe /store $bcdBIOS /create /d "VenkatPulse AI OS Recovery Suite" /application osloader
+$biosGuid = ($biosLoader | Select-String -Pattern '\{[a-fA-F0-9-]{36}\}').Matches.Value
+
+& bcdedit.exe /store $bcdBIOS /set $biosGuid device "ramdisk=[boot]\sources\boot.wim,{76127c59-ac0e-44a3-9543-25a12d0865c0}" | Out-Null
+& bcdedit.exe /store $bcdBIOS /set $biosGuid osdevice "ramdisk=[boot]\sources\boot.wim,{76127c59-ac0e-44a3-9543-25a12d0865c0}" | Out-Null
+& bcdedit.exe /store $bcdBIOS /set $biosGuid path "\windows\system32\winload.exe" | Out-Null
+& bcdedit.exe /store $bcdBIOS /set $biosGuid systemroot "\windows" | Out-Null
+& bcdedit.exe /store $bcdBIOS /set $biosGuid detecthal Yes | Out-Null
+& bcdedit.exe /store $bcdBIOS /set $biosGuid winpe Yes | Out-Null
+
+& bcdedit.exe /store $bcdBIOS /set '{bootmgr}' default $biosGuid | Out-Null
+& bcdedit.exe /store $bcdBIOS /set '{bootmgr}' displayorder $biosGuid | Out-Null
 
 # Double check critical boot files exist
 if (!(Test-Path "$tempDir\media\boot\etfsboot.com") -or !(Test-Path "$tempDir\media\EFI\Microsoft\Boot\efisys.bin")) {
     Write-Error "Could not locate boot sector files (etfsboot.com / efisys.bin) required for bootable media creation."
+    Exit
+}
+if (!(Test-Path $bcdUEFI) -or !(Test-Path $bcdBIOS)) {
+    Write-Error "BCD configuration database files were not created successfully."
     Exit
 }
 
