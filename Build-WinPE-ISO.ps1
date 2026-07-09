@@ -207,7 +207,7 @@ echo ========================================================
 echo   Venkat Pulse AI OS Recovery Suite - Auto-Launch
 echo ========================================================
 echo.
-echo Searching for VenkatPulse.exe on external drives...
+echo Searching for VenkatPulse / PrintPulse executable on external drives...
 for %%d in (C D E F G H I J K L M N O P Q R S T U V W X Y Z) do (
     if exist %%d:\VenkatPulse\VenkatPulse.exe (
         echo Found VenkatPulse on drive %%d:
@@ -218,8 +218,17 @@ for %%d in (C D E F G H I J K L M N O P Q R S T U V W X Y Z) do (
         pause
         exit
     )
+    if exist %%d:\VenkatPulse\PrintPulse.exe (
+        echo Found PrintPulse on drive %%d:
+        cd /d %%d:\VenkatPulse
+        PrintPulse.exe
+        echo.
+        echo PrintPulse exited. Error Level: %%errorlevel%%
+        pause
+        exit
+    )
 )
-echo WARNING: VenkatPulse.exe was not found on any external drive!
+echo WARNING: No VenkatPulse or PrintPulse executable was found on any external drive!
 echo You can run it manually if you know its location.
 cmd.exe
 
