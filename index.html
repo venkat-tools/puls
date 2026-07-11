@@ -121,7 +121,11 @@
           <span>Audit Logs</span>
         </button>
       </nav>
-      <div class="header-actions">
+      <div class="header-actions" style="display: flex; align-items: center; gap: 15px;">
+        <button class="btn btn-danger" onclick="triggerCleanup()" style="display: flex; align-items: center; gap: 6px; padding: 6px 14px; font-size: 0.8rem; background: #dc2626; color: white; border: none; border-radius: var(--border-radius-sm); cursor: pointer; transition: background 0.2s ease; font-weight: 600;" onmouseover="this.style.background='#b91c1c'" onmouseout="this.style.background='#dc2626'">
+          <i data-lucide="power" style="width: 14px; height: 14px;"></i>
+          <span>Close & Clean Up</span>
+        </button>
         <div class="theme-select-container" style="display: flex; align-items: center; gap: 8px;">
           <i data-lucide="palette" style="width: 18px; height: 18px; color: var(--text-secondary);"></i>
           <select id="theme-select" style="background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-primary); padding: 6px 12px; border-radius: var(--border-radius-sm); font-size: 0.8rem; cursor: pointer; outline: none; transition: border-color var(--transition-fast);">
