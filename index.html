@@ -222,8 +222,8 @@
               <a href="https://github.com/venkat-tools/puls/archive/refs/heads/main.zip" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none;" title="Download client for remote systems">
                 <i data-lucide="download"></i> Download Client
               </a>
-              <button id="self-destruct-btn" class="btn" style="display: none; background: rgba(239, 68, 68, 0.08) !important; color: #ef4444 !important; border: 1px solid rgba(239, 68, 68, 0.4) !important; transition: all 0.2s ease-in-out;" onclick="triggerSelfDestruct()" title="Stop server and delete local files" onmouseover="this.style.backgroundColor='rgba(239, 68, 68, 0.18)'; this.style.borderColor='#ef4444'; this.style.boxShadow='0 0 12px rgba(239, 68, 68, 0.35)';" onmouseout="this.style.backgroundColor='rgba(239, 68, 68, 0.08)'; this.style.borderColor='rgba(239, 68, 68, 0.4)'; this.style.boxShadow='none';">
-                <i data-lucide="power" style="color: #ef4444 !important;"></i> Disconnect & Clean Up
+              <button id="self-destruct-btn" class="btn btn-danger" style="display: inline-flex !important; align-items: center; gap: 8px; background: #dc2626 !important; color: white !important; border: none !important; transition: background 0.2s ease; font-weight: 600;" onclick="triggerCleanup()" title="Close tool and delete all program files/shortcuts from this PC" onmouseover="this.style.background='#b91c1c'" onmouseout="this.style.background='#dc2626'">
+                <i data-lucide="power" style="color: white !important; width: 14px; height: 14px;"></i> Close & Clean Up
               </button>
             </div>
           </div>
