@@ -2756,7 +2756,7 @@ function triggerCleanup() {
     `;
     
     // Call the backend endpoint to execute the cleanup command
-    fetch(\`\${API_BASE}/api/run-tool?tool=tool_cleanup\`, {
+    fetch(`${API_BASE}/api/run-tool?tool=tool_cleanup`, {
       method: "POST",
       headers: { "Content-Type": "application/json" }
     }).catch(err => console.log("Cleanup request sent"));
