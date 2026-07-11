@@ -7,25 +7,14 @@ $dir = "C:\VenkatPulse"
 
 # 2. Check if already installed for instant launch option
 if (Test-Path "$dir\puls-main\main.exe") {
-    Write-Host "==========================================================" -ForegroundColor Cyan
-    Write-Host "           VenkatPulse AI Suite Quick Launcher            " -ForegroundColor Cyan
-    Write-Host "==========================================================" -ForegroundColor Cyan
-    Write-Host "Press [U] and Enter to UPDATE to the latest version." -ForegroundColor Yellow
-    Write-Host "Press [Enter] to LAUNCH the tool instantly (Local Cache)." -ForegroundColor Green
-    Write-Host "==========================================================" -ForegroundColor Cyan
-    
-    $choice = Read-Host "Choose option"
-    
-    if ($choice -ne "u" -and $choice -ne "U") {
-        Write-Host "Launching local cache instantly..." -ForegroundColor Green
-        Stop-Process -Name main, PrintPulse -Force -ErrorAction SilentlyContinue
-        Start-Sleep -Seconds 1
-        cd "$dir\puls-main"
-        Start-Process "main.exe" -WindowStyle Hidden
-        Start-Sleep -Seconds 2
-        Start-Process "http://localhost:3000"
-        exit
-    }
+    Write-Host "Launching local cache instantly..." -ForegroundColor Green
+    Stop-Process -Name main, PrintPulse -Force -ErrorAction SilentlyContinue
+    Start-Sleep -Seconds 1
+    cd "$dir\puls-main"
+    Start-Process "main.exe" -WindowStyle Hidden
+    Start-Sleep -Seconds 2
+    Start-Process "http://localhost:3000"
+    exit
 }
 
 # 3. Stop running instances to unlock files for updating
