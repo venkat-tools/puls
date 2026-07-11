@@ -1997,9 +1997,9 @@ const TOOLBOX_DATA = {
   },
   ultimate_performance: {
     title: "Enable Ultimate Performance Plan",
-    description: "Unlocks and activates the hidden 'Ultimate Performance' power scheme on your computer for maximum CPU/GPU throughput.",
-    codeType: "CMD (Run as Admin)",
-    code: "powercfg -duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61 && powercfg -setactive e9a42b02-d5df-448d-aa00-03f14749eb61"
+    description: "Unlocks and activates the hidden 'Ultimate Performance' power scheme on your computer (falls back to High Performance plan on S0 Modern Standby systems).",
+    codeType: "PowerShell (Run as Admin)",
+    code: "powershell -ExecutionPolicy Bypass -Command \"try { powercfg -duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61; powercfg -setactive e9a42b02-d5df-448d-aa00-03f14749eb61 } catch { powercfg -duplicatescheme 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c; powercfg -setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c }\""
   },
   disable_bing_search: {
     title: "Disable Start Menu Bing Search Suggestions",
