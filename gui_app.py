@@ -45,7 +45,7 @@ class VenkatPulseApp(ctk.CTk):
         super().__init__()
         
         # Window configuration
-        self.title("Venkat Pulse AI OS Recovery Suite")
+        self.title("Venkat Windows Tool Kit OS Recovery Suite")
         self.geometry("1100x680")
         self.minsize(950, 600)
         
@@ -83,7 +83,7 @@ class VenkatPulseApp(ctk.CTk):
         else:
             self.logo_title = ctk.CTkLabel(
                 self.sidebar_frame, 
-                text="VenkatPulse AI", 
+                text="Venkat Windows Tool Kit", 
                 font=ctk.CTkFont(size=20, weight="bold")
             )
             self.logo_title.grid(row=0, column=0, padx=20, pady=(20, 5))
@@ -296,7 +296,7 @@ class VenkatPulseApp(ctk.CTk):
         # Hero Welcome Header
         welcome_lbl = ctk.CTkLabel(
             frame, 
-            text="Welcome to VenkatPulse AI Suite", 
+            text="Welcome to Venkat Windows Tool Kit Suite", 
             font=ctk.CTkFont(size=24, weight="bold"),
             anchor="w"
         )
@@ -1035,7 +1035,7 @@ Write-Host 'Office Installation finished.'
         header_container = ctk.CTkFrame(frame, fg_color="transparent")
         header_container.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
         
-        title = ctk.CTkLabel(header_container, text="VenkatPulse AI Assistant", font=ctk.CTkFont(size=20, weight="bold"))
+        title = ctk.CTkLabel(header_container, text="Venkat Windows Tool Kit Assistant", font=ctk.CTkFont(size=20, weight="bold"))
         title.pack(side="left")
         
         # Key Entry configuration
@@ -1111,7 +1111,7 @@ Write-Host 'Office Installation finished.'
         payload = {
             "contents": [{
                 "parts": [{
-                    "text": f"You are a helpful IT System administrator helper called VenkatPulse AI. A user is asking help for system diagnosis: '{prompt_text}'. Keep response concise and offer actionable Windows commands or tips."
+                    "text": f"You are a helpful IT System administrator helper called Venkat Windows Tool Kit. A user is asking help for system diagnosis: '{prompt_text}'. Keep response concise and offer actionable Windows commands or tips."
                 }]
             }]
         }
@@ -1202,7 +1202,7 @@ Write-Host 'Office Installation finished.'
         
         desc = ctk.CTkLabel(
             frame, 
-            text="Configure and build a standalone bootable WinPE USB diagnostics drive. Embeds VenkatPulse tools to run offline.",
+            text="Configure and build a standalone bootable WinPE USB diagnostics drive. Embeds Venkat Windows Tool Kit tools to run offline.",
             text_color="gray",
             font=ctk.CTkFont(size=12)
         )
@@ -1238,7 +1238,7 @@ Write-Host 'Office Installation finished.'
         options_frame = ctk.CTkFrame(frame, fg_color="transparent")
         options_frame.grid(row=4, column=0, padx=10, pady=10, sticky="ew")
         
-        self.embed_chk = ctk.CTkCheckBox(options_frame, text="Embed VenkatPulse diagnostic suite on USB root", hover=True)
+        self.embed_chk = ctk.CTkCheckBox(options_frame, text="Embed Venkat Windows Tool Kit diagnostic suite on USB root", hover=True)
         self.embed_chk.select()  # checked by default
         self.embed_chk.pack(side="left")
         
@@ -1560,7 +1560,7 @@ Write-Host 'Office Installation finished.'
                         "wpeinit\n"
                         "@echo off\n"
                         "echo ========================================================\n"
-                        "echo   PrintPulse AI OS Recovery Suite - Auto-Launch\n"
+                        "echo   Venkat Windows Tool Kit OS Recovery Suite - Auto-Launch\n"
                         "echo ========================================================\n"
                         "echo.\n"
                         "echo Searching for PrintPulse.exe on external drives...\n"
@@ -1613,7 +1613,7 @@ Write-Host 'Office Installation finished.'
             proc = subprocess.run(dismount_cmd, capture_output=True, text=True)
             self.log_build("ISO Dismounted successfully.")
             
-            # 5. Embed PrintPulse / VenkatPulse tools
+            # 5. Embed PrintPulse / Venkat Windows Tool Kit tools
             if embed_tool:
                 self.after(0, lambda: self.lbl_winpe_status.configure(text="Step 5/5: Embedding tools..."))
                 self.winpe_progress.set(0.9)

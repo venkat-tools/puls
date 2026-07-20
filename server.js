@@ -591,6 +591,6 @@ server.on('error', (err) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`VenkatPulse AI Local API Server running at http://localhost:${PORT}`);
+  console.log(`Venkat Windows Tool Kit Local API Server running at http://localhost:${PORT}`);
   console.log(`[IMPORTANT] RUN THIS SERVER AS ADMINISTRATOR TO ENABLE ONE-CLICK WEB REPAIRS.`);
 });

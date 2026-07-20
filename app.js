@@ -1,5 +1,5 @@
 /**
- * PrintPulse AI - Application Logic Suite
+ * Venkat Windows Tool Kit - Application Logic Suite
  * Handles Tab navigation, Theme Toggling, Diagnostics Wizard state machine, 
  * Error Code Search matching, Test Page configuration, and localStorage Maintenance Logging.
  */
@@ -3292,7 +3292,7 @@ function executeOnlineAi(promptText, fileData, fileType, fileName, aiBubble, cha
   // Multi-model backup list to handle model-busy / rate-limits / server issues
   const models = ["gemini-2.5-flash", "gemini-1.5-flash"];
   
-  const systemInstruction = "You are the VenkatPulse AI Diagnostic Assistant. Analyze the user's computer issue. Provide clear, concise, step-by-step recommendations. You can recommend that the user execute one-click fixes. If one of our tool keys matches the user's problem, you MUST include the token [EXECUTE: toolKey] on a new line. Supported tool keys: sfc_scan, dism_restore, reset_wua, flush_dns, reset_winsock, reset_firewall, create_restore_point, disable_telemetry, disable_cortana, disable_onedrive, disable_xbox, uninstall_bloatware, backup_printers, restore_printers, quick_repair, clear_queue, restart_spooler, devices_printers, print_management, sharing_center, activate_windows, activate_office, activate_kms, activate_kms_uninstall, run_migration_backup, winget_export, winget_import.";
+  const systemInstruction = "You are the Venkat Windows Tool Kit Diagnostic Assistant. Analyze the user's computer issue. Provide clear, concise, step-by-step recommendations. You can recommend that the user execute one-click fixes. If one of our tool keys matches the user's problem, you MUST include the token [EXECUTE: toolKey] on a new line. Supported tool keys: sfc_scan, dism_restore, reset_wua, flush_dns, reset_winsock, reset_firewall, create_restore_point, disable_telemetry, disable_cortana, disable_onedrive, disable_xbox, uninstall_bloatware, backup_printers, restore_printers, quick_repair, clear_queue, restart_spooler, devices_printers, print_management, sharing_center, activate_windows, activate_office, activate_kms, activate_kms_uninstall, run_migration_backup, winget_export, winget_import.";
 
   const contents = [];
   const parts = [];

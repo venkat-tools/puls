@@ -2,19 +2,19 @@
 :: Self-elevating script to run Node Server as Administrator
 openfiles >nul 2>&1
 if %errorlevel% neq 0 (
-    echo Requesting Administrator privileges to run PrintPulse AI Server...
+    echo Requesting Administrator privileges to run Venkat Windows Tool Kit Server...
     powershell -Command "Start-Process -FilePath '%~f0' -Verb RunAs"
     exit /B
 )
 
 cd /d "%~dp0."
-title PrintPulse AI Admin Web Server (Node.js)
+title Venkat Windows Tool Kit Admin Web Server (Node.js)
 
 :: Kill any process currently occupying port 3000
 for /f "tokens=5" %%a in ('netstat -aon ^| findstr :3000 ^| findstr LISTENING') do taskkill /F /PID %%a >nul 2>&1
 
 echo ======================================================================
-echo             Starting PrintPulse AI Node.js Admin Web Server
+echo             Starting Venkat Windows Tool Kit Node.js Admin Web Server
 echo ======================================================================
 echo.
 echo Server is launching on: http://localhost:3000

@@ -204,7 +204,7 @@ if (Test-Path $startnetPath) {
 wpeinit
 @echo off
 echo ========================================================
-echo   Venkat Pulse AI OS Recovery Suite - Auto-Launch
+echo   Venkat Windows Tool Kit OS Recovery Suite - Auto-Launch
 echo ========================================================
 echo.
 echo Searching for VenkatPulse.exe on external drives...

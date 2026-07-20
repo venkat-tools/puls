@@ -793,7 +793,7 @@ if __name__ == "__main__":
     httpd = HTTPServer(server_address, PythonAdminServer)
     
     print("======================================================================")
-    print("            Starting PrintPulse AI Python Admin Web Server            ")
+    print("            Starting Venkat Windows Tool Kit Python Admin Web Server            ")
     print("======================================================================")
     print(f"Server is launching on: http://localhost:{PORT}")
     print("One-click repairs are now active through this terminal socket.")
