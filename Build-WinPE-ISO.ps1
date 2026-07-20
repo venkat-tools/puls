@@ -119,7 +119,7 @@ if (Test-Path $bcdUEFI) { Remove-Item $bcdUEFI -Force }
 & bcdedit.exe /store $bcdUEFI /set '{76127c59-ac0e-44a3-9543-25a12d0865c0}' ramdisksdipath "\boot\boot.sdi" | Out-Null
 
 # Create Loader Entry for UEFI
-$uefiLoader = & bcdedit.exe /store $bcdUEFI /create /d "VenkatPulse AI OS Recovery Suite" /application osloader
+$uefiLoader = & bcdedit.exe /store $bcdUEFI /create /d "Venkat Windows Tool Kit OS Recovery Suite" /application osloader
 $uefiGuid = ($uefiLoader | Select-String -Pattern '\{[a-fA-F0-9-]{36}\}').Matches.Value
 
 & bcdedit.exe /store $bcdUEFI /set $uefiGuid device "ramdisk=[locate]\sources\boot.wim,{76127c59-ac0e-44a3-9543-25a12d0865c0}" | Out-Null
@@ -145,7 +145,7 @@ if (Test-Path $bcdBIOS) { Remove-Item $bcdBIOS -Force }
 & bcdedit.exe /store $bcdBIOS /set '{76127c59-ac0e-44a3-9543-25a12d0865c0}' ramdisksdipath "\boot\boot.sdi" | Out-Null
 
 # Create Loader Entry for BIOS
-$biosLoader = & bcdedit.exe /store $bcdBIOS /create /d "VenkatPulse AI OS Recovery Suite" /application osloader
+$biosLoader = & bcdedit.exe /store $bcdBIOS /create /d "Venkat Windows Tool Kit OS Recovery Suite" /application osloader
 $biosGuid = ($biosLoader | Select-String -Pattern '\{[a-fA-F0-9-]{36}\}').Matches.Value
 
 & bcdedit.exe /store $bcdBIOS /set $biosGuid device "ramdisk=[locate]\sources\boot.wim,{76127c59-ac0e-44a3-9543-25a12d0865c0}" | Out-Null

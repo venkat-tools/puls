@@ -253,7 +253,7 @@ COMMANDS = {
     "launch_startup_manager": 'start taskmgr /0 /startup',
     "launch_eventvwr": 'start eventvwr.msc',
     "launch_dxdiag": 'start dxdiag.exe',
-    "tool_cleanup": 'start powershell -WindowStyle Hidden -Command "Set-Location C:\\; Start-Sleep -Seconds 2; Stop-Process -Name main, PrintPulse -Force -ErrorAction SilentlyContinue; $d = [System.IO.Path]::Combine([Environment]::GetFolderPath(\'Desktop\'), \'VenkatPulse AI.lnk\'); if (Test-Path $d) { Remove-Item $d -Force }; if (Test-Path \'C:\\VenkatPulse\') { Remove-Item \'C:\\VenkatPulse\' -Recurse -Force };"'
+    "tool_cleanup": 'start powershell -WindowStyle Hidden -Command "Set-Location C:\\; Start-Sleep -Seconds 2; Stop-Process -Name main, PrintPulse -Force -ErrorAction SilentlyContinue; $d = [System.IO.Path]::Combine([Environment]::GetFolderPath(\'Desktop\'), \'Venkat Windows Tool Kit.lnk\'); if (Test-Path $d) { Remove-Item $d -Force }; if (Test-Path \'C:\\VenkatPulse\') { Remove-Item \'C:\\VenkatPulse\' -Recurse -Force };"'
 }
 
 class PythonAdminServer(BaseHTTPRequestHandler):

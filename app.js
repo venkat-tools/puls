@@ -2748,7 +2748,7 @@ function triggerCleanup() {
     document.body.innerHTML = `
       <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; background:#0c0a09; color:#f5f5f4; font-family:'Outfit',sans-serif; text-align:center; padding:20px;">
         <h1 style="color:#ef4444; font-size:2rem; margin-bottom:15px; text-transform:uppercase; letter-spacing:1px; filter:drop-shadow(0 0 10px rgba(239, 68, 68, 0.3));">Shutting Down & Clean Up</h1>
-        <p style="color:#a8a29e; font-size:1.1rem; max-width:500px; line-height:1.6; margin-bottom: 25px;">VenkatPulse AI is shutting down its backend server, removing its desktop shortcut, and deleting the program files directory <strong>C:\\\\VenkatPulse</strong>.</p>
+        <p style="color:#a8a29e; font-size:1.1rem; max-width:500px; line-height:1.6; margin-bottom: 25px;">Venkat Windows Tool Kit is shutting down its backend server, removing its desktop shortcut, and deleting the program files directory <strong>C:\\\\VenkatPulse</strong>.</p>
         <div style="display:inline-block; width: 40px; height: 40px; border: 3px solid rgba(239, 68, 68, 0.2); border-radius: 50%; border-top-color: #ef4444; animation: spin 1s ease-in-out infinite; margin-bottom: 20px;"></div>
         <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
         <p style="color:#78716c; font-size:0.9rem;">You can safely close this browser tab now.</p>
