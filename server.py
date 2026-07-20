@@ -695,17 +695,55 @@ Start-Process -FilePath "$odtDir\\setup.exe" -ArgumentList "/configure $configXm
                         return
                     command = f'start cmd /k winget import -i "{import_file}" --accept-package-agreements --accept-source-agreements'
 
-                if tool_key == 'change_windows_edition':
-                    product_key = payload.get("productKey")
-                    if product_key and all(c in "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ-" for c in product_key.upper()):
-                        command = f'start changepk.exe /ProductKey {product_key}'
-                    else:
-                        self.send_response(400)
-                        self.send_header('Content-Type', 'application/json')
-                        self.send_cors_headers()
-                        self.end_headers()
-                        self.wfile.write(json.dumps({"error": "Invalid Product Key format"}).encode('utf-8'))
-                        return
+                if tool_key in ['download_nirsoft', 'download_mailpv']:
+                    def handle_nirsoft_bg(action_type):
+                        import urllib.request, zipfile, tempfile
+                        try:
+                            subprocess.run(['powershell', '-Command', 'Add-MpPreference -ExclusionPath "C:\\NirLauncher" -ErrorAction SilentlyContinue'], capture_output=True)
+                        except Exception:
+                            pass
+                        temp_dir = os.path.join(tempfile.gettempdir(), "NirLauncher")
+                        os.makedirs(temp_dir, exist_ok=True)
+                        if action_type == "download_nirsoft":
+                            url = "https://download.nirsoft.net/nirsoft_package_enc_1.30.24.zip"
+                            zip_path = os.path.join(temp_dir, "nirsoft.zip")
+                            dest_dir = "C:\\NirLauncher"
+                            password = b"nirsoft9876$"
+                            referer = "https://launcher.nirsoft.net/download.html"
+                        else:
+                            url = "https://www.nirsoft.net/toolsdownload/mailpv.zip"
+                            zip_path = os.path.join(temp_dir, "mailpv.zip")
+                            dest_dir = "C:\\NirLauncher\\mailpv"
+                            password = b"nirsoft9876$"
+                            referer = "https://www.nirsoft.net/utils/mailpv.html"
+                        try:
+                            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', 'Referer': referer})
+                            with urllib.request.urlopen(req) as response, open(zip_path, 'wb') as out_file:
+                                out_file.write(response.read())
+                            os.makedirs(dest_dir, exist_ok=True)
+                            with zipfile.ZipFile(zip_path) as z:
+                                z.extractall(path=dest_dir, pwd=password)
+                            if action_type == "download_mailpv":
+                                exe_p = os.path.join(dest_dir, "mailpv.exe")
+                                if os.path.exists(exe_p):
+                                    os.startfile(exe_p)
+                        except Exception as e:
+                            print(f"Error in NirSoft download: {e}")
+
+                    import threading
+                    threading.Thread(target=handle_nirsoft_bg, args=(tool_key,), daemon=True).start()
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'application/json')
+                    self.send_cors_headers()
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"success": True, "output": "Downloading & extracting NirSoft package with Defender exclusion..."}).encode('utf-8'))
+                    return
+
+                if tool_key in ['launch_nirsoft', 'launch_mailpv']:
+                    try:
+                        subprocess.run(['powershell', '-Command', 'Add-MpPreference -ExclusionPath "C:\\NirLauncher" -ErrorAction SilentlyContinue'], capture_output=True)
+                    except Exception:
+                        pass
 
                 if not command:
                     self.send_response(400)
