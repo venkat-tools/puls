@@ -218,8 +218,8 @@
               <a href="https://github.com/venkat-tools/puls/archive/refs/heads/main.zip" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none;" title="Download client for remote systems">
                 <i data-lucide="download"></i> Download Client
               </a>
-              <button id="self-destruct-btn" class="btn" style="display: none; background: rgba(239, 68, 68, 0.08) !important; color: #ef4444 !important; border: 1px solid rgba(239, 68, 68, 0.4) !important; transition: all 0.2s ease-in-out;" onclick="triggerSelfDestruct()" title="Stop server and delete local files" onmouseover="this.style.backgroundColor='rgba(239, 68, 68, 0.18)'; this.style.borderColor='#ef4444'; this.style.boxShadow='0 0 12px rgba(239, 68, 68, 0.35)';" onmouseout="this.style.backgroundColor='rgba(239, 68, 68, 0.08)'; this.style.borderColor='rgba(239, 68, 68, 0.4)'; this.style.boxShadow='none';">
-                <i data-lucide="power" style="color: #ef4444 !important;"></i> Disconnect & Clean Up
+              <button id="self-destruct-btn" class="btn btn-danger" style="display: inline-flex !important; align-items: center; gap: 8px; background: #dc2626 !important; color: white !important; border: none !important; transition: background 0.2s ease; font-weight: 600;" onclick="triggerCleanup()" title="Close tool and delete all program files/shortcuts from this PC" onmouseover="this.style.background='#b91c1c'" onmouseout="this.style.background='#dc2626'">
+                <i data-lucide="power" style="color: white !important; width: 14px; height: 14px;"></i> Close & Clean Up
               </button>
             </div>
           </div>
@@ -1087,6 +1087,55 @@
               </div>
             </label>
           </div>
+
+          <h3 style="margin-top: 30px; margin-bottom: 15px; font-size: 1.2rem; display: flex; align-items: center; gap: 8px;">
+            <i data-lucide="zap" style="color: var(--accent-cyan); width: 20px; height: 20px;"></i>
+            <span>System Performance & Maintenance Tweaks</span>
+          </h3>
+          <div class="debloat-card-list">
+            <div class="debloat-card" style="cursor: default; display: flex; justify-content: space-between; align-items: center; gap: 15px;">
+              <div class="debloat-info" style="flex: 1;">
+                <span class="debloat-title">Enable Ultimate Performance Plan</span>
+                <span class="debloat-desc">Unlocks hidden high-performance power plan for maximum CPU/GPU throughput.</span>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="openToolModal('ultimate_performance')" style="flex-shrink: 0;"><i data-lucide="play"></i> Run</button>
+            </div>
+            <div class="debloat-card" style="cursor: default; display: flex; justify-content: space-between; align-items: center; gap: 15px;">
+              <div class="debloat-info" style="flex: 1;">
+                <span class="debloat-title">Disable Start Menu Bing Search</span>
+                <span class="debloat-desc">Stops Start Menu search from showing Bing suggestions, boosting local search speed.</span>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="openToolModal('disable_bing_search')" style="flex-shrink: 0;"><i data-lucide="play"></i> Run</button>
+            </div>
+            <div class="debloat-card" style="cursor: default; display: flex; justify-content: space-between; align-items: center; gap: 15px;">
+              <div class="debloat-info" style="flex: 1;">
+                <span class="debloat-title">Optimize Visual Effects</span>
+                <span class="debloat-desc">Reduces window animations and menu hover delays for snappier responses.</span>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="openToolModal('optimize_visual_effects')" style="flex-shrink: 0;"><i data-lucide="play"></i> Run</button>
+            </div>
+            <div class="debloat-card" style="cursor: default; display: flex; justify-content: space-between; align-items: center; gap: 15px;">
+              <div class="debloat-info" style="flex: 1;">
+                <span class="debloat-title">Deep Temporary Cache Cleaner</span>
+                <span class="debloat-desc">Purges user Temp, System Temp, and Prefetch caches to free storage.</span>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="openToolModal('deep_temp_clean')" style="flex-shrink: 0;"><i data-lucide="play"></i> Run</button>
+            </div>
+            <div class="debloat-card" style="cursor: default; display: flex; justify-content: space-between; align-items: center; gap: 15px;">
+              <div class="debloat-info" style="flex: 1;">
+                <span class="debloat-title">Reset Windows Update Cache</span>
+                <span class="debloat-desc">Wipes SoftwareDistribution component directories to resolve update service errors.</span>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="openToolModal('reset_update_cache')" style="flex-shrink: 0;"><i data-lucide="play"></i> Run</button>
+            </div>
+            <div class="debloat-card" style="cursor: default; display: flex; justify-content: space-between; align-items: center; gap: 15px;">
+              <div class="debloat-info" style="flex: 1;">
+                <span class="debloat-title">Network Socket & DNS Flush Reset</span>
+                <span class="debloat-desc">Resets network configurations, Winsock catalog, and flushes local DNS.</span>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="openToolModal('network_reset_dns')" style="flex-shrink: 0;"><i data-lucide="play"></i> Run</button>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -1764,6 +1813,8 @@
               <button class="btn btn-secondary btn-large" onclick="executeAdminTool('launch_info_specs')">Launch Info Specs (msinfo32)</button>
               <button class="btn btn-secondary btn-large" onclick="executeAdminTool('generate_health_report')">Generate Health Report (perfmon)</button>
               <button class="btn btn-secondary btn-large" onclick="executeAdminTool('generate_battery_report')">Generate Battery Report (powercfg)</button>
+              <button class="btn btn-secondary btn-large" onclick="executeAdminTool('launch_eventvwr')">Open System Event Viewer Console</button>
+              <button class="btn btn-secondary btn-large" onclick="executeAdminTool('launch_dxdiag')">Open DirectX System Diagnostics (DxDiag)</button>
             </div>
           </div>
 
@@ -1775,6 +1826,10 @@
               <button class="btn btn-secondary" style="flex: 1; padding: 12px 6px; font-size: 0.8rem;" onclick="executeAdminTool('run_quick_scan')"><i data-lucide="play"></i> Quick Scan</button>
               <button class="btn btn-secondary" style="flex: 1; padding: 12px 6px; font-size: 0.8rem;" onclick="executeAdminTool('deep_full_scan')"><i data-lucide="shield-alert"></i> Deep Scan</button>
               <button class="btn btn-secondary" style="flex: 1; padding: 12px 6px; font-size: 0.8rem;" onclick="executeAdminTool('update_defender_db')"><i data-lucide="refresh-cw"></i> Update DB</button>
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 8px;">
+              <button class="btn btn-secondary" style="flex: 1; padding: 8px 4px; font-size: 0.75rem;" onclick="executeAdminTool('defender_disable')">🛡️ Disable Defender Realtime</button>
+              <button class="btn btn-secondary" style="flex: 1; padding: 8px 4px; font-size: 0.75rem;" onclick="executeAdminTool('defender_enable')">🛡️ Enable Defender Realtime</button>
             </div>
           </div>
 
@@ -1869,6 +1924,9 @@
                 <button class="btn btn-secondary" style="font-size:0.8rem; text-align: left;" onclick="executeAdminTool('user_netplwiz')">⚙ User Accounts Console (netplwiz)</button>
                 <button class="btn btn-secondary" style="font-size:0.8rem; text-align: left;" onclick="executeAdminTool('gp_editor')">🛡 Group Policy Layout (gpedit.msc)</button>
                 <button class="btn btn-secondary" style="font-size:0.8rem; text-align: left;" onclick="executeAdminTool('create_godmode')">👑 Create 'God Mode' Folder</button>
+                <button class="btn btn-secondary" style="font-size:0.8rem; text-align: left;" onclick="executeAdminTool('sandbox_enable')">📦 Enable Windows Sandbox Feature</button>
+                <button class="btn btn-secondary" style="font-size:0.8rem; text-align: left;" onclick="executeAdminTool('hyperv_enable')">💻 Enable Hyper-V Virtualization</button>
+                <button class="btn btn-secondary" style="font-size:0.8rem; text-align: left;" onclick="executeAdminTool('launch_startup_manager')">⚡ Startup Apps Manager (TaskMgr)</button>
               </div>
             </div>
           </div>
@@ -1882,6 +1940,7 @@
                 <span class="telemetry-label" style="font-size: 0.75rem; font-weight:600; color: var(--text-secondary);">IP Stack & Subnet Scanner Matrix</span>
                 <button class="btn btn-secondary btn-large" style="margin-top: 6px;" onclick="executeAdminTool('flush_dns')">Flush DNS Cache & Reset IP Socket Stack</button>
                 <button class="btn btn-secondary btn-large" style="margin-top: 6px;" onclick="executeAdminTool('net_scan_subnet')">Scan Local Active Subnet Nodes (ARP)</button>
+                <button class="btn btn-secondary btn-large" style="margin-top: 6px;" onclick="executeAdminTool('net_port_scanner')">Scan Active Port Listeners & PIDs</button>
               </div>
               <div>
                 <span class="telemetry-label" style="font-size: 0.75rem; font-weight:600; color: var(--text-secondary);">Network Diagnostics & Cycling</span>
@@ -1918,6 +1977,7 @@
                 <span class="telemetry-label" style="font-size: 0.75rem; font-weight:600; color: var(--text-secondary);">Enterprise Gateways & Log Purges</span>
                 <button class="btn btn-secondary btn-large" style="margin-top: 6px;" onclick="executeAdminTool('restart_tally')">Restart Active Tally Gateway Server Engine</button>
                 <button class="btn btn-secondary btn-large" style="margin-top: 6px;" onclick="executeAdminTool('purge_temp_cache')">Purge System Prefetch, Cache, and Temp Files</button>
+                <button class="btn btn-secondary btn-large" style="margin-top: 6px;" onclick="executeAdminTool('browser_cache_clean')">Purge Google Chrome & Edge Browser Caches</button>
               </div>
               <div>
                 <span class="telemetry-label" style="font-size: 0.75rem; font-weight:600; color: var(--text-secondary);">Shell Recovery & Icon Database Rebuild</span>

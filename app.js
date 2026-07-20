@@ -17,7 +17,7 @@ let wizardState = {
 };
 
 // Local API Server Base URL (handles file:// and remote web hosting launches)
-const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? '' : 'http://localhost:3000';
+const API_BASE = (window.location.protocol === 'file:') ? 'http://localhost:3000' : window.location.origin;
 let isServerOnline = false;
 
 // Error Code Database
@@ -1831,7 +1831,7 @@ const TOOLBOX_DATA = {
     title: "Outlook Mail Control Setup Console (mlcfg32)",
     description: "Launches the classic Office Mail Setup console to manage data files and active profiles directly.",
     codeType: "PowerShell",
-    code: "powershell -ExecutionPolicy Bypass -NoExit -Command \"try { Start-Process control.exe -ArgumentList 'mlcfg32.cpl' } catch { Write-Host 'Error: Mail Setup control panel (mlcfg32.cpl) could not be opened.' -ForegroundColor Red }\""
+    code: "powershell -ExecutionPolicy Bypass -NoExit -Command \"$c = 'mlcfg32.cpl'; $f = $false; $s = @('C:\\\\Program Files\\\\Microsoft Office\\\\root\\\\Office16\\\\MLCFG32.CPL','C:\\\\Program Files (x86)\\\\Microsoft Office\\\\root\\\\Office16\\\\MLCFG32.CPL','C:\\\\Program Files\\\\Microsoft Office\\\\Office16\\\\MLCFG32.CPL','C:\\\\Program Files (x86)\\\\Microsoft Office\\\\Office16\\\\MLCFG32.CPL','C:\\\\Program Files\\\\Microsoft Office\\\\Office15\\\\MLCFG32.CPL','C:\\\\Program Files (x86)\\\\Microsoft Office\\\\Office15\\\\MLCFG32.CPL'); foreach ($p in $s) { if (Test-Path $p) { $c = $p; $f = $true; break; } }; if (-not $f) { $qs = Get-ChildItem -Path 'C:\\\\Program Files\\\\Microsoft Office','C:\\\\Program Files (x86)\\\\Microsoft Office' -Filter 'MLCFG32.CPL' -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1; if ($qs) { $c = $qs.FullName; $f = $true; } }; try { if ($f) { Write-Host 'Found MLCFG32.CPL at:' $c -ForegroundColor Green; Start-Process control.exe -ArgumentList $c; } else { Start-Process control.exe -ArgumentList 'mlcfg32.cpl' -ErrorAction Stop; } } catch { Write-Host 'Error: Mail Setup control panel could not be opened.' -ForegroundColor Red; Write-Host 'Microsoft Outlook (or mlcfg32.cpl) is not installed.' -ForegroundColor Yellow; }\""
   },
   outlook_scanpst_auto: {
     title: "Run ScanPST (Automated File Recovery)",
@@ -1867,7 +1867,7 @@ const TOOLBOX_DATA = {
     title: "Create New Outlook Profile Configuration",
     description: "Opens mail setup control panel window to create a fresh profile database.",
     codeType: "PowerShell",
-    code: "powershell -ExecutionPolicy Bypass -NoExit -Command \"try { Start-Process control.exe -ArgumentList 'mlcfg32.cpl' } catch { Write-Host 'Error: Mail Setup control panel could not be opened.' -ForegroundColor Red }\""
+    code: "powershell -ExecutionPolicy Bypass -NoExit -Command \"$c = 'mlcfg32.cpl'; $f = $false; $s = @('C:\\\\Program Files\\\\Microsoft Office\\\\root\\\\Office16\\\\MLCFG32.CPL','C:\\\\Program Files (x86)\\\\Microsoft Office\\\\root\\\\Office16\\\\MLCFG32.CPL','C:\\\\Program Files\\\\Microsoft Office\\\\Office16\\\\MLCFG32.CPL','C:\\\\Program Files (x86)\\\\Microsoft Office\\\\Office16\\\\MLCFG32.CPL','C:\\\\Program Files\\\\Microsoft Office\\\\Office15\\\\MLCFG32.CPL','C:\\\\Program Files (x86)\\\\Microsoft Office\\\\Office15\\\\MLCFG32.CPL'); foreach ($p in $s) { if (Test-Path $p) { $c = $p; $f = $true; break; } }; if (-not $f) { $qs = Get-ChildItem -Path 'C:\\\\Program Files\\\\Microsoft Office','C:\\\\Program Files (x86)\\\\Microsoft Office' -Filter 'MLCFG32.CPL' -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1; if ($qs) { $c = $qs.FullName; $f = $true; } }; try { if ($f) { Write-Host 'Found MLCFG32.CPL at:' $c -ForegroundColor Green; Start-Process control.exe -ArgumentList $c; } else { Start-Process control.exe -ArgumentList 'mlcfg32.cpl' -ErrorAction Stop; } } catch { Write-Host 'Error: Mail Setup control panel could not be opened.' -ForegroundColor Red; Write-Host 'Microsoft Outlook (or mlcfg32.cpl) is not installed.' -ForegroundColor Yellow; }\""
   },
   winword_safe_mode: {
     title: "Launch Microsoft Word in Safe Mode",
@@ -1901,15 +1901,15 @@ const TOOLBOX_DATA = {
   },
   driver_backup: {
     title: "Backup Hardware Drivers to C:\\PulseBackup",
-    description: "Exports all active third-party drivers to C:\\PulseBackup\\DriversBackup folder using DISM utility.",
+    description: "Exports all active third-party drivers to C:\\PulseBackup\\Drivers folder using pnputil utility.",
     codeType: "CMD (Run as Admin)",
-    code: "if not exist C:\\PulseBackup\\DriversBackup (mkdir C:\\PulseBackup\\DriversBackup) && dism /online /export-driver /destination:\"C:\\PulseBackup\\DriversBackup\""
+    code: "if not exist C:\\PulseBackup\\Drivers (mkdir C:\\PulseBackup\\Drivers) && pnputil /export-driver * \"C:\\PulseBackup\\Drivers\""
   },
   driver_restore: {
     title: "Restore Hardware Drivers from C:\\PulseBackup",
     description: "Imports and installs third-party drivers from drivers backup directories in C:\\PulseBackup.",
     codeType: "CMD (Run as Admin)",
-    code: "if not exist C:\\PulseBackup\\DriversBackup (echo Backup folder C:\\PulseBackup\\DriversBackup not found!) else (pnputil /add-driver \"C:\\PulseBackup\\DriversBackup\\*.inf\" /subdirs /install)"
+    code: "if not exist C:\\PulseBackup\\Drivers (echo Backup folder C:\\PulseBackup\\Drivers not found!) else (pnputil /add-driver \"C:\\PulseBackup\\Drivers\\*.inf\" /subdirs /install)"
   },
   user_netplwiz: {
     title: "Launch netplwiz Account Panel",
@@ -1994,6 +1994,127 @@ const TOOLBOX_DATA = {
     description: "Runs multi-threaded Robocopy mirroring from source to target directory path.",
     codeType: "CMD (Run as Admin)",
     code: "robocopy \"[Source]\" \"[Target]\" /MIR /MT:8"
+  },
+  ultimate_performance: {
+    title: "Enable Ultimate Performance Plan",
+    description: "Unlocks and activates the hidden 'Ultimate Performance' power scheme on your computer (falls back to High Performance plan on S0 Modern Standby systems).",
+    codeType: "PowerShell (Run as Admin)",
+    code: "powershell -ExecutionPolicy Bypass -Command \"try { powercfg -duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61; powercfg -setactive e9a42b02-d5df-448d-aa00-03f14749eb61 } catch { powercfg -duplicatescheme 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c; powercfg -setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c }\""
+  },
+  disable_bing_search: {
+    title: "Disable Start Menu Bing Search Suggestions",
+    description: "Modifies registry settings to disable Bing web search integration in Windows Search, accelerating local file and program queries.",
+    codeType: "Registry Script / CMD",
+    code: "reg add \"HKCU\\Software\\Policies\\Microsoft\\Windows\\Explorer\" /v DisableSearchBoxSuggestions /t REG_DWORD /d 1 /f && reg add \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Search\" /v BingSearchEnabled /t REG_DWORD /d 0 /f"
+  },
+  optimize_visual_effects: {
+    title: "Optimize Windows Visual Performance Settings",
+    description: "Reduces visual animations, fade effects, and menu delays to speed up system responsiveness and window drawing.",
+    codeType: "Registry Script / CMD",
+    code: "reg add \"HKCU\\Control Panel\\Desktop\" /v MenuShowDelay /t REG_SZ /d 0 /f && reg add \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VisualEffects\" /v VisualFXSetting /t REG_DWORD /d 2 /f"
+  },
+  deep_temp_clean: {
+    title: "Deep Temporary Cache Cleaner",
+    description: "Cleans temporary directories, system logs, cache folders, and prefetch storage to release disk space.",
+    codeType: "PowerShell (Run as Admin)",
+    code: "Remove-Item -Path $env:TEMP\\* -Recurse -Force; Remove-Item -Path 'C:\\Windows\\Temp\\*' -Recurse -Force; Remove-Item -Path 'C:\\Windows\\Prefetch\\*' -Recurse -Force"
+  },
+  reset_update_cache: {
+    title: "Reset Windows Update Cache Components",
+    description: "Stops wuauserv & BITS services, purges SoftwareDistribution components to resolve Windows Update errors, and restarts update engine.",
+    codeType: "PowerShell (Run as Admin)",
+    code: "Stop-Service -Name wuauserv, bits, cryptsvc -Force\nRemove-Item -Path 'C:\\Windows\\SoftwareDistribution\\*' -Recurse -Force\nStart-Service -Name wuauserv, bits, cryptsvc"
+  },
+  network_reset_dns: {
+    title: "Full Network Socket & DNS Flush Reset",
+    description: "Clears DNS cache, releases and renews IP lease, and resets TCP/IP stack and Winsock catalog sockets to fix packet drop problems.",
+    codeType: "CMD (Run as Admin)",
+    code: "ipconfig /release && ipconfig /renew && ipconfig /flushdns && netsh winsock reset && netsh int ip reset"
+  },
+  driver_backup: {
+    title: "Backup Existing System Drivers",
+    description: "Exports all active, third-party, and OEM drivers currently loaded in the operating system to C:\\PulseBackup\\Drivers using PnPutil.",
+    codeType: "CMD (Run as Admin)",
+    code: "mkdir C:\\PulseBackup\\Drivers\npnputil /export-driver * C:\\PulseBackup\\Drivers"
+  },
+  hardware_scan: {
+    title: "Scan for New Hardware Changes",
+    description: "Forces a full scan of local system components and PnP system controllers to detect newly connected or unconfigured device controllers.",
+    codeType: "CMD (Run as Admin)",
+    code: "pnputil /scan-devices"
+  },
+  launch_devmgmt: {
+    title: "Launch Windows Device Manager",
+    description: "Opens the Microsoft Management Console (MMC) snap-in for viewing, configuring, and updating local computer device drivers.",
+    codeType: "Windows Run Dialog (Win+R)",
+    code: "devmgmt.msc"
+  },
+  launch_rapr: {
+    title: "Download DriverStore Explorer (Rapr)",
+    description: "Opens the official GitHub download page for DriverStore Explorer (Rapr), which allows you to inspect and clean old, duplicate, or unused drivers.",
+    codeType: "GitHub Web URL",
+    code: "https://github.com/lostindark/DriverStoreExplorer/releases",
+    launchUri: "https://github.com/lostindark/DriverStoreExplorer/releases"
+  },
+  defender_disable: {
+    title: "Disable Windows Defender Real-time Protection",
+    description: "Temporarily disables Windows Defender Real-time monitoring using PowerShell cmdlets.",
+    codeType: "PowerShell (Run as Admin)",
+    code: "Set-MpPreference -DisableRealtimeMonitoring $true"
+  },
+  defender_enable: {
+    title: "Enable Windows Defender Real-time Protection",
+    description: "Re-enables Windows Defender Real-time monitoring to secure the system against threats.",
+    codeType: "PowerShell (Run as Admin)",
+    code: "Set-MpPreference -DisableRealtimeMonitoring $false"
+  },
+  net_port_scanner: {
+    title: "Active Listening Ports Scanner",
+    description: "Runs netstat to list all open ports and identifying process IDs currently listening on network interfaces.",
+    codeType: "CMD (Run as Admin)",
+    code: "netstat -ano | findstr LISTENING"
+  },
+  browser_cache_clean: {
+    title: "Purge Chrome & Edge Browser Caches",
+    description: "Closes Google Chrome and Microsoft Edge, then cleans their temporary caches to resolve website loading issues.",
+    codeType: "PowerShell (Run as Admin)",
+    code: "Stop-Process -Name chrome, msedge -Force; Remove-Item -Path $env:LOCALAPPDATA\\Google\\Chrome\\User Data\\Default\\Cache\\* -Recurse"
+  },
+  sandbox_enable: {
+    title: "Enable Windows Sandbox Feature",
+    description: "Uses DISM packages to enable Windows Sandbox container features for isolated application execution.",
+    codeType: "CMD (Run as Admin)",
+    code: "dism /online /Enable-Feature /FeatureName:Containers-DisposableVM /All /NoRestart"
+  },
+  hyperv_enable: {
+    title: "Enable Hyper-V Virtualization Features",
+    description: "Uses DISM packages to enable Hyper-V hypervisor platform features on this local machine.",
+    codeType: "CMD (Run as Admin)",
+    code: "dism /online /Enable-Feature /FeatureName:Microsoft-Hyper-V /All /NoRestart"
+  },
+  launch_startup_manager: {
+    title: "Launch Task Manager Startup Apps Manager",
+    description: "Opens Windows Task Manager directly to the Startup Apps dashboard to manage boot performance.",
+    codeType: "Windows Command",
+    code: "taskmgr /0 /startup"
+  },
+  launch_eventvwr: {
+    title: "Launch Windows Event Viewer Console",
+    description: "Opens Microsoft Management Console snap-in for viewing system logs and errors.",
+    codeType: "Windows Command",
+    code: "eventvwr.msc"
+  },
+  launch_dxdiag: {
+    title: "Launch DirectX Diagnostic Tool (DxDiag)",
+    description: "Opens DirectX diagnostics console detailing complete hardware, audio, and graphics configurations.",
+    codeType: "Windows Command",
+    code: "dxdiag.exe"
+  },
+  tool_cleanup: {
+    title: "Self-Destruct and Cleanup Tool",
+    description: "Completely terminates the backend servers, deletes the main VenkatPulse directories, and removes the desktop shortcut.",
+    codeType: "PowerShell (Admin)",
+    code: "Remove-Item C:\\VenkatPulse -Recurse -Force"
   }
 };
 
@@ -2620,6 +2741,30 @@ function executeNirSoft(action) {
 // 12f. Super Admin Tool launcher controller
 function executeAdminTool(toolKey) {
   openToolModal(toolKey);
+}
+
+function triggerCleanup() {
+  if (confirm("Are you sure you want to close the tool and completely delete all VenkatPulse program files and desktop shortcuts from this local client system?")) {
+    document.body.innerHTML = `
+      <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; background:#0c0a09; color:#f5f5f4; font-family:'Outfit',sans-serif; text-align:center; padding:20px;">
+        <h1 style="color:#ef4444; font-size:2rem; margin-bottom:15px; text-transform:uppercase; letter-spacing:1px; filter:drop-shadow(0 0 10px rgba(239, 68, 68, 0.3));">Shutting Down & Clean Up</h1>
+        <p style="color:#a8a29e; font-size:1.1rem; max-width:500px; line-height:1.6; margin-bottom: 25px;">VenkatPulse AI is shutting down its backend server, removing its desktop shortcut, and deleting the program files directory <strong>C:\\\\VenkatPulse</strong>.</p>
+        <div style="display:inline-block; width: 40px; height: 40px; border: 3px solid rgba(239, 68, 68, 0.2); border-radius: 50%; border-top-color: #ef4444; animation: spin 1s ease-in-out infinite; margin-bottom: 20px;"></div>
+        <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+        <p style="color:#78716c; font-size:0.9rem;">You can safely close this browser tab now.</p>
+      </div>
+    `;
+    
+    // Call the backend endpoint to execute the cleanup command
+    fetch(`${API_BASE}/api/run-tool?tool=tool_cleanup`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" }
+    }).catch(err => console.log("Cleanup request sent"));
+    
+    setTimeout(() => {
+      window.close();
+    }, 2000);
+  }
 }
 
 // 12g. Robocopy engine controller

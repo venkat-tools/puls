@@ -645,6 +645,53 @@ class VenkatPulseApp(ctk.CTk):
             command=lambda: self.run_cmd('start powershell -NoExit -Command "@(\'*XboxApp*\', \'*ZuneMusic*\', \'*BingNews*\', \'*Office.OneNote*\', \'*SolitaireCollection*\') | ForEach-Object { Get-AppxPackage -AllUsers $_ | Remove-AppxPackage -ErrorAction SilentlyContinue }"', "Uninstall Bloatware")
         ).grid(row=2, column=1, padx=25, pady=15, sticky="ew")
 
+        # Performance Optimizer Card
+        opt_title = ctk.CTkLabel(frame, text="Performance & Maintenance Tweaks", font=ctk.CTkFont(size=16, weight="bold"))
+        opt_title.grid(row=3, column=0, columnspan=2, padx=10, pady=(20, 5), sticky="w")
+        
+        card2 = ctk.CTkFrame(frame, corner_radius=12)
+        card2.grid(row=4, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
+        card2.grid_columnconfigure(0, weight=1)
+        card2.grid_columnconfigure(1, weight=1)
+        
+        # Left column of Performance Tweaks
+        ctk.CTkButton(
+            card2,
+            text="Enable Ultimate Performance Power Plan",
+            command=lambda: self.run_cmd('powercfg -duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61 && powercfg -setactive e9a42b02-d5df-448d-aa00-03f14749eb61', "Enable Ultimate Performance")
+        ).grid(row=0, column=0, padx=25, pady=15, sticky="ew")
+        
+        ctk.CTkButton(
+            card2,
+            text="Disable Bing Suggestions in Start Search",
+            command=lambda: self.run_cmd('reg add "HKCU\\Software\\Policies\\Microsoft\\Windows\\Explorer" /v DisableSearchBoxSuggestions /t REG_DWORD /d 1 /f && reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Search" /v BingSearchEnabled /t REG_DWORD /d 0 /f', "Disable Bing Start Search")
+        ).grid(row=1, column=0, padx=25, pady=15, sticky="ew")
+        
+        ctk.CTkButton(
+            card2,
+            text="Optimize Visual Effects (Responsive UI)",
+            command=lambda: self.run_cmd('reg add "HKCU\\Control Panel\\Desktop" /v MenuShowDelay /t REG_SZ /d 0 /f && reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VisualEffects" /v VisualFXSetting /t REG_DWORD /d 2 /f', "Optimize Visual Effects")
+        ).grid(row=2, column=0, padx=25, pady=15, sticky="ew")
+        
+        # Right column of Performance Tweaks
+        ctk.CTkButton(
+            card2,
+            text="Deep Temporary Cache Cleaner",
+            command=lambda: self.run_cmd('start cmd /k powershell -NoExit -Command "Write-Host \'Cleaning Temporary folders...\'; Remove-Item -Path $env:TEMP\\* -Recurse -Force -ErrorAction SilentlyContinue; Remove-Item -Path \'C:\\Windows\\Temp\\*\' -Recurse -Force -ErrorAction SilentlyContinue; Remove-Item -Path \'C:\\Windows\\Prefetch\\*\' -Recurse -Force -ErrorAction SilentlyContinue; Write-Host \'Temporary folders cleared successfully!\'"', "Deep Temp Clean")
+        ).grid(row=0, column=1, padx=25, pady=15, sticky="ew")
+        
+        ctk.CTkButton(
+            card2,
+            text="Reset Windows Update Components Cache",
+            command=lambda: self.run_cmd('start cmd /k powershell -NoExit -Command "Write-Host \'Stopping Windows Update services...\'; Stop-Service -Name wuauserv, bits, cryptsvc -Force; Write-Host \'Clearing cache...\'; Remove-Item -Path \'C:\\Windows\\SoftwareDistribution\\*\' -Recurse -Force -ErrorAction SilentlyContinue; Write-Host \'Restarting services...\'; Start-Service -Name wuauserv, bits, cryptsvc; Write-Host \'Windows Update Cache reset successfully!\'"', "Reset Update Cache")
+        ).grid(row=1, column=1, padx=25, pady=15, sticky="ew")
+        
+        ctk.CTkButton(
+            card2,
+            text="Full Network Socket & DNS Flush Reset",
+            command=lambda: self.run_cmd('start cmd /k "ipconfig /release && ipconfig /renew && ipconfig /flushdns && netsh winsock reset && netsh int ip reset"', "Network Socket Reset")
+        ).grid(row=2, column=1, padx=25, pady=15, sticky="ew")
+
     # --- 4. APP DOWNLOADER FRAME ---
     def create_app_downloader_frame(self):
         frame = ctk.CTkFrame(self, fg_color="transparent")
@@ -1022,6 +1069,134 @@ Write-Host 'Office Installation finished.'
             text="🛡️ Security Updates Only",
             command=lambda: self.run_cmd('start powershell -NoExit -Command "Write-Host \'Configuring Windows Update for Security Patches Only...\'; reg add \\"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\" /v ExcludeWUDriversInQualityUpdate /t REG_DWORD /d 1 /f; reg add \\"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\" /v DeferFeatureUpdates /t REG_DWORD /d 1 /f; reg add \\"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\" /v DeferFeatureUpdatesPeriodInDays /t REG_DWORD /d 365 /f; reg add \\"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\" /v DeferQualityUpdates /t REG_DWORD /d 1 /f; reg add \\"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\" /v DeferQualityUpdatesPeriodInDays /t REG_DWORD /d 4 /f; reg delete \\"HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU\\" /v NoAutoUpdate /f; reg add \\"HKLM\\SYSTEM\\CurrentControlSet\\Services\\WaaSMedicSvc\\" /v Start /t REG_DWORD /d 3 /f; Set-Service -Name wuauserv, bits, UsoSvc -StartupType Manual; Start-Service -Name wuauserv, bits, UsoSvc; Write-Host \'Windows Update configured for Security Updates Only (Features deferred 365 days, drivers disabled, updates enabled).\'"', "Security Updates Only")
         ).grid(row=1, column=2, padx=15, pady=15, sticky="ew")
+
+        # Row 3, span both columns: Driver & Hardware Management
+        c4 = ctk.CTkFrame(frame, corner_radius=10)
+        c4.grid(row=3, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
+        c4.grid_columnconfigure(0, weight=1)
+        c4.grid_columnconfigure(1, weight=1)
+        c4.grid_columnconfigure(2, weight=1)
+        
+        ctk.CTkLabel(c4, text="Driver & Hardware Management", font=ctk.CTkFont(size=15, weight="bold")).grid(row=0, column=0, columnspan=3, padx=15, pady=10, sticky="w")
+        
+        # Scan for Driver Updates via Windows Update
+        ctk.CTkButton(
+            c4,
+            text="🔍 Scan Missing Drivers (PnP)",
+            command=lambda: self.run_cmd("pnputil /scan-devices", "Scan Missing Drivers")
+        ).grid(row=1, column=0, padx=15, pady=15, sticky="ew")
+        
+        # Backup System Drivers
+        ctk.CTkButton(
+            c4,
+            text="📦 Backup Drivers to C:\\PulseBackup",
+            command=lambda: self.run_cmd('start cmd /k "if not exist C:\\PulseBackup\\Drivers mkdir C:\\PulseBackup\\Drivers && pnputil /export-driver * C:\\PulseBackup\\Drivers && echo Drivers successfully backed up to C:\\PulseBackup\\Drivers && pause"', "Backup Drivers")
+        ).grid(row=1, column=1, padx=15, pady=15, sticky="ew")
+        
+        # Restore System Drivers
+        ctk.CTkButton(
+            c4,
+            text="🚚 Restore Drivers from Backup",
+            command=lambda: self.run_cmd('start cmd /k "if not exist C:\\PulseBackup\\Drivers (echo Backup folder C:\\PulseBackup\\Drivers not found! && pause) else (pnputil /add-driver C:\\PulseBackup\\Drivers\\*.inf /subdirs /install /reboot)"', "Restore Drivers")
+        ).grid(row=1, column=2, padx=15, pady=15, sticky="ew")
+        
+        # Row 2 inside c4: Device Manager & Rapr
+        ctk.CTkButton(
+            c4,
+            text="⚙ Launch Windows Device Manager",
+            command=lambda: self.run_cmd("start devmgmt.msc", "Launch Device Manager")
+        ).grid(row=2, column=0, padx=15, pady=(0, 15), sticky="ew")
+        
+        ctk.CTkButton(
+            c4,
+            text="📥 Force Install Driver Upgrades",
+            fg_color="#059669",
+            hover_color="#047857",
+            font=ctk.CTkFont(weight="bold"),
+            command=lambda: self.run_cmd('start powershell -ExecutionPolicy Bypass -Command "try { Write-Host \'Setting up PSWindowsUpdate module...\' -ForegroundColor Cyan; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Set-PSRepository -Name PSGallery -InstallationPolicy Trusted -ErrorAction SilentlyContinue; Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -ErrorAction SilentlyContinue; Install-Module -Name PSWindowsUpdate -Force -SkipPublisherCheck -ErrorAction SilentlyContinue; Import-Module PSWindowsUpdate -ErrorAction Stop; Write-Host \'Enabling and starting Windows Update service...\' -ForegroundColor Cyan; Set-Service -Name wuauserv -StartupType Manual -ErrorAction SilentlyContinue; Start-Service -Name wuauserv -ErrorAction SilentlyContinue; Write-Host \'Checking for driver updates...\' -ForegroundColor Cyan; $updates = Get-WindowsUpdate -Category \'Drivers\' -ErrorAction SilentlyContinue; if ($updates) { Write-Host \'Driver updates found! Installing...\' -ForegroundColor Green; Get-WindowsUpdate -Category \'Drivers\' -Install -AcceptAll -AutoReboot; } else { Write-Host \'All system drivers are already up to date.\' -ForegroundColor Green; } } catch { Write-Host \'Error: \' $_.Exception.Message -ForegroundColor Red; Write-Host \'Failed to run PSWindowsUpdate. Make sure you are connected to the Internet.\' -ForegroundColor Red; } Write-Host \'Process complete. Press Enter to close this window...\' -ForegroundColor Cyan; [void]$Host.UI.RawUI.ReadKey(\'NoEcho,IncludeKeyDown\');"', "Force Driver Upgrades")
+        ).grid(row=2, column=1, padx=15, pady=(0, 15), sticky="ew")
+        
+        ctk.CTkButton(
+            c4,
+            text="🌐 Download DriverStore Explorer (Rapr)",
+            command=lambda: self.run_cmd("start https://github.com/lostindark/DriverStoreExplorer/releases", "Download Rapr")
+        ).grid(row=2, column=2, padx=15, pady=(0, 15), sticky="ew")
+
+        # Row 4, span both columns: Advanced System & Security Tools
+        c5 = ctk.CTkFrame(frame, corner_radius=10)
+        c5.grid(row=4, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
+        c5.grid_columnconfigure(0, weight=1)
+        c5.grid_columnconfigure(1, weight=1)
+        c5.grid_columnconfigure(2, weight=1)
+        
+        ctk.CTkLabel(c5, text="Advanced System & Security Utilities", font=ctk.CTkFont(size=15, weight="bold")).grid(row=0, column=0, columnspan=3, padx=15, pady=10, sticky="w")
+        
+        # Defender Disable / Enable
+        ctk.CTkButton(
+            c5,
+            text="🛡️ Disable Defender Realtime",
+            fg_color="#dc2626",
+            hover_color="#b91c1c",
+            command=lambda: self.run_cmd('start powershell -NoExit -Command "Write-Host \'Disabling Windows Defender Real-time Monitoring...\' -ForegroundColor Yellow; Set-MpPreference -DisableRealtimeMonitoring $true; Write-Host \'Real-time monitoring temporarily disabled.\' -ForegroundColor Green"', "Disable Defender")
+        ).grid(row=1, column=0, padx=15, pady=15, sticky="ew")
+        
+        ctk.CTkButton(
+            c5,
+            text="🛡️ Enable Defender Realtime",
+            fg_color="#2563eb",
+            hover_color="#1d4ed8",
+            command=lambda: self.run_cmd('start powershell -NoExit -Command "Write-Host \'Enabling Windows Defender Real-time Monitoring...\' -ForegroundColor Cyan; Set-MpPreference -DisableRealtimeMonitoring $false; Write-Host \'Real-time monitoring re-enabled.\' -ForegroundColor Green"', "Enable Defender")
+        ).grid(row=1, column=1, padx=15, pady=15, sticky="ew")
+        
+        # Scan Listening Ports
+        ctk.CTkButton(
+            c5,
+            text="🔌 Scan Active Listening Ports",
+            command=lambda: self.run_cmd('start cmd /k "echo Scanning active listening network ports... && echo. && netstat -ano | findstr LISTENING && echo. && echo Port list complete. Locate the PID inside Windows Task Manager details. && pause"', "Port Scanner")
+        ).grid(row=1, column=2, padx=15, pady=15, sticky="ew")
+        
+        # Row 2 inside c5
+        # Browser Cache Purge
+        ctk.CTkButton(
+            c5,
+            text="🧹 Purge Browser Caches (Edge/Chrome)",
+            command=lambda: self.run_cmd('start powershell -NoExit -Command "Write-Host \'Closing active browser processes...\' -ForegroundColor Yellow; Stop-Process -Name chrome, msedge, firefox -Force -ErrorAction SilentlyContinue; Start-Sleep -Seconds 1; Write-Host \'Purging Google Chrome local temporary cache...\' -ForegroundColor Cyan; Remove-Item -Path \'$env:LOCALAPPDATA\\Google\\Chrome\\User Data\\Default\\Cache\\*\' -Recurse -Force -ErrorAction SilentlyContinue; Write-Host \'Purging Microsoft Edge local temporary cache...\' -ForegroundColor Cyan; Remove-Item -Path \'$env:LOCALAPPDATA\\Microsoft\\Edge\\User Data\\Default\\Cache\\*\' -Recurse -Force -ErrorAction SilentlyContinue; Write-Host \'Cache purge complete!\' -ForegroundColor Green"', "Browser Cache Purge")
+        ).grid(row=2, column=0, padx=15, pady=(0, 15), sticky="ew")
+        
+        # Windows Sandbox & Hyper-V Toggles
+        ctk.CTkButton(
+            c5,
+            text="📦 Enable Windows Sandbox Feature",
+            command=lambda: self.run_cmd('start cmd /k "dism /online /Enable-Feature /FeatureName:Containers-DisposableVM /All /NoRestart && echo. && echo Windows Sandbox has been enabled successfully. Restart computer to apply changes. && pause"', "Enable Sandbox")
+        ).grid(row=2, column=1, padx=15, pady=(0, 15), sticky="ew")
+        
+        ctk.CTkButton(
+            c5,
+            text="💻 Enable Hyper-V Platform",
+            command=lambda: self.run_cmd('start cmd /k "dism /online /Enable-Feature /FeatureName:Microsoft-Hyper-V /All /NoRestart && echo. && echo Hyper-V Virtualization has been enabled successfully. Restart computer to apply changes. && pause"', "Enable Hyper-V")
+        ).grid(row=2, column=2, padx=15, pady=(0, 15), sticky="ew")
+        
+        # Row 3 inside c5
+        # Startup apps manager
+        ctk.CTkButton(
+            c5,
+            text="⚡ Launch Startup Apps Manager (TaskMgr)",
+            command=lambda: self.run_cmd("start taskmgr /0 /startup", "Startup Manager")
+        ).grid(row=3, column=0, padx=15, pady=(0, 15), sticky="ew")
+        
+        # Event Viewer
+        ctk.CTkButton(
+            c5,
+            text="📜 Open System Event Viewer Console",
+            command=lambda: self.run_cmd("start eventvwr.msc", "Event Viewer")
+        ).grid(row=3, column=1, padx=15, pady=(0, 15), sticky="ew")
+        
+        # DxDiag
+        ctk.CTkButton(
+            c5,
+            text="🎮 Open DirectX Diagnostics (DxDiag)",
+            command=lambda: self.run_cmd("start dxdiag.exe", "DxDiag")
+        ).grid(row=3, column=2, padx=15, pady=(0, 15), sticky="ew")
 
     # --- 7. AI ASSISTANT FRAME ---
     def create_ai_assistant_frame(self):

@@ -1,5 +1,8 @@
 @echo off
 :: Self-elevating script to run Node Server as Administrator
+:init
+set localdirectory=%~dp0
+set tempname=%temp%\getadmin.vbs
 openfiles >nul 2>&1
 if %errorlevel% neq 0 (
     echo Requesting Administrator privileges to run Venkat Windows Tool Kit Server...
@@ -23,35 +26,16 @@ echo Keep this window open while using the web application dashboard.
 echo.
 echo ======================================================================
 
-:: Resolve python path (check local appdata if not in system path when elevated)
-set "PYTHON_CMD=python"
-python --version >nul 2>&1
-if %errorlevel% neq 0 (
-    if exist "C:\Users\user\AppData\Local\Programs\Python\Python312\python.exe" (
-        set "PYTHON_CMD=C:\Users\user\AppData\Local\Programs\Python\Python312\python.exe"
-    )
-)
-
-:: Run python server if resolved
-"%PYTHON_CMD%" --version >nul 2>&1
+:: Check if python is available and working (not the Windows App Store alias)
+python -c "import sys" >nul 2>&1
 if %errorlevel% equ 0 (
-    "%PYTHON_CMD%" server.py
-    if %errorlevel% neq 0 (
-        echo.
-        echo [CRASH] Python server exited with error code %errorlevel%.
-        pause
-    )
+    python server.py
     goto end
 )
 
 :: Fallback to compiled main.exe
 if exist main.exe (
     main.exe
-    if %errorlevel% neq 0 (
-        echo.
-        echo [CRASH] main.exe exited with error code %errorlevel%.
-        pause
-    )
     goto end
 )
 
