@@ -2001,6 +2001,36 @@ const TOOLBOX_DATA = {
     codeType: "PowerShell (Run as Admin)",
     code: "powershell -ExecutionPolicy Bypass -Command \"try { powercfg -duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61; powercfg -setactive e9a42b02-d5df-448d-aa00-03f14749eb61 } catch { powercfg -duplicatescheme 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c; powercfg -setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c }\""
   },
+  sys_shutdown: {
+    title: "Shutdown System",
+    description: "Force shuts down the system gracefully in 5 seconds.",
+    codeType: "CMD / System",
+    code: "shutdown /s /t 5 /f"
+  },
+  sys_restart: {
+    title: "Restart System",
+    description: "Restarts the system gracefully in 5 seconds.",
+    codeType: "CMD / System",
+    code: "shutdown /r /t 5 /f"
+  },
+  sys_sleep: {
+    title: "Sleep Mode",
+    description: "Puts the computer into low-power sleep mode.",
+    codeType: "PowerShell / System",
+    code: "powershell -Command \"Add-Type -Assembly System.Windows.Forms; [System.Windows.Forms.Application]::SetSuspendState('Suspend', $false, $false)\""
+  },
+  sys_hibernate: {
+    title: "Hibernate Mode",
+    description: "Saves session to disk and turns off the PC.",
+    codeType: "CMD / System",
+    code: "shutdown /h"
+  },
+  sys_lock: {
+    title: "Lock Workstation",
+    description: "Locks the active user session immediately.",
+    codeType: "DLL / System",
+    code: "rundll32.exe user32.dll,LockWorkStation"
+  },
   disable_bing_search: {
     title: "Disable Start Menu Bing Search Suggestions",
     description: "Modifies registry settings to disable Bing web search integration in Windows Search, accelerating local file and program queries.",

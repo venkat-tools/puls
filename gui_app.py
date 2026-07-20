@@ -1099,6 +1099,36 @@ Write-Host 'Office Installation finished.'
             text="🚚 Restore Drivers from Backup",
             command=lambda: self.run_cmd('start cmd /k "if not exist C:\\PulseBackup\\Drivers (echo Backup folder C:\\PulseBackup\\Drivers not found! && pause) else (pnputil /add-driver C:\\PulseBackup\\Drivers\\*.inf /subdirs /install /reboot)"', "Restore Drivers")
         ).grid(row=1, column=2, padx=15, pady=15, sticky="ew")
+
+        # Row 4, span both columns: System Power Controls
+        c5 = ctk.CTkFrame(frame, corner_radius=10)
+        c5.grid(row=4, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
+        c5.grid_columnconfigure(0, weight=1)
+        c5.grid_columnconfigure(1, weight=1)
+        c5.grid_columnconfigure(2, weight=1)
+        c5.grid_columnconfigure(3, weight=1)
+        
+        ctk.CTkLabel(c5, text="⚡ System Power Controls", font=ctk.CTkFont(size=15, weight="bold")).grid(row=0, column=0, columnspan=4, padx=15, pady=10, sticky="w")
+        
+        ctk.CTkButton(
+            c5, text="🛑 Shutdown PC", fg_color="#b91c1c", hover_color="#991b1b", font=ctk.CTkFont(weight="bold"),
+            command=lambda: self.run_cmd("shutdown /s /t 5 /f", "Shutdown PC")
+        ).grid(row=1, column=0, padx=10, pady=10, sticky="ew")
+
+        ctk.CTkButton(
+            c5, text="🔄 Restart PC", fg_color="#d97706", hover_color="#b45309", font=ctk.CTkFont(weight="bold"),
+            command=lambda: self.run_cmd("shutdown /r /t 5 /f", "Restart PC")
+        ).grid(row=1, column=1, padx=10, pady=10, sticky="ew")
+
+        ctk.CTkButton(
+            c5, text="🌙 Sleep Mode",
+            command=lambda: self.run_cmd('powershell -Command "Add-Type -Assembly System.Windows.Forms; [System.Windows.Forms.Application]::SetSuspendState(\'Suspend\', $false, $false)"', "Sleep Mode")
+        ).grid(row=1, column=2, padx=10, pady=10, sticky="ew")
+
+        ctk.CTkButton(
+            c5, text="🔒 Lock Workstation",
+            command=lambda: self.run_cmd("rundll32.exe user32.dll,LockWorkStation", "Lock Screen")
+        ).grid(row=1, column=3, padx=10, pady=10, sticky="ew")
         
         # Row 2 inside c4: Device Manager & Rapr
         ctk.CTkButton(
