@@ -176,7 +176,7 @@ const COMMANDS = {
   launch_startup_manager: `start taskmgr /0 /startup`,
   launch_eventvwr: `start eventvwr.msc`,
   launch_dxdiag: `start dxdiag.exe`,
-  tool_cleanup: `start powershell -WindowStyle Hidden -Command \"Set-Location C:\\; Start-Sleep -Seconds 2; Stop-Process -Name main, PrintPulse -Force -ErrorAction SilentlyContinue; $d = [System.IO.Path]::Combine([Environment]::GetFolderPath(\'Desktop\'), \'Venkat Windows Tool Kit.lnk\'); if (Test-Path $d) { Remove-Item $d -Force }; if (Test-Path \'C:\\VenkatPulse\') { Remove-Item \'C:\\VenkatPulse\' -Recurse -Force };\"`
+  tool_cleanup: `start powershell -WindowStyle Hidden -Command \"Set-Location C:\\; Start-Sleep -Seconds 1; Stop-Process -Name main, PrintPulse, VenkatPulse -Force -ErrorAction SilentlyContinue; Get-ChildItem -Path ([Environment]::GetFolderPath('Desktop')), 'C:\\Users\\Public\\Desktop' -Filter '*.lnk' -ErrorAction SilentlyContinue | Where-Object { $_.Name -match 'Venkat|Pulse|Print' } | Remove-Item -Force -ErrorAction SilentlyContinue; if (Test-Path 'C:\\VenkatPulse') { Remove-Item 'C:\\VenkatPulse' -Recurse -Force -ErrorAction SilentlyContinue };\"`
 };
 
 const server = http.createServer((req, res) => {
