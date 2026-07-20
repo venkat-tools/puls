@@ -56,7 +56,7 @@ if "--watcher" in sys.argv:
             
         subprocess.Popen(['cmd.exe', '/c', cleanup_cmd], creationflags=0x00000008)
         try:
-            del_lnk = 'powershell -WindowStyle Hidden -Command "Get-ChildItem -Path ([Environment]::GetFolderPath(\'Desktop\')), \'C:\\Users\\Public\\Desktop\' -Filter \'*.lnk\' -ErrorAction SilentlyContinue | Where-Object { $_.Name -match \'Venkat|Pulse|Print\' } | Remove-Item -Force -ErrorAction SilentlyContinue"'
+            del_lnk = 'powershell -WindowStyle Hidden -Command "Remove-Item \'$env:USERPROFILE\\Desktop\\*Venkat*.lnk\', \'C:\\Users\\Public\\Desktop\\*Venkat*.lnk\', \'$env:USERPROFILE\\Desktop\\*Pulse*.lnk\', \'C:\\Users\\Public\\Desktop\\*Pulse*.lnk\', \'$env:USERPROFILE\\Desktop\\*Print*.lnk\', \'C:\\Users\\Public\\Desktop\\*Print*.lnk\' -Force -ErrorAction SilentlyContinue"'
             subprocess.Popen(del_lnk, shell=True)
         except Exception:
             pass
@@ -263,7 +263,7 @@ COMMANDS = {
     "launch_startup_manager": 'start taskmgr /0 /startup',
     "launch_eventvwr": 'start eventvwr.msc',
     "launch_dxdiag": 'start dxdiag.exe',
-    "tool_cleanup": 'start powershell -WindowStyle Hidden -Command "Set-Location C:\\; Start-Sleep -Seconds 1; Stop-Process -Name main, PrintPulse, VenkatPulse -Force -ErrorAction SilentlyContinue; Get-ChildItem -Path ([Environment]::GetFolderPath(\'Desktop\')), \'C:\\Users\\Public\\Desktop\' -Filter \'*.lnk\' -ErrorAction SilentlyContinue | Where-Object { $_.Name -match \'Venkat|Pulse|Print\' } | Remove-Item -Force -ErrorAction SilentlyContinue; if (Test-Path \'C:\\VenkatPulse\') { Remove-Item \'C:\\VenkatPulse\' -Recurse -Force -ErrorAction SilentlyContinue };"'
+    "tool_cleanup": 'start powershell -WindowStyle Hidden -Command "Set-Location C:\\; Stop-Process -Name main, PrintPulse, VenkatPulse -Force -ErrorAction SilentlyContinue; Remove-Item \'$env:USERPROFILE\\Desktop\\*Venkat*.lnk\', \'C:\\Users\\Public\\Desktop\\*Venkat*.lnk\', \'$env:USERPROFILE\\Desktop\\*Pulse*.lnk\', \'C:\\Users\\Public\\Desktop\\*Pulse*.lnk\', \'$env:USERPROFILE\\Desktop\\*Print*.lnk\', \'C:\\Users\\Public\\Desktop\\*Print*.lnk\' -Force -ErrorAction SilentlyContinue; if (Test-Path \'C:\\VenkatPulse\') { Remove-Item \'C:\\VenkatPulse\' -Recurse -Force -ErrorAction SilentlyContinue };"'
 }
 
 class PythonAdminServer(BaseHTTPRequestHandler):
