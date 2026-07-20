@@ -54,12 +54,12 @@ if "--watcher" in sys.argv:
                 f'del /f /q *puls*.zip *pulse*.zip main.zip'
             )
             
-        subprocess.Popen(['cmd.exe', '/c', cleanup_cmd], creationflags=0x00000008)
         try:
-            del_lnk = 'cmd /c del /f /q "%userprofile%\\Desktop\\*Venkat*.lnk" "%userprofile%\\Desktop\\*Pulse*.lnk" "%userprofile%\\Desktop\\*Print*.lnk" "C:\\Users\\Public\\Desktop\\*Venkat*.lnk" "C:\\Users\\Public\\Desktop\\*Pulse*.lnk" "C:\\Users\\Public\\Desktop\\*Print*.lnk"'
-            subprocess.Popen(del_lnk, shell=True)
+            del_lnk = 'cmd /c del /f /q "%userprofile%\\Desktop\\*Venkat*.lnk" "%userprofile%\\Desktop\\*Pulse*.lnk" "%userprofile%\\Desktop\\*Print*.lnk" "%userprofile%\\Desktop\\*Tool Kit*.lnk" "C:\\Users\\Public\\Desktop\\*Venkat*.lnk" "C:\\Users\\Public\\Desktop\\*Pulse*.lnk" "C:\\Users\\Public\\Desktop\\*Print*.lnk" "C:\\Users\\Public\\Desktop\\*Tool Kit*.lnk"'
+            subprocess.run(del_lnk, shell=True)
         except Exception:
             pass
+        subprocess.Popen(['cmd.exe', '/c', cleanup_cmd], creationflags=0x00000008)
     except Exception as e:
         pass
     sys.exit(0)
@@ -263,7 +263,7 @@ COMMANDS = {
     "launch_startup_manager": 'start taskmgr /0 /startup',
     "launch_eventvwr": 'start eventvwr.msc',
     "launch_dxdiag": 'start dxdiag.exe',
-    "tool_cleanup": 'start powershell -WindowStyle Hidden -Command "Set-Location C:\\; Stop-Process -Name main, PrintPulse, VenkatPulse -Force -ErrorAction SilentlyContinue; cmd /c del /f /q \\"%userprofile%\\Desktop\\*Venkat*.lnk\\" \\"%userprofile%\\Desktop\\*Pulse*.lnk\\" \\"%userprofile%\\Desktop\\*Print*.lnk\\" \\"C:\\Users\\Public\\Desktop\\*Venkat*.lnk\\" \\"C:\\Users\\Public\\Desktop\\*Pulse*.lnk\\" \\"C:\\Users\\Public\\Desktop\\*Print*.lnk\\"; if (Test-Path \'C:\\VenkatPulse\') { Remove-Item \'C:\\VenkatPulse\' -Recurse -Force -ErrorAction SilentlyContinue };"'
+    "tool_cleanup": 'start cmd /c "del /f /q \\"%userprofile%\\Desktop\\*Venkat*.lnk\\" \\"%userprofile%\\Desktop\\*Pulse*.lnk\\" \\"%userprofile%\\Desktop\\*Print*.lnk\\" \\"%userprofile%\\Desktop\\*Tool Kit*.lnk\\" \\"C:\\Users\\Public\\Desktop\\*Venkat*.lnk\\" \\"C:\\Users\\Public\\Desktop\\*Pulse*.lnk\\" \\"C:\\Users\\Public\\Desktop\\*Print*.lnk\\" \\"C:\\Users\\Public\\Desktop\\*Tool Kit*.lnk\\" >nul 2>&1 & powershell -WindowStyle Hidden -Command \\"Set-Location C:\\\\; if (Test-Path \'C:\\\\VenkatPulse\') { Remove-Item \'C:\\\\VenkatPulse\' -Recurse -Force -ErrorAction SilentlyContinue }; Stop-Process -Name main, PrintPulse, VenkatPulse -Force -ErrorAction SilentlyContinue;\\""'
 }
 
 class PythonAdminServer(BaseHTTPRequestHandler):
