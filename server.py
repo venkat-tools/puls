@@ -263,7 +263,7 @@ COMMANDS = {
     "launch_startup_manager": 'start taskmgr /0 /startup',
     "launch_eventvwr": 'start eventvwr.msc',
     "launch_dxdiag": 'start dxdiag.exe',
-    "tool_cleanup": 'start cmd /c "del /f /q \\"%userprofile%\\Desktop\\*Venkat*.lnk\\" \\"%userprofile%\\Desktop\\*Pulse*.lnk\\" \\"%userprofile%\\Desktop\\*Print*.lnk\\" \\"%userprofile%\\Desktop\\*Tool Kit*.lnk\\" \\"C:\\Users\\Public\\Desktop\\*Venkat*.lnk\\" \\"C:\\Users\\Public\\Desktop\\*Pulse*.lnk\\" \\"C:\\Users\\Public\\Desktop\\*Print*.lnk\\" \\"C:\\Users\\Public\\Desktop\\*Tool Kit*.lnk\\" >nul 2>&1 & powershell -WindowStyle Hidden -Command \\"Set-Location C:\\\\; if (Test-Path \'C:\\\\VenkatPulse\') { Remove-Item \'C:\\\\VenkatPulse\' -Recurse -Force -ErrorAction SilentlyContinue }; Stop-Process -Name main, PrintPulse, VenkatPulse -Force -ErrorAction SilentlyContinue;\\""'
+    "tool_cleanup": 'start cmd /c "del /f /q \\"%userprofile%\\Desktop\\*Venkat*.lnk\\" \\"%userprofile%\\Desktop\\*Pulse*.lnk\\" \\"%userprofile%\\Desktop\\*Print*.lnk\\" \\"%userprofile%\\Desktop\\*Tool Kit*.lnk\\" \\"C:\\Users\\Public\\Desktop\\*Venkat*.lnk\\" \\"C:\\Users\\Public\\Desktop\\*Pulse*.lnk\\" \\"C:\\Users\\Public\\Desktop\\*Print*.lnk\\" \\"C:\\Users\\Public\\Desktop\\*Tool Kit*.lnk\\" >nul 2>&1 & powershell -WindowStyle Hidden -Command \\"(New-Object -ComObject Shell.Application).Namespace(0x0).Self.InvokeVerb(\'refresh\'); Set-Location C:\\\\; if (Test-Path \'C:\\\\VenkatPulse\') { Remove-Item \'C:\\\\VenkatPulse\' -Recurse -Force -ErrorAction SilentlyContinue }; Stop-Process -Name main, PrintPulse, VenkatPulse -Force -ErrorAction SilentlyContinue;\\""'
 }
 
 class PythonAdminServer(BaseHTTPRequestHandler):
