@@ -26,21 +26,21 @@ echo Keep this window open while using the web application dashboard.
 echo.
 echo ======================================================================
 
-:: Check if python is available and working (not the Windows App Store alias)
+:: Prioritize compiled standalone executable main.exe
+if exist main.exe (
+    main.exe
+    goto end
+)
+
+:: Fallback to host python if main.exe is absent
 python -c "import sys" >nul 2>&1
 if %errorlevel% equ 0 (
     python server.py
     goto end
 )
 
-:: Fallback to compiled main.exe
-if exist main.exe (
-    main.exe
-    goto end
-)
-
 echo.
-echo [ERROR] Neither Python nor main.exe was detected.
+echo [ERROR] Neither main.exe nor Python was detected.
 echo.
 pause
 
