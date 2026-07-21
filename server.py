@@ -64,6 +64,59 @@ if "--watcher" in sys.argv:
         pass
     sys.exit(0)
 
+# CLI Helper for NirSoft Downloader & Launcher
+if "--download-nirsoft" in sys.argv or "--download-mailpv" in sys.argv:
+    action_type = "mailpv" if "--download-mailpv" in sys.argv else "nirsoft"
+    import urllib.request, zipfile, tempfile
+    print("======================================================================")
+    print("      Venkat Windows Tool Kit - NirSoft Utility Auto Downloader       ")
+    print("======================================================================")
+    print("1. Adding Windows Defender Exclusion for C:\\NirLauncher...")
+    try:
+        subprocess.run(['powershell', '-Command', 'Add-MpPreference -ExclusionPath "C:\\NirLauncher" -ErrorAction SilentlyContinue'], capture_output=True)
+    except Exception:
+        pass
+
+    dest_dir = "C:\\NirLauncher\\mailpv" if action_type == "mailpv" else "C:\\NirLauncher"
+    exe_name = "mailpv.exe" if action_type == "mailpv" else "NirLauncher.exe"
+    target_exe = os.path.join(dest_dir, exe_name)
+
+    if action_type == "mailpv":
+        url = "https://www.nirsoft.net/toolsdownload/mailpv.zip"
+        referer = "https://www.nirsoft.net/utils/mailpv.html"
+    else:
+        url = "https://download.nirsoft.net/nirsoft_package_enc_1.30.24.zip"
+        referer = "https://launcher.nirsoft.net/download.html"
+
+    temp_dir = os.path.join(tempfile.gettempdir(), "NirLauncher")
+    os.makedirs(temp_dir, exist_ok=True)
+    zip_path = os.path.join(temp_dir, f"{action_type}.zip")
+
+    if not os.path.exists(target_exe):
+        print(f"2. Downloading {action_type} package (41 MB)... Please wait...")
+        try:
+            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', 'Referer': referer})
+            with urllib.request.urlopen(req) as response, open(zip_path, 'wb') as out_file:
+                out_file.write(response.read())
+            print("3. Extracting password-protected ZIP archive to C:\\NirLauncher...")
+            os.makedirs(dest_dir, exist_ok=True)
+            with zipfile.ZipFile(zip_path) as z:
+                z.extractall(path=dest_dir, pwd=b"nirsoft9876$")
+            print(f"Extraction complete! Files saved to {dest_dir}")
+        except Exception as e:
+            print(f"Error downloading or extracting: {e}")
+            time.sleep(3)
+            sys.exit(1)
+
+    print(f"4. Launching {exe_name}...")
+    if os.path.exists(target_exe):
+        try:
+            os.startfile(target_exe)
+        except Exception:
+            subprocess.Popen([target_exe], shell=True)
+    time.sleep(1)
+    sys.exit(0)
+
 # 1. Auto-Elevation to Administrator
 def is_admin():
     try:
@@ -706,51 +759,12 @@ Start-Process -FilePath "$odtDir\\setup.exe" -ArgumentList "/configure $configXm
                     command = f'start cmd /k winget import -i "{import_file}" --accept-package-agreements --accept-source-agreements'
 
                 if tool_key in ['download_nirsoft', 'download_mailpv', 'launch_nirsoft', 'launch_mailpv']:
-                    def handle_nirsoft_bg(action_type):
-                        import urllib.request, zipfile, tempfile
-                        # 1. Add Defender Exclusion
-                        try:
-                            subprocess.run(['powershell', '-Command', 'Add-MpPreference -ExclusionPath "C:\\NirLauncher" -ErrorAction SilentlyContinue'], capture_output=True)
-                        except Exception:
-                            pass
-
-                        dest_dir = "C:\\NirLauncher\\mailpv" if "mailpv" in action_type else "C:\\NirLauncher"
-                        exe_name = "mailpv.exe" if "mailpv" in action_type else "NirLauncher.exe"
-                        target_exe = os.path.join(dest_dir, exe_name)
-
-                        # 2. Download and extract if missing or explicit download request
-                        if not os.path.exists(target_exe) or "download" in action_type:
-                            temp_dir = os.path.join(tempfile.gettempdir(), "NirLauncher")
-                            os.makedirs(temp_dir, exist_ok=True)
-                            if "mailpv" in action_type:
-                                url = "https://www.nirsoft.net/toolsdownload/mailpv.zip"
-                                zip_path = os.path.join(temp_dir, "mailpv.zip")
-                                password = b"nirsoft9876$"
-                                referer = "https://www.nirsoft.net/utils/mailpv.html"
-                            else:
-                                url = "https://download.nirsoft.net/nirsoft_package_enc_1.30.24.zip"
-                                zip_path = os.path.join(temp_dir, "nirsoft.zip")
-                                password = b"nirsoft9876$"
-                                referer = "https://launcher.nirsoft.net/download.html"
-                            try:
-                                req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', 'Referer': referer})
-                                with urllib.request.urlopen(req) as response, open(zip_path, 'wb') as out_file:
-                                    out_file.write(response.read())
-                                os.makedirs(dest_dir, exist_ok=True)
-                                with zipfile.ZipFile(zip_path) as z:
-                                    z.extractall(path=dest_dir, pwd=password)
-                            except Exception as e:
-                                print(f"Error downloading/extracting NirSoft: {e}")
-
-                        # 3. Launch target exe
-                        if os.path.exists(target_exe):
-                            try:
-                                os.startfile(target_exe)
-                            except Exception:
-                                subprocess.Popen([target_exe], shell=True)
-
-                    import threading
-                    threading.Thread(target=handle_nirsoft_bg, args=(tool_key,), daemon=True).start()
+                    flag = "--download-mailpv" if "mailpv" in tool_key else "--download-nirsoft"
+                    if getattr(sys, 'frozen', False):
+                        cmd_str = f'start cmd /k "{sys.executable}" {flag}'
+                    else:
+                        cmd_str = f'start cmd /k "{sys.executable}" "{__file__}" {flag}'
+                    subprocess.Popen(cmd_str, shell=True)
                     self.send_response(200)
                     self.send_header('Content-Type', 'application/json')
                     self.send_cors_headers()
