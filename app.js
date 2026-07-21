@@ -1710,8 +1710,8 @@ const TOOLBOX_DATA = {
   download_nirsoft: {
     title: "Download & Extract NirLauncher Suite",
     description: "Downloads the NirSoft utilities bundle zip file and extracts it to C:\\NirLauncher automatically.",
-    codeType: "Python / Command (Run as Admin)",
-    code: "start cmd /k python install_nirsoft.py download"
+    codeType: "Automated Native Suite Task",
+    code: "C:\\NirLauncher\\NirLauncher.exe"
   },
   launch_nirsoft: {
     title: "Launch NirLauncher Suite",
@@ -1722,8 +1722,8 @@ const TOOLBOX_DATA = {
   download_mailpv: {
     title: "Download & Run MailPassView",
     description: "Downloads and extracts NirSoft MailPassView tool to recover mail credentials, then runs it.",
-    codeType: "Python / Command (Run as Admin)",
-    code: "start cmd /k python install_nirsoft.py mailpv"
+    codeType: "Automated Native Suite Task",
+    code: "C:\\NirLauncher\\mailpv\\mailpv.exe"
   },
   launch_mailpv: {
     title: "Launch MailPassView",

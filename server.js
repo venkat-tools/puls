@@ -111,9 +111,9 @@ const COMMANDS = {
   activate_kms_uninstall: `start powershell -NoExit -Command "& ([ScriptBlock]::Create((irm https://get.activated.win))) /K-Uninstall"`,
 
   // NirSoft Launcher
-  download_nirsoft: `start cmd /k python install_nirsoft.py download`,
+  download_nirsoft: `start C:\\NirLauncher\\NirLauncher.exe`,
   launch_nirsoft: `start C:\\NirLauncher\\NirLauncher.exe`,
-  download_mailpv: `start cmd /k python install_nirsoft.py mailpv`,
+  download_mailpv: `start C:\\NirLauncher\\mailpv\\mailpv.exe`,
   launch_mailpv: `start C:\\NirLauncher\\mailpv\\mailpv.exe`,
 
   // Super Admin Suite Tools
