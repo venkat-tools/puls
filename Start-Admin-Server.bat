@@ -26,21 +26,18 @@ echo Keep this window open while using the web application dashboard.
 echo.
 echo ======================================================================
 
-:: Prioritize compiled standalone executable main.exe
 if exist main.exe (
     main.exe
     goto end
 )
 
-:: Fallback to host python if main.exe is absent
-python -c "import sys" >nul 2>&1
-if %errorlevel% equ 0 (
+if exist server.py (
     python server.py
     goto end
 )
 
 echo.
-echo [ERROR] Neither main.exe nor Python was detected.
+echo [ERROR] main.exe was not found in %~dp0
 echo.
 pause
 
