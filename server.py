@@ -549,6 +549,196 @@ class PythonAdminServer(BaseHTTPRequestHandler):
             self.wfile.write(b"Not Found")
 
     def do_POST(self):
+        # Multipart parser helper
+        def parse_multipart(handler):
+            import email
+            import re
+            content_type = handler.headers.get('Content-Type')
+            content_length = int(handler.headers.get('Content-Length', 0))
+            body = handler.rfile.read(content_length)
+            msg = email.message_from_bytes(b"Content-Type: " + content_type.encode('utf-8') + b"\r\n\r\n" + body)
+            files = []
+            fields = {}
+            for part in msg.walk():
+                cdisp = part.get('Content-Disposition')
+                if cdisp:
+                    name_match = re.search(r'name="([^"]+)"', cdisp)
+                    name = name_match.group(1) if name_match else None
+                    filename = part.get_filename()
+                    if filename:
+                        files.append({
+                            "filename": filename,
+                            "data": part.get_payload(decode=True),
+                            "field": name
+                        })
+                    elif name:
+                        fields[name] = part.get_payload(decode=True).decode('utf-8', errors='ignore').strip()
+            return fields, files
+
+        # 0. PDF & Image Utilities Endpoints
+        if self.path == '/api/pdf/image-to-pdf':
+            try:
+                from PIL import Image
+                import io
+                fields, files = parse_multipart(self)
+                pil_images = []
+                for f in files:
+                    try:
+                        img = Image.open(io.BytesIO(f['data']))
+                        if img.mode in ('RGBA', 'LA') or (img.mode == 'P' and 'transparency' in img.info):
+                            bg = Image.new('RGB', img.size, (255, 255, 255))
+                            bg.paste(img, mask=img.split()[3] if img.mode == 'RGBA' else None)
+                            pil_images.append(bg)
+                        else:
+                            pil_images.append(img.convert('RGB'))
+                    except Exception:
+                        pass
+                if pil_images:
+                    pdf_io = io.BytesIO()
+                    pil_images[0].save(pdf_io, format='PDF', save_all=True, append_images=pil_images[1:])
+                    pdf_data = pdf_io.getvalue()
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'application/pdf')
+                    self.send_header('Content-Disposition', 'attachment; filename="converted.pdf"')
+                    self.send_cors_headers()
+                    self.end_headers()
+                    self.wfile.write(pdf_data)
+                else:
+                    self.send_response(400)
+                    self.send_header('Content-Type', 'application/json')
+                    self.send_cors_headers()
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"error": "No valid images provided"}).encode('utf-8'))
+            except Exception as e:
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json')
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode('utf-8'))
+            return
+
+        elif self.path == '/api/pdf/pdf-to-image':
+            try:
+                import fitz
+                import zipfile
+                import io
+                fields, files = parse_multipart(self)
+                if files:
+                    pdf_data = files[0]['data']
+                    doc = fitz.open(stream=pdf_data, filetype="pdf")
+                    zip_io = io.BytesIO()
+                    with zipfile.ZipFile(zip_io, 'w', zipfile.ZIP_DEFLATED) as z:
+                        for i, page in enumerate(doc):
+                            pix = page.get_pixmap(dpi=150)
+                            img_data = pix.tobytes("png")
+                            z.writestr(f"page_{i+1}.png", img_data)
+                    zip_data = zip_io.getvalue()
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'application/zip')
+                    self.send_header('Content-Disposition', 'attachment; filename="extracted_pages.zip"')
+                    self.send_cors_headers()
+                    self.end_headers()
+                    self.wfile.write(zip_data)
+                else:
+                    self.send_response(400)
+                    self.send_header('Content-Type', 'application/json')
+                    self.send_cors_headers()
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"error": "No PDF file provided"}).encode('utf-8'))
+            except Exception as e:
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json')
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode('utf-8'))
+            return
+
+        elif self.path == '/api/pdf/merge-images':
+            try:
+                from PIL import Image
+                import io
+                fields, files = parse_multipart(self)
+                pil_images = []
+                for f in files:
+                    try:
+                        pil_images.append(Image.open(io.BytesIO(f['data'])))
+                    except Exception:
+                        pass
+                if pil_images:
+                    orientation = fields.get('orientation', 'vertical')
+                    widths, heights = zip(*(img.size for img in pil_images))
+                    if orientation == 'horizontal':
+                        total_width = sum(widths)
+                        max_height = max(heights)
+                        new_img = Image.new('RGBA', (total_width, max_height), (255, 255, 255, 0))
+                        x_offset = 0
+                        for img in pil_images:
+                            new_img.paste(img, (x_offset, 0))
+                            x_offset += img.size[0]
+                    else:
+                        max_width = max(widths)
+                        total_height = sum(heights)
+                        new_img = Image.new('RGBA', (max_width, total_height), (255, 255, 255, 0))
+                        y_offset = 0
+                        for img in pil_images:
+                            new_img.paste(img, (0, y_offset))
+                            y_offset += img.size[1]
+                    out_io = io.BytesIO()
+                    new_img.save(out_io, format='PNG')
+                    merged_data = out_io.getvalue()
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'image/png')
+                    self.send_header('Content-Disposition', 'attachment; filename="merged.png"')
+                    self.send_cors_headers()
+                    self.end_headers()
+                    self.wfile.write(merged_data)
+                else:
+                    self.send_response(400)
+                    self.send_header('Content-Type', 'application/json')
+                    self.send_cors_headers()
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"error": "No valid images provided"}).encode('utf-8'))
+            except Exception as e:
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json')
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode('utf-8'))
+            return
+
+        elif self.path == '/api/pdf/merge-pdfs':
+            try:
+                from pypdf import PdfMerger
+                import io
+                fields, files = parse_multipart(self)
+                if files:
+                    merger = PdfMerger()
+                    for f in files:
+                        merger.append(io.BytesIO(f['data']))
+                    pdf_io = io.BytesIO()
+                    merger.write(pdf_io)
+                    merger.close()
+                    merged_pdf_data = pdf_io.getvalue()
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'application/pdf')
+                    self.send_header('Content-Disposition', 'attachment; filename="merged.pdf"')
+                    self.send_cors_headers()
+                    self.end_headers()
+                    self.wfile.write(merged_pdf_data)
+                else:
+                    self.send_response(400)
+                    self.send_header('Content-Type', 'application/json')
+                    self.send_cors_headers()
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"error": "No PDF files provided"}).encode('utf-8'))
+            except Exception as e:
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json')
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode('utf-8'))
+            return
+
         # 1. API Endpoint: Execute System Commands
         if self.path == '/api/execute':
             content_length = int(self.headers['Content-Length'])

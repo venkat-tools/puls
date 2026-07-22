@@ -108,6 +108,7 @@ class VenkatPulseApp(ctk.CTk):
             ("AiAssistant", "💬 AI Assistant"),
             ("WinPEBuilder", "💾 WinPE USB Builder"),
             ("DiskSecurity", "💾 Disk & Password Tools"),
+            ("PdfUtils", "📄 PDF & Image Tools"),
             ("StandaloneTools", "🧰 Standalone Tools")
         ]
         
@@ -153,6 +154,7 @@ class VenkatPulseApp(ctk.CTk):
         self.create_ai_assistant_frame()
         self.create_winpe_builder_frame()
         self.create_disk_security_frame()
+        self.create_pdf_utils_frame()
         self.create_standalone_tools_frame()
         
         # Show Dashboard initially
@@ -2144,6 +2146,241 @@ Write-Host 'Office Installation finished.'
         
         # Initial scan & population
         self.refresh_disk_security_selectors()
+
+    def create_pdf_utils_frame(self):
+        frame = ctk.CTkScrollableFrame(self, fg_color="transparent")
+        self.frames["PdfUtils"] = frame
+        
+        frame.grid_columnconfigure(0, weight=1)
+        frame.grid_columnconfigure(1, weight=1)
+        
+        title = ctk.CTkLabel(frame, text="📄 PDF & Image Utilities", font=ctk.CTkFont(size=20, weight="bold"))
+        title.grid(row=0, column=0, columnspan=2, padx=10, pady=10, sticky="w")
+        
+        subtitle = ctk.CTkLabel(frame, text="Perform quick conversions and merge actions natively on your local system.", text_color="gray", font=ctk.CTkFont(size=12))
+        subtitle.grid(row=1, column=0, columnspan=2, padx=10, pady=(0, 15), sticky="w")
+
+        # Column 1
+        col1 = ctk.CTkFrame(frame, fg_color="transparent")
+        col1.grid(row=2, column=0, padx=10, pady=10, sticky="nsew")
+        col1.grid_columnconfigure(0, weight=1)
+
+        # Panel 1: Image to PDF
+        p1 = ctk.CTkFrame(col1, corner_radius=10)
+        p1.grid(row=0, column=0, padx=5, pady=8, sticky="ew")
+        p1.grid_columnconfigure(0, weight=1)
+        
+        ctk.CTkLabel(p1, text="🖼️ Convert Images to PDF", font=ctk.CTkFont(size=14, weight="bold")).grid(row=0, column=0, padx=15, pady=(10, 5), sticky="w")
+        ctk.CTkLabel(p1, text="Compile multiple image files (PNG, JPG) sequentially into a PDF.", text_color="gray", font=ctk.CTkFont(size=11)).grid(row=1, column=0, padx=15, pady=(0, 10), sticky="w")
+        
+        self.lbl_img2pdf_status = ctk.CTkLabel(p1, text="No files selected", text_color="gray", font=ctk.CTkFont(size=11))
+        self.lbl_img2pdf_status.grid(row=2, column=0, padx=15, pady=(0, 10), sticky="w")
+        
+        self.img2pdf_paths = []
+        def select_images():
+            from tkinter import filedialog
+            files = filedialog.askopenfilenames(filetypes=[("Image Files", "*.png *.jpg *.jpeg *.bmp")])
+            if files:
+                self.img2pdf_paths = list(files)
+                self.lbl_img2pdf_status.configure(text=f"{len(files)} file(s) selected", text_color="#10b981")
+        
+        def run_img2pdf():
+            if not self.img2pdf_paths:
+                messagebox.showerror("Error", "Please select images first!")
+                return
+            from tkinter import filedialog
+            out_pdf = filedialog.asksaveasfilename(defaultextension=".pdf", filetypes=[("PDF Files", "*.pdf")])
+            if not out_pdf:
+                return
+            try:
+                from PIL import Image
+                pil_images = []
+                for p in self.img2pdf_paths:
+                    img = Image.open(p)
+                    if img.mode in ('RGBA', 'LA') or (img.mode == 'P' and 'transparency' in img.info):
+                        bg = Image.new('RGB', img.size, (255, 255, 255))
+                        bg.paste(img, mask=img.split()[3] if img.mode == 'RGBA' else None)
+                        pil_images.append(bg)
+                    else:
+                        pil_images.append(img.convert('RGB'))
+                if pil_images:
+                    pil_images[0].save(out_pdf, save_all=True, append_images=pil_images[1:])
+                    messagebox.showinfo("Success", f"Successfully converted and saved PDF to:\n{out_pdf}")
+                    self.img2pdf_paths = []
+                    self.lbl_img2pdf_status.configure(text="No files selected", text_color="gray")
+            except Exception as ex:
+                messagebox.showerror("Error", f"Failed to convert: {ex}")
+                
+        btn_sel = ctk.CTkButton(p1, text="Browse Images...", width=140, command=select_images)
+        btn_sel.grid(row=3, column=0, padx=15, pady=(0, 10), sticky="w")
+        
+        btn_conv = ctk.CTkButton(p1, text="Convert to PDF", fg_color="#10b981", hover_color="#059669", font=ctk.CTkFont(weight="bold"), command=run_img2pdf)
+        btn_conv.grid(row=4, column=0, padx=15, pady=(0, 15), sticky="ew")
+
+        # Panel 2: Merge Images
+        p2 = ctk.CTkFrame(col1, corner_radius=10)
+        p2.grid(row=1, column=0, padx=5, pady=8, sticky="ew")
+        p2.grid_columnconfigure(0, weight=1)
+        
+        ctk.CTkLabel(p2, text="🥞 Merge Images", font=ctk.CTkFont(size=14, weight="bold")).grid(row=0, column=0, padx=15, pady=(10, 5), sticky="w")
+        ctk.CTkLabel(p2, text="Combine multiple images side-by-side or top-to-bottom.", text_color="gray", font=ctk.CTkFont(size=11)).grid(row=1, column=0, padx=15, pady=(0, 10), sticky="w")
+        
+        self.lbl_mergeimg_status = ctk.CTkLabel(p2, text="No files selected", text_color="gray", font=ctk.CTkFont(size=11))
+        self.lbl_mergeimg_status.grid(row=2, column=0, padx=15, pady=(0, 10), sticky="w")
+        
+        self.mergeimg_paths = []
+        def select_merge_images():
+            from tkinter import filedialog
+            files = filedialog.askopenfilenames(filetypes=[("Image Files", "*.png *.jpg *.jpeg *.bmp")])
+            if files:
+                self.mergeimg_paths = list(files)
+                self.lbl_mergeimg_status.configure(text=f"{len(files)} file(s) selected", text_color="#10b981")
+                
+        def run_merge_images():
+            if not self.mergeimg_paths:
+                messagebox.showerror("Error", "Please select images first!")
+                return
+            from tkinter import filedialog
+            out_img = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PNG Image", "*.png"), ("JPEG Image", "*.jpg")])
+            if not out_img:
+                return
+            try:
+                from PIL import Image
+                pil_images = [Image.open(p) for p in self.mergeimg_paths]
+                orientation = self.opt_orientation.get().lower()
+                widths, heights = zip(*(img.size for img in pil_images))
+                
+                if "horizontal" in orientation:
+                    total_width = sum(widths)
+                    max_height = max(heights)
+                    new_img = Image.new('RGBA', (total_width, max_height), (255, 255, 255, 0))
+                    x_offset = 0
+                    for img in pil_images:
+                        new_img.paste(img, (x_offset, 0))
+                        x_offset += img.size[0]
+                else:
+                    max_width = max(widths)
+                    total_height = sum(heights)
+                    new_img = Image.new('RGBA', (max_width, total_height), (255, 255, 255, 0))
+                    y_offset = 0
+                    for img in pil_images:
+                        new_img.paste(img, (0, y_offset))
+                        y_offset += img.size[1]
+                
+                new_img.save(out_img)
+                messagebox.showinfo("Success", f"Successfully merged and saved image to:\n{out_img}")
+                self.mergeimg_paths = []
+                self.lbl_mergeimg_status.configure(text="No files selected", text_color="gray")
+            except Exception as ex:
+                messagebox.showerror("Error", f"Failed to merge: {ex}")
+
+        btn_sel_merge = ctk.CTkButton(p2, text="Browse Images...", width=140, command=select_merge_images)
+        btn_sel_merge.grid(row=3, column=0, padx=15, pady=(0, 10), sticky="w")
+        
+        opt_frame = ctk.CTkFrame(p2, fg_color="transparent")
+        opt_frame.grid(row=4, column=0, padx=15, pady=(0, 10), sticky="w")
+        ctk.CTkLabel(opt_frame, text="Orientation:").pack(side="left", padx=(0, 5))
+        self.opt_orientation = ctk.CTkOptionMenu(opt_frame, width=120, values=["Vertical", "Horizontal"])
+        self.opt_orientation.pack(side="left")
+        
+        btn_merge = ctk.CTkButton(p2, text="Merge Images", fg_color="#8b5cf6", hover_color="#7c3aed", font=ctk.CTkFont(weight="bold"), command=run_merge_images)
+        btn_merge.grid(row=5, column=0, padx=15, pady=(0, 15), sticky="ew")
+
+        # Column 2
+        col2 = ctk.CTkFrame(frame, fg_color="transparent")
+        col2.grid(row=2, column=1, padx=10, pady=10, sticky="nsew")
+        col2.grid_columnconfigure(0, weight=1)
+
+        # Panel 3: PDF to Image
+        p3 = ctk.CTkFrame(col2, corner_radius=10)
+        p3.grid(row=0, column=0, padx=5, pady=8, sticky="ew")
+        p3.grid_columnconfigure(0, weight=1)
+        
+        ctk.CTkLabel(p3, text="📑 Convert PDF to Images", font=ctk.CTkFont(size=14, weight="bold")).grid(row=0, column=0, padx=15, pady=(10, 5), sticky="w")
+        ctk.CTkLabel(p3, text="Extract all PDF pages as standalone high-quality PNG images.", text_color="gray", font=ctk.CTkFont(size=11)).grid(row=1, column=0, padx=15, pady=(0, 10), sticky="w")
+        
+        self.lbl_pdf2img_status = ctk.CTkLabel(p3, text="No PDF selected", text_color="gray", font=ctk.CTkFont(size=11))
+        self.lbl_pdf2img_status.grid(row=2, column=0, padx=15, pady=(0, 10), sticky="w")
+        
+        self.pdf2img_path = ""
+        def select_pdf():
+            from tkinter import filedialog
+            f = filedialog.askopenfilename(filetypes=[("PDF Files", "*.pdf")])
+            if f:
+                self.pdf2img_path = f
+                self.lbl_pdf2img_status.configure(text=os.path.basename(f), text_color="#10b981")
+                
+        def run_pdf2img():
+            if not self.pdf2img_path:
+                messagebox.showerror("Error", "Please select a PDF file first!")
+                return
+            from tkinter import filedialog
+            out_dir = filedialog.askdirectory()
+            if not out_dir:
+                return
+            try:
+                import fitz
+                doc = fitz.open(self.pdf2img_path)
+                for i, page in enumerate(doc):
+                    pix = page.get_pixmap(dpi=150)
+                    pix.save(os.path.join(out_dir, f"page_{i+1}.png"))
+                messagebox.showinfo("Success", f"Extracted {len(doc)} pages as PNGs to:\n{out_dir}")
+                self.pdf2img_path = ""
+                self.lbl_pdf2img_status.configure(text="No PDF selected", text_color="gray")
+            except Exception as ex:
+                messagebox.showerror("Error", f"Failed to extract pages: {ex}")
+                
+        btn_sel_pdf = ctk.CTkButton(p3, text="Browse PDF...", width=140, command=select_pdf)
+        btn_sel_pdf.grid(row=3, column=0, padx=15, pady=(0, 10), sticky="w")
+        
+        btn_extract = ctk.CTkButton(p3, text="Extract Pages", fg_color="#3b82f6", hover_color="#2563eb", font=ctk.CTkFont(weight="bold"), command=run_pdf2img)
+        btn_extract.grid(row=4, column=0, padx=15, pady=(0, 15), sticky="ew")
+
+        # Panel 4: Merge PDFs
+        p4 = ctk.CTkFrame(col2, corner_radius=10)
+        p4.grid(row=1, column=0, padx=5, pady=8, sticky="ew")
+        p4.grid_columnconfigure(0, weight=1)
+        
+        ctk.CTkLabel(p4, text="📚 Merge PDF Files", font=ctk.CTkFont(size=14, weight="bold")).grid(row=0, column=0, padx=15, pady=(10, 5), sticky="w")
+        ctk.CTkLabel(p4, text="Combine multiple PDF documents sequentially into one.", text_color="gray", font=ctk.CTkFont(size=11)).grid(row=1, column=0, padx=15, pady=(0, 10), sticky="w")
+        
+        self.lbl_mergepdf_status = ctk.CTkLabel(p4, text="No PDFs selected", text_color="gray", font=ctk.CTkFont(size=11))
+        self.lbl_mergepdf_status.grid(row=2, column=0, padx=15, pady=(0, 10), sticky="w")
+        
+        self.mergepdf_paths = []
+        def select_merge_pdfs():
+            from tkinter import filedialog
+            files = filedialog.askopenfilenames(filetypes=[("PDF Files", "*.pdf")])
+            if files:
+                self.mergepdf_paths = list(files)
+                self.lbl_mergepdf_status.configure(text=f"{len(files)} file(s) selected", text_color="#10b981")
+                
+        def run_merge_pdfs():
+            if not self.mergepdf_paths:
+                messagebox.showerror("Error", "Please select PDFs first!")
+                return
+            from tkinter import filedialog
+            out_pdf = filedialog.asksaveasfilename(defaultextension=".pdf", filetypes=[("PDF Files", "*.pdf")])
+            if not out_pdf:
+                return
+            try:
+                from pypdf import PdfMerger
+                merger = PdfMerger()
+                for p in self.mergepdf_paths:
+                    merger.append(p)
+                merger.write(out_pdf)
+                merger.close()
+                messagebox.showinfo("Success", f"Successfully merged and saved PDF to:\n{out_pdf}")
+                self.mergepdf_paths = []
+                self.lbl_mergepdf_status.configure(text="No PDFs selected", text_color="gray")
+            except Exception as ex:
+                messagebox.showerror("Error", f"Failed to merge PDFs: {ex}")
+                
+        btn_sel_merge_pdf = ctk.CTkButton(p4, text="Browse PDFs...", width=140, command=select_merge_pdfs)
+        btn_sel_merge_pdf.grid(row=3, column=0, padx=15, pady=(0, 10), sticky="w")
+        
+        btn_merge_pdf = ctk.CTkButton(p4, text="Merge PDFs", fg_color="#ef4444", hover_color="#dc2626", font=ctk.CTkFont(weight="bold"), command=run_merge_pdfs)
+        btn_merge_pdf.grid(row=4, column=0, padx=15, pady=(0, 15), sticky="ew")
 
     def create_standalone_tools_frame(self):
         frame = ctk.CTkScrollableFrame(self, fg_color="transparent")

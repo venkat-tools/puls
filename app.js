@@ -3807,3 +3807,127 @@ function runWebInstallFix() {
     .catch(err => alert("Error: " + err.message));
   }
 }
+
+function updateFileLabel(key) {
+  const input = document.getElementById(key + '-input');
+  const label = document.getElementById(key + '-label');
+  if (input && label) {
+    if (input.files.length === 0) {
+      label.innerText = 'No files selected';
+    } else {
+      label.innerText = input.files.length + ' file(s) selected: ' + Array.from(input.files).map(f => f.name).join(', ');
+    }
+  }
+}
+
+function uploadAndDownload(url, formData, btnId, defaultFilename) {
+  const btn = document.getElementById(btnId);
+  const originalHtml = btn.innerHTML;
+  btn.disabled = true;
+  btn.style.background = "var(--state-warning)";
+  btn.innerHTML = `<i class="lucide-spinner" style="animation: spin 1.5s linear infinite; width:14px; height:14px; margin-right:4px; vertical-align: middle; display: inline-block;"></i> Processing...`;
+  
+  fetch(url, {
+    method: 'POST',
+    body: formData
+  })
+  .then(res => {
+    if (!res.ok) {
+      return res.json().then(data => { throw new Error(data.error || 'Operation failed'); });
+    }
+    let filename = defaultFilename;
+    const disp = res.headers.get('Content-Disposition');
+    if (disp) {
+      const match = disp.match(/filename="([^"]+)"/);
+      if (match) filename = match[1];
+    }
+    return res.blob().then(blob => ({ blob, filename }));
+  })
+  .then(({ blob, filename }) => {
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = downloadUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(downloadUrl);
+    
+    btn.style.background = "var(--state-success)";
+    btn.style.borderColor = "var(--state-success)";
+    btn.innerHTML = `<i data-lucide="check" style="width:14px; height:14px; margin-right:4px; vertical-align: middle;"></i> Completed!`;
+    lucide.createIcons();
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.style.background = "";
+      btn.style.borderColor = "";
+      btn.innerHTML = originalHtml;
+      lucide.createIcons();
+    }, 3000);
+  })
+  .catch(err => {
+    btn.style.background = "var(--state-danger)";
+    btn.innerHTML = `<i data-lucide="x" style="width:14px; height:14px; margin-right:4px; vertical-align: middle;"></i> Failed`;
+    lucide.createIcons();
+    alert("Operation failed: " + err.message);
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.style.background = "";
+      btn.style.borderColor = "";
+      btn.innerHTML = originalHtml;
+      lucide.createIcons();
+    }, 3000);
+  });
+}
+
+function processImageToPdf() {
+  const input = document.getElementById('img2pdf-input');
+  if (input.files.length === 0) {
+    alert("Please select at least one image file first!");
+    return;
+  }
+  const formData = new FormData();
+  for (let i = 0; i < input.files.length; i++) {
+    formData.append('file-' + i, input.files[i]);
+  }
+  uploadAndDownload(API_BASE + '/api/pdf/image-to-pdf', formData, 'btn-img2pdf', 'converted.pdf');
+}
+
+function processPdfToImage() {
+  const input = document.getElementById('pdf2img-input');
+  if (input.files.length === 0) {
+    alert("Please select a PDF document first!");
+    return;
+  }
+  const formData = new FormData();
+  formData.append('file', input.files[0]);
+  uploadAndDownload(API_BASE + '/api/pdf/pdf-to-image', formData, 'btn-pdf2img', 'extracted_pages.zip');
+}
+
+function processMergeImages() {
+  const input = document.getElementById('mergeimg-input');
+  if (input.files.length === 0) {
+    alert("Please select at least one image file first!");
+    return;
+  }
+  const orient = document.getElementById('mergeimg-orientation').value;
+  const formData = new FormData();
+  for (let i = 0; i < input.files.length; i++) {
+    formData.append('file-' + i, input.files[i]);
+  }
+  formData.append('orientation', orient);
+  uploadAndDownload(API_BASE + '/api/pdf/merge-images', formData, 'btn-mergeimg', 'merged.png');
+}
+
+function processMergePdfs() {
+  const input = document.getElementById('mergepdf-input');
+  if (input.files.length === 0) {
+    alert("Please select at least one PDF file first!");
+    return;
+  }
+  const formData = new FormData();
+  for (let i = 0; i < input.files.length; i++) {
+    formData.append('file-' + i, input.files[i]);
+  }
+  uploadAndDownload(API_BASE + '/api/pdf/merge-pdfs', formData, 'btn-mergepdf', 'merged.pdf');
+}
