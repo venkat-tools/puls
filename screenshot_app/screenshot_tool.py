@@ -1365,6 +1365,7 @@ class PDFUtilsWindow(ctk.CTkToplevel):
 # Main Floating Dock Widget (System Capsule Bar)
 class FloatingDock(ctk.CTk):
     def __init__(self):
+        super().__init__()
         self.overrideredirect(True)
         self.attributes("-topmost", True)
         self.configure(fg_color="#1e1e1e")
