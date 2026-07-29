@@ -1006,19 +1006,14 @@ Start-Process -FilePath "$odtDir\\setup.exe" -ArgumentList "/configure $configXm
                     command = f'start cmd /k winget import -i "{import_file}" --accept-package-agreements --accept-source-agreements'
 
                 if tool_key in ['download_nirsoft', 'download_mailpv', 'launch_nirsoft', 'launch_mailpv']:
-                    flag = "--download-mailpv" if "mailpv" in tool_key else "--download-nirsoft"
-                    if getattr(sys, 'frozen', False):
-                        cmd_str = f'start cmd /k "{sys.executable}" {flag}'
+                    action = "mailpv" if "mailpv" in tool_key else "download"
+                    curr_dir = os.path.dirname(sys.executable) if getattr(sys, 'frozen', False) else os.path.dirname(os.path.abspath(__file__))
+                    ps_script = os.path.join(curr_dir, "Download-NirSoft-Suite.ps1")
+                    target_path = "C:\\NirLauncher\\mailpv\\mailpv.exe" if action == "mailpv" else "C:\\NirLauncher\\NirLauncher.exe"
+                    if "launch" in tool_key and os.path.exists(target_path):
+                        command = f'start "" "{target_path}"'
                     else:
-                        cmd_str = f'start cmd /k "{sys.executable}" "{__file__}" {flag}'
-                    subprocess.Popen(cmd_str, shell=True)
-                    self.send_response(200)
-                    self.send_header('Content-Type', 'application/json')
-                    self.send_cors_headers()
-                    self.end_headers()
-                    msg = "Downloading and launching NirLauncher Suite..." if "nirsoft" in tool_key else "Downloading and launching MailPassView..."
-                    self.wfile.write(json.dumps({"success": True, "output": msg}).encode('utf-8'))
-                    return
+                        command = f'start powershell -NoExit -ExecutionPolicy Bypass -File "{ps_script}" -action {action}'
 
                 if not command:
                     self.send_response(400)

@@ -111,10 +111,10 @@ const COMMANDS = {
   activate_kms_uninstall: `start powershell -NoExit -Command "& ([ScriptBlock]::Create((irm https://get.activated.win))) /K-Uninstall"`,
 
   // NirSoft Launcher
-  download_nirsoft: `start C:\\NirLauncher\\NirLauncher.exe`,
-  launch_nirsoft: `start C:\\NirLauncher\\NirLauncher.exe`,
-  download_mailpv: `start C:\\NirLauncher\\mailpv\\mailpv.exe`,
-  launch_mailpv: `start C:\\NirLauncher\\mailpv\\mailpv.exe`,
+  download_nirsoft: ``,
+  launch_nirsoft: ``,
+  download_mailpv: ``,
+  launch_mailpv: ``,
 
   // Super Admin Suite Tools
   launch_info_specs: `start msinfo32.exe`,
@@ -393,6 +393,18 @@ const server = http.createServer((req, res) => {
             return;
           }
           command = `winget install --id ${appId} --silent --accept-package-agreements --accept-source-agreements`;
+        }
+
+        if (toolKey === 'download_nirsoft' || toolKey === 'launch_nirsoft' || toolKey === 'download_mailpv' || toolKey === 'launch_mailpv') {
+          const action = toolKey.includes('mailpv') ? 'mailpv' : 'download';
+          const psScript = path.join(__dirname, 'Download-NirSoft-Suite.ps1');
+          const targetPath = action === 'mailpv' ? 'C:\\\\NirLauncher\\\\mailpv\\\\mailpv.exe' : 'C:\\\\NirLauncher\\\\NirLauncher.exe';
+          
+          if (toolKey.includes('launch') && fs.existsSync(targetPath)) {
+            command = `start "" "${targetPath}"`;
+          } else {
+            command = `start powershell -NoExit -ExecutionPolicy Bypass -File "${psScript}" -action ${action}`;
+          }
         }
 
         if (toolKey === 'install_office_2019') {
