@@ -1,7 +1,8 @@
-# 1. Elevate to Administrator
+# 1. Elevate to Administrator & Set Security Protocol
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(544)) {
     Start-Process powershell "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs; exit
 }
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 $dir = "C:\VenkatPulse"
 
@@ -43,6 +44,6 @@ try {
 
 # 7. Run Server & Launch Dashboard
 Write-Host "Launching Venkat Windows Tool Kit..." -ForegroundColor Cyan
-Start-Process "main.exe" -WindowStyle Hidden
+Start-Process "Start-Admin-Server.bat"
 Start-Sleep -Seconds 2
 Start-Process "http://localhost:3000"
