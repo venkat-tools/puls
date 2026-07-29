@@ -6,28 +6,39 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
 
 $dir = "C:\VenkatPulse"
 
-# 2. Stop running instances to unlock files for updating
+# 2. Check if already installed for instant launch option
+if (Test-Path "$dir\puls-main\main.exe") {
+    Write-Host "Launching Venkat Windows Tool Kit instantly..." -ForegroundColor Green
+    Stop-Process -Name main, PrintPulse, VenkatPulse -Force -ErrorAction SilentlyContinue
+    cd "$dir\puls-main"
+    Start-Process "Start-Admin-Server.bat"
+    Start-Sleep -Seconds 1
+    Start-Process "http://localhost:3000"
+    exit
+}
+
+# 3. Stop running instances to unlock files for updating
 Write-Host "Stopping active instances of Venkat Windows Tool Kit..." -ForegroundColor Yellow
 Stop-Process -Name main, PrintPulse, VenkatPulse -Force -ErrorAction SilentlyContinue
 Start-Sleep -Seconds 1
 
-# 3. Setup Directory & Clean Old Version
+# 4. Setup Directory & Clean Old Version
 if (Test-Path "$dir\puls-main") { 
     Remove-Item "$dir\puls-main" -Recurse -Force -ErrorAction SilentlyContinue 
 }
 New-Item -ItemType Directory -Path $dir -Force | Out-Null
 
-# 4. Download & Extract Suite
+# 5. Download & Extract Suite
 Write-Host "Downloading latest Venkat Windows Tool Kit..." -ForegroundColor Green
 Invoke-WebRequest "https://github.com/venkat-tools/puls/archive/refs/heads/main.zip" -OutFile "$dir\temp.zip" -UseBasicParsing
 Expand-Archive "$dir\temp.zip" $dir -Force
 Remove-Item "$dir\temp.zip" -Force
 
-# 5. Unblock Files
+# 6. Unblock Files
 cd "$dir\puls-main"
 Get-ChildItem -Recurse | Unblock-File
 
-# 6. Create Desktop Shortcut for one-click launches
+# 7. Create Desktop Shortcut for one-click launches
 try {
     $desktopPath = [System.IO.Path]::Combine([Environment]::GetFolderPath("Desktop"), "Venkat Windows Tool Kit.lnk")
     $WshShell = New-Object -ComObject WScript.Shell
@@ -42,7 +53,7 @@ try {
     Write-Host "Failed to create desktop shortcut: $_" -ForegroundColor Yellow
 }
 
-# 7. Run Server & Launch Dashboard
+# 8. Run Server & Launch Dashboard
 Write-Host "Launching Venkat Windows Tool Kit..." -ForegroundColor Cyan
 Start-Process "Start-Admin-Server.bat"
 Start-Sleep -Seconds 2
