@@ -2494,12 +2494,6 @@ function installOffice(versionId) {
   
   if (!btn) return;
   
-  if (versionId === '2007') {
-    // 2007 is redirect only
-    window.open("https://archive.org/details/microsoft-office-2007-standard", "_blank");
-    logMaintenanceAction("Downloaded Office 2007 Info", "Resolved", "Opened Office 2007 legacy download archive link.");
-    return;
-  }
   
   const originalHtml = btn.innerHTML;
   btn.disabled = true;
@@ -3638,10 +3632,17 @@ function startTelemetryMonitor() {
 }
 
 // 16. Disk & Security Tools Integration
+let cachedVolumesData = [];
+
 function loadWebDiskInfo() {
   fetch(API_BASE + '/api/diskinfo')
     .then(res => res.json())
     .then(data => {
+      // Store volumes in global cache
+      if (data.volumes) {
+        cachedVolumesData = data.volumes;
+      }
+
       // 1. Populate Windows drives
       const winSelect = document.getElementById("ds-win-drive");
       if (winSelect) {
@@ -3686,10 +3687,75 @@ function loadWebDiskInfo() {
           }
         }
       });
+
+      // Refresh telemetry visualizers
+      if (cachedVolumesData.length > 0) {
+        updateWebTelemetry("pw", document.getElementById("ds-win-drive")?.value || "C");
+        updateWebTelemetry("fat", document.getElementById("ds-fat32-drive")?.value || "D");
+        updateWebTelemetry("boot", document.getElementById("ds-bcd-win")?.value || "C");
+        updateWebTelemetry("setup", document.getElementById("ds-target-part")?.value || "C");
+      }
     })
     .catch(err => {
       console.warn("Failed to load disk info: ", err);
     });
+}
+
+function updateWebTelemetry(suffix, driveLetter) {
+  const card = document.getElementById(`telemetry-${suffix}`);
+  if (!card) return;
+
+  if (!driveLetter) {
+    card.style.display = "none";
+    return;
+  }
+
+  const vol = cachedVolumesData.find(v => v.DriveLetter.toUpperCase() === driveLetter.toUpperCase());
+  if (!vol) {
+    card.style.display = "none";
+    return;
+  }
+
+  card.style.display = "block";
+
+  // Set file system badge
+  const fsBadge = document.getElementById(`telemetry-${suffix}-fs`);
+  if (fsBadge) fsBadge.innerText = vol.FileSystem;
+
+  // Set label
+  const lbl = document.getElementById(`telemetry-${suffix}-label`);
+  if (lbl) {
+    const labelText = vol.Label ? vol.Label : (driveLetter === 'C' ? "OS System Drive" : "Local Disk");
+    lbl.innerText = `${labelText} (${driveLetter}:)`;
+  }
+
+  // Calculate sizes in GB
+  const sizeGB = (vol.Size / (1024 * 1024 * 1024)).toFixed(1);
+  const freeGB = (vol.SizeRemaining / (1024 * 1024 * 1024)).toFixed(1);
+  const usedGB = (sizeGB - freeGB).toFixed(1);
+  const pctUsed = vol.Size > 0 ? Math.round(((vol.Size - vol.SizeRemaining) / vol.Size) * 100) : 0;
+
+  // Set space text
+  const spaceTxt = document.getElementById(`telemetry-${suffix}-space`);
+  if (spaceTxt) {
+    spaceTxt.innerText = `${freeGB} GB Free of ${sizeGB} GB (${pctUsed}% Used)`;
+  }
+
+  // Update progress bar fill
+  const bar = document.getElementById(`telemetry-${suffix}-fill`);
+  if (bar) {
+    bar.style.width = `${pctUsed}%`;
+    if (pctUsed > 90) {
+      bar.style.background = "linear-gradient(90deg, #ef4444, #b91c1c)";
+      bar.style.boxShadow = "0 0 8px rgba(239, 68, 68, 0.5)";
+    } else if (pctUsed > 75) {
+      bar.style.background = "linear-gradient(90deg, #f59e0b, #d97706)";
+      bar.style.boxShadow = "0 0 8px rgba(245, 158, 6, 0.5)";
+    } else {
+      bar.style.background = "linear-gradient(90deg, var(--accent-cyan), var(--accent-blue))";
+      bar.style.boxShadow = "0 0 8px rgba(6, 182, 212, 0.5)";
+    }
+  }
 }
 
 function runDiskSecurityCommand(action) {
@@ -3718,11 +3784,13 @@ function runDiskSecurityCommand(action) {
     return res.json();
   })
   .then(data => {
-    alert("Command executed successfully!");
+    showToast("Command Executed", `Action ${action.replace(/_/g, ' ')} succeeded.`, "success");
     logMaintenanceAction("Disk/Security Tool", "Success", `Action: ${action}`);
+    // Reload info after action
+    setTimeout(loadWebDiskInfo, 1000);
   })
   .catch(err => {
-    alert("Error: " + err.message);
+    showToast("Execution Error", err.message, "error");
   });
 }
 
@@ -3766,7 +3834,7 @@ function runWebInstallFix() {
   const val = select.value;
   const info = OS_INSTALL_ERRORS_WEB[val];
   if (!info || !info.fix_type) {
-    alert("Please select a valid error to fix.");
+    showToast("Selection Missing", "Please select a valid error to fix.", "warning");
     return;
   }
 
@@ -3786,10 +3854,11 @@ function runWebInstallFix() {
     .then(res => res.json())
     .then(data => {
       if (data.error) throw new Error(data.error);
-      alert("Disk wiped and converted successfully!");
+      showToast("Fix Applied", `Disk ${disk} wiped and converted successfully!`, "success");
       logMaintenanceAction("Disk Fixer", "Success", `Wiped disk ${disk} and converted to ${fix_type}`);
+      setTimeout(loadWebDiskInfo, 1000);
     })
-    .catch(err => alert("Error: " + err.message));
+    .catch(err => showToast("Execution Error", err.message, "error"));
     
   } else if (fix_type === "chkdsk") {
     const part = document.getElementById("ds-target-part").value;
@@ -3801,10 +3870,10 @@ function runWebInstallFix() {
     .then(res => res.json())
     .then(data => {
       if (data.error) throw new Error(data.error);
-      alert("chkdsk integrity scan launched!");
+      showToast("Check Disk Launched", `chkdsk integrity scan launched on drive ${part}:`, "success");
       logMaintenanceAction("Disk Fixer", "Success", `Run chkdsk on drive ${part}:`);
     })
-    .catch(err => alert("Error: " + err.message));
+    .catch(err => showToast("Execution Error", err.message, "error"));
   }
 }
 
@@ -3930,4 +3999,57 @@ function processMergePdfs() {
     formData.append('file-' + i, input.files[i]);
   }
   uploadAndDownload(API_BASE + '/api/pdf/merge-pdfs', formData, 'btn-mergepdf', 'merged.pdf');
+}
+
+// Glassmorphic Toast Notification Engine
+function showToast(title, message, type = "success") {
+  const container = document.getElementById("toast-container");
+  if (!container) return;
+
+  const card = document.createElement("div");
+  card.className = `toast-card toast-${type}`;
+
+  let iconHtml = "";
+  if (type === "success") {
+    iconHtml = `<i data-lucide="check-circle" style="width: 20px; height: 20px;"></i>`;
+  } else if (type === "error") {
+    iconHtml = `<i data-lucide="x-circle" style="width: 20px; height: 20px;"></i>`;
+  } else {
+    iconHtml = `<i data-lucide="alert-triangle" style="width: 20px; height: 20px;"></i>`;
+  }
+
+  card.innerHTML = `
+    <div class="toast-icon-wrapper">
+      ${iconHtml}
+    </div>
+    <div class="toast-body">
+      <div class="toast-title">${title}</div>
+      <div class="toast-msg">${message}</div>
+    </div>
+    <button class="toast-close-btn" onclick="this.parentElement.classList.remove('show'); setTimeout(() => this.parentElement.remove(), 400);">
+      <i data-lucide="x" style="width: 16px; height: 16px;"></i>
+    </button>
+  `;
+
+  container.appendChild(card);
+  
+  if (window.lucide) {
+    lucide.createIcons({
+      attrs: {
+        class: 'lucide-icon'
+      },
+      nameAttr: 'data-lucide'
+    });
+  }
+
+  card.offsetHeight; // Force reflow
+  card.classList.add("show");
+
+  setTimeout(() => {
+    card.classList.remove("show");
+    setTimeout(() => {
+      card.remove();
+    }, 400);
+  }, 4500);
+}
 }

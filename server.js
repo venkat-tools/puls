@@ -101,7 +101,7 @@ const COMMANDS = {
   install_office_m365: `start winget install --id Microsoft.Office --silent --accept-package-agreements --accept-source-agreements`,
   install_office_2021: `start powershell -Command "$odtUrl = 'https://download.microsoft.com/download/2/7/A/27AF1BEF-6E55-454E-8413-507AFE730268/officedeploymenttool_17425-20150.exe'; $tempDir = Join-Path $env:TEMP 'ODT_2021'; New-Item -ItemType Directory -Path $tempDir -Force; $odtExe = Join-Path $tempDir 'odt.exe'; Invoke-WebRequest -Uri $odtUrl -OutFile $odtExe; Start-Process -FilePath $odtExe -ArgumentList '/extract:C:\\Users\\Public\\Documents\\ODT2021 /quiet' -Wait; $configXml = 'C:\\Users\\Public\\Documents\\ODT2021\\configuration_2021.xml'; '<Configuration><Add OfficeClientEdition=\\"64\\" Channel=\\"PerpetualVL2021\\"><Product ID=\\"ProPlus2021Volume\\"><Language ID=\\"en-us\\" /><ExcludeApp ID=\\"Lync\\" /><ExcludeApp ID=\\"OneDrive\\" /></Product></Add><Display Level=\\"Full\\" AcceptEULA=\\"TRUE\\" /><Property Name=\\"SharedComputerLicensing\\" Value=\\"0\\" /><Property Name=\\"FORCEAPPSHUTDOWN\\" Value=\\"TRUE\\" /><Property Name=\\"DeviceBasedLicensing\\" Value=\\"0\\" /></Configuration>' | Out-File -FilePath $configXml -Encoding utf8; Start-Process -FilePath 'C:\\Users\\Public\\Documents\\ODT2021\\setup.exe' -ArgumentList '/configure C:\\Users\\Public\\Documents\\ODT2021\\configuration_2021.xml' -Wait"`,
   install_office_2024: `start powershell -Command "$odtUrl = 'https://download.microsoft.com/download/2/7/A/27AF1BEF-6E55-454E-8413-507AFE730268/officedeploymenttool_17425-20150.exe'; $tempDir = Join-Path $env:TEMP 'ODT_2024'; New-Item -ItemType Directory -Path $tempDir -Force; $odtExe = Join-Path $tempDir 'odt.exe'; Invoke-WebRequest -Uri $odtUrl -OutFile $odtExe; Start-Process -FilePath $odtExe -ArgumentList '/extract:C:\\Users\\Public\\Documents\\ODT2024 /quiet' -Wait; $configXml = 'C:\\Users\\Public\\Documents\\ODT2024\\configuration_2024.xml'; '<Configuration><Add OfficeClientEdition=\\"64\\" Channel=\\"PerpetualVL2024\\"><Product ID=\\"ProPlus2024Volume\\"><Language ID=\\"en-us\\" /><ExcludeApp ID=\\"Lync\\" /></Product></Add><Display Level=\\"Full\\" AcceptEULA=\\"TRUE\\" /><Property Name=\\"FORCEAPPSHUTDOWN\\" Value=\\"TRUE\\" /></Configuration>' | Out-File -FilePath $configXml -Encoding utf8; Start-Process -FilePath 'C:\\Users\\Public\\Documents\\ODT2024\\setup.exe' -ArgumentList '/configure C:\\Users\\Public\\Documents\\ODT2024\\configuration_2024.xml' -Wait"`,
-  install_office_2007: `start https://archive.org/details/microsoft-office-2007-standard`,
+  install_office_2019: ``,
   install_ninite_bundle: `start powershell -NoExit -Command "Write-Host 'Starting PrintPulse Ninite-style WinGet Bundle Installer...'; winget install --id Google.Chrome --silent --accept-package-agreements --accept-source-agreements; winget install --id VideoLAN.VLC --silent --accept-package-agreements --accept-source-agreements; winget install --id 7zip.7zip --silent --accept-package-agreements --accept-source-agreements; Write-Host 'All bundle apps installation completed! You can close this window.'"`,
 
   // Activation Tools
@@ -393,6 +393,42 @@ const server = http.createServer((req, res) => {
             return;
           }
           command = `winget install --id ${appId} --silent --accept-package-agreements --accept-source-agreements`;
+        }
+
+        if (toolKey === 'install_office_2019') {
+          const psScriptPath = path.join(os.tmpdir(), 'install_office_2019.ps1');
+          const scriptContent = `$ErrorActionPreference = 'Stop'
+$odtUrl = 'https://download.microsoft.com/download/6c1eeb25-cf8b-41d9-8d0d-cc1dbc032140/officedeploymenttool_20026-20112.exe'
+$odtDir = 'C:\\\\Users\\\\Public\\\\Documents\\\\ODT2019'
+if (!(Test-Path $odtDir)) {
+    New-Item -ItemType Directory -Path $odtDir -Force
+}
+$odtExe = Join-Path $odtDir 'odt.exe'
+Write-Host 'Downloading Office Deployment Tool...'
+Invoke-WebRequest -Uri $odtUrl -OutFile $odtExe
+Write-Host 'Extracting Office Deployment Tool...'
+Start-Process -FilePath $odtExe -ArgumentList "/extract:$odtDir /quiet" -Wait
+$configXml = Join-Path $odtDir 'configuration.xml'
+$xmlContent = @'
+<Configuration>
+  <Add OfficeClientEdition="64" Channel="PerpetualVL2019">
+    <Product ID="ProPlus2019Volume">
+      <Language ID="en-us" />
+      <ExcludeApp ID="Lync" />
+      <ExcludeApp ID="OneDrive" />
+    </Product>
+  </Add>
+  <Display Level="Full" AcceptEULA="TRUE" />
+  <Property Name="FORCEAPPSHUTDOWN" Value="TRUE" />
+</Configuration>
+'@
+$xmlContent | Out-File -FilePath $configXml -Encoding utf8
+Write-Host 'Starting Office Installation...'
+Start-Process -FilePath "$odtDir\\\\setup.exe" -ArgumentList "/configure $configXml" -Wait
+Write-Host 'Office Installation finished.'
+`;
+          fs.writeFileSync(psScriptPath, scriptContent, 'utf8');
+          command = `start powershell -NoExit -ExecutionPolicy Bypass -File "${psScriptPath}"`;
         }
 
         if (toolKey === 'install_office_2021') {

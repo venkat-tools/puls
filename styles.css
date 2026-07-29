@@ -3123,3 +3123,208 @@ body.light-theme .form-control {
 .btn-success:active {
   transform: translateY(0) !important;
 }
+
+/* Glassmorphic Toast Notification Engine */
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 380px;
+  pointer-events: none;
+}
+
+.toast-card {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  border-radius: var(--border-radius-lg);
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-md), var(--shadow-glow);
+  color: var(--text-primary);
+  transform: translateX(120%);
+  opacity: 0;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease, margin 0.3s ease, height 0.3s ease;
+  overflow: hidden;
+}
+
+.toast-card.show {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.toast-card.hide {
+  transform: translateX(120%);
+  opacity: 0;
+}
+
+.toast-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.toast-success .toast-icon-wrapper {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--state-success);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.toast-error .toast-icon-wrapper {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--state-danger);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.toast-warning .toast-icon-wrapper {
+  background: rgba(245, 158, 6, 0.15);
+  color: var(--state-warning);
+  border: 1px solid rgba(245, 158, 6, 0.3);
+}
+
+.toast-body {
+  flex-grow: 1;
+}
+
+.toast-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 3px;
+  color: var(--text-primary);
+}
+
+.toast-msg {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.toast-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 4px;
+  flex-shrink: 0;
+  transition: color var(--transition-fast);
+}
+
+.toast-close-btn:hover {
+  color: var(--text-primary);
+}
+
+/* Dynamic Live Disk Telemetry Cards */
+.telemetry-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  padding: 14px;
+  transition: all var(--transition-normal);
+  animation: fadeIn 0.4s ease;
+}
+
+.telemetry-card:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(99, 102, 241, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.telemetry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.telemetry-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.telemetry-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: rgba(99, 102, 241, 0.15);
+  color: var(--accent-indigo);
+  padding: 2px 8px;
+  border-radius: 20px;
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  text-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+}
+
+.telemetry-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.telemetry-info-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+}
+
+.progress-track {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue));
+  box-shadow: 0 0 8px rgba(6, 182, 212, 0.5);
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Micro-animations and premium touch updates */
+.nav-tab {
+  transition: all var(--transition-normal) !important;
+}
+
+.nav-tab:hover {
+  transform: translateY(-2px);
+  color: var(--text-primary);
+  background: var(--bg-glass-hover);
+}
+
+.btn {
+  transition: all var(--transition-fast) !important;
+}
+
+.btn:hover {
+  transform: translateY(-2px) scale(1.015);
+}
+
+.btn:active {
+  transform: translateY(0) scale(0.985);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}

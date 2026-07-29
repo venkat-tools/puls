@@ -241,7 +241,7 @@ COMMANDS = {
 
     # Office Installer
     "install_office_m365": "start winget install --id Microsoft.Office --silent --accept-package-agreements --accept-source-agreements",
-    "install_office_2007": "start https://archive.org/details/microsoft-office-2007-standard",
+    "install_office_2019": "",
     "install_ninite_bundle": 'start powershell -NoExit -Command "Write-Host \'Starting PrintPulse Ninite-style WinGet Bundle Installer...\'; winget install --id Google.Chrome --silent --accept-package-agreements --accept-source-agreements; winget install --id VideoLAN.VLC --silent --accept-package-agreements --accept-source-agreements; winget install --id 7zip.7zip --silent --accept-package-agreements --accept-source-agreements; Write-Host \'All bundle apps installation completed! You can close this window.\'"',
 
     # Activation Tools
@@ -457,10 +457,33 @@ class PythonAdminServer(BaseHTTPRequestHandler):
             except Exception:
                 pass
                 
+            volumes = []
+            try:
+                cmd = ["powershell", "-Command", "Get-Volume | Select-Object DriveLetter, FileSystemLabel, FileSystem, Size, SizeRemaining | ConvertTo-Json"]
+                process = subprocess.run(cmd, capture_output=True, text=True)
+                output = process.stdout.strip()
+                if output:
+                    data = json.loads(output)
+                    if not isinstance(data, list):
+                        data = [data]
+                    for v in data:
+                        letter = v.get("DriveLetter")
+                        if letter and len(str(letter)) == 1:
+                            volumes.append({
+                                "DriveLetter": str(letter),
+                                "Label": v.get("FileSystemLabel") or "",
+                                "FileSystem": v.get("FileSystem") or "Unknown",
+                                "Size": v.get("Size") or 0,
+                                "SizeRemaining": v.get("SizeRemaining") or 0
+                            })
+            except Exception:
+                pass
+                
             info = {
                 "windowsDrives": win_drives,
                 "allDrives": all_drives,
-                "disks": disks
+                "disks": disks,
+                "volumes": volumes
             }
             self.wfile.write(json.dumps(info).encode('utf-8'))
             return
@@ -784,6 +807,40 @@ class PythonAdminServer(BaseHTTPRequestHandler):
                         self.wfile.write(json.dumps({"error": "Invalid Application ID"}).encode('utf-8'))
                         return
                 
+                # Check for Office 2019 Silent Installer XML Script
+                if tool_key == 'install_office_2019':
+                    import tempfile
+                    ps_path = os.path.join(tempfile.gettempdir(), 'install_office_2019.ps1')
+                    script = """$ErrorActionPreference = 'Stop'
+$odtUrl = 'https://download.microsoft.com/download/6c1eeb25-cf8b-41d9-8d0d-cc1dbc032140/officedeploymenttool_20026-20112.exe'
+$odtDir = 'C:\\\\Users\\\\Public\\\\Documents\\\\ODT2019'
+if (!(Test-Path $odtDir)) {
+    New-Item -ItemType Directory -Path $odtDir -Force
+}
+$odtExe = Join-Path $odtDir 'odt.exe'
+Invoke-WebRequest -Uri $odtUrl -OutFile $odtExe
+Start-Process -FilePath $odtExe -ArgumentList "/extract:$odtDir /quiet" -Wait
+$configXml = Join-Path $odtDir 'configuration.xml'
+$xmlContent = @'
+<Configuration>
+  <Add OfficeClientEdition="64" Channel="PerpetualVL2019">
+    <Product ID="ProPlus2019Volume">
+      <Language ID="en-us" />
+      <ExcludeApp ID="Lync" />
+      <ExcludeApp ID="OneDrive" />
+    </Product>
+  </Add>
+  <Display Level="Full" AcceptEULA="TRUE" />
+  <Property Name="FORCEAPPSHUTDOWN" Value="TRUE" />
+</Configuration>
+'@
+$xmlContent | Out-File -FilePath $configXml -Encoding utf8
+Start-Process -FilePath "$odtDir\\\\setup.exe" -ArgumentList "/configure $configXml" -Wait
+"""
+                    with open(ps_path, 'w', encoding='utf-8') as f:
+                        f.write(script)
+                    command = f'start powershell -NoExit -ExecutionPolicy Bypass -File "{ps_path}"'
+
                 # Check for Office 2021 Silent Installer XML Script
                 if tool_key == 'install_office_2021':
                     import tempfile

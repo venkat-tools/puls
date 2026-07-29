@@ -1914,7 +1914,7 @@ Write-Host 'Office Installation finished.'
         p1_action_frame.grid(row=2, column=0, padx=15, pady=(0, 15), sticky="ew")
         
         ctk.CTkLabel(p1_action_frame, text="Windows Drive:").pack(side="left", padx=(0, 5))
-        self.win_drive_dropdown = ctk.CTkOptionMenu(p1_action_frame, width=90, values=["C"])
+        self.win_drive_dropdown = ctk.CTkOptionMenu(p1_action_frame, width=90, values=["C"], command=self.update_gui_telemetry_pw)
         self.win_drive_dropdown.pack(side="left", padx=(0, 10))
         
         btn_apply_bypass = ctk.CTkButton(
@@ -1935,6 +1935,10 @@ Write-Host 'Office Installation finished.'
             command=lambda: self.restore_utilman(self.win_drive_dropdown.get())
         )
         btn_restore_bypass.pack(side="left")
+
+        # Telemetry Label for Password Bypass
+        self.lbl_telemetry_pw = ctk.CTkLabel(p1, text="📊 Drive Stats: Querying...", font=ctk.CTkFont(size=11, weight="bold"), text_color="#06b6d4")
+        self.lbl_telemetry_pw.grid(row=3, column=0, padx=15, pady=(0, 12), sticky="w")
         
         # Panel 2: Lossless Disk File System & Partition Style Converters
         p2 = ctk.CTkFrame(left_column, corner_radius=10)
@@ -1948,7 +1952,7 @@ Write-Host 'Office Installation finished.'
         fs_frame = ctk.CTkFrame(p2, fg_color="transparent")
         fs_frame.grid(row=2, column=0, padx=15, pady=(0, 10), sticky="ew")
         ctk.CTkLabel(fs_frame, text="FAT32 Drive Letter:").pack(side="left", padx=(0, 5))
-        self.fat32_drive_dropdown = ctk.CTkOptionMenu(fs_frame, width=90, values=["D"])
+        self.fat32_drive_dropdown = ctk.CTkOptionMenu(fs_frame, width=90, values=["D"], command=self.update_gui_telemetry_fat)
         self.fat32_drive_dropdown.pack(side="left", padx=(0, 10))
         btn_conv_fs = ctk.CTkButton(
             fs_frame,
@@ -1972,6 +1976,10 @@ Write-Host 'Office Installation finished.'
             command=lambda: self.run_mbr_to_gpt(self.mbr_disk_dropdown.get())
         )
         btn_conv_pt.pack(side="left", fill="x", expand=True)
+
+        # Telemetry Label for Lossless Converters
+        self.lbl_telemetry_fat = ctk.CTkLabel(p2, text="📊 Drive Stats: Querying...", font=ctk.CTkFont(size=11, weight="bold"), text_color="#06b6d4")
+        self.lbl_telemetry_fat.grid(row=4, column=0, padx=15, pady=(0, 12), sticky="w")
         
         # Panel 3: Boot Sector & BCD Recovery Tools
         p3 = ctk.CTkFrame(left_column, corner_radius=10)
@@ -1997,7 +2005,7 @@ Write-Host 'Office Installation finished.'
         p3_bcdboot_frame.grid(row=3, column=0, padx=15, pady=(5, 15), sticky="ew")
         
         ctk.CTkLabel(p3_bcdboot_frame, text="Windows Part:").pack(side="left", padx=(0, 3))
-        self.bcd_win_dropdown = ctk.CTkOptionMenu(p3_bcdboot_frame, width=70, values=["C"])
+        self.bcd_win_dropdown = ctk.CTkOptionMenu(p3_bcdboot_frame, width=70, values=["C"], command=self.update_gui_telemetry_boot)
         self.bcd_win_dropdown.pack(side="left", padx=(0, 8))
         
         ctk.CTkLabel(p3_bcdboot_frame, text="Boot Part:").pack(side="left", padx=(0, 3))
@@ -2013,6 +2021,10 @@ Write-Host 'Office Installation finished.'
             command=lambda: self.run_boot_repair("bcdboot", self.bcd_win_dropdown.get(), self.bcd_boot_dropdown.get())
         )
         btn_bcdboot.pack(side="left", fill="x", expand=True)
+
+        # Telemetry Label for BCDBoot
+        self.lbl_telemetry_boot = ctk.CTkLabel(p3, text="📊 Partition Stats: Querying...", font=ctk.CTkFont(size=11, weight="bold"), text_color="#06b6d4")
+        self.lbl_telemetry_boot.grid(row=4, column=0, padx=15, pady=(0, 12), sticky="w")
         
         # -------------------------------------------------------------
         # Right Column: OS Installation Error Fixer
@@ -2086,8 +2098,12 @@ Write-Host 'Office Installation finished.'
         self.install_disk_dropdown.pack(side="left", padx=(0, 15))
         
         ctk.CTkLabel(self.fix_inputs_frame, text="Partition:").pack(side="left", padx=(0, 5))
-        self.install_partition_dropdown = ctk.CTkOptionMenu(self.fix_inputs_frame, width=90, values=["C"])
+        self.install_partition_dropdown = ctk.CTkOptionMenu(self.fix_inputs_frame, width=90, values=["C"], command=self.update_gui_telemetry_setup)
         self.install_partition_dropdown.pack(side="left")
+
+        # Telemetry Label for OS Setup Fixer
+        self.lbl_telemetry_setup = ctk.CTkLabel(p4, text="📊 Partition Stats: Querying...", font=ctk.CTkFont(size=11, weight="bold"), text_color="#06b6d4")
+        self.lbl_telemetry_setup.grid(row=5, column=0, padx=15, pady=(0, 12), sticky="w")
         
         # Apply Fix Button
         self.btn_run_install_fix = ctk.CTkButton(
@@ -2099,7 +2115,7 @@ Write-Host 'Office Installation finished.'
             font=ctk.CTkFont(weight="bold"),
             command=self.run_installation_error_fix
         )
-        self.btn_run_install_fix.grid(row=5, column=0, padx=15, pady=(0, 15), sticky="ew")
+        self.btn_run_install_fix.grid(row=6, column=0, padx=15, pady=(0, 15), sticky="ew")
         
         # Panel 5: System Recovery & Boot Management
         p5 = ctk.CTkFrame(right_column, corner_radius=10)
@@ -2412,6 +2428,7 @@ Write-Host 'Office Installation finished.'
             ("CPU-Z System Hardware Info", "diag", "CPU-Z\\cpuz_x64.exe", "CPU-Z", "Detailed processor and RAM specifications."),
             ("HWMonitor Sensor Monitor", "diag", "HWMonitor\\HWMonitor_x64.exe", "HWMonitor", "Live temperature, voltage, and fan speed monitor."),
             ("CrystalDiskInfo HDD/SSD Health", "diag", "CrystalDiskInfo\\CrystalDiskInfoPortable.exe", "CrystalDiskInfo", "Check hard drive S.M.A.R.T. health and temperature."),
+            ("PrintPulse Screen Capture", "net", "screenshot_tool.py", "ScreenshotTool", "Area, Window, Scroll, GIF, Color & OCR Capture tool."),
             ("Angry IP Scanner", "net", "Angry_IP_Scanner.exe", "AngryIPScanner", "Network device and IP scanner."),
             ("Notepad++ Code Editor", "net", "NotepadPlusPlus\\notepad++.exe", "NotepadPlusPlus", "Advanced portable text and code editor."),
             ("Rufus USB Formatter", "net", "Rufus_Portable.exe", "Rufus", "Create bootable USB drives from ISO files.")
@@ -2484,7 +2501,10 @@ Write-Host 'Office Installation finished.'
         self.log_build(f"Launching {name} from {path}...")
         try:
             # Run in a detached process so it doesn't block the GUI
-            subprocess.Popen(f'"{path}"', shell=True)
+            if path.endswith(".py"):
+                subprocess.Popen(f'"{sys.executable}" "{path}"', shell=True)
+            else:
+                subprocess.Popen(f'"{path}"', shell=True)
         except Exception as e:
             self.show_toast(f"❌ Failed to launch {name}: {e}")
             
@@ -2583,6 +2603,71 @@ Write-Host 'Office Installation finished.'
         
         self.install_disk_dropdown.configure(values=disks)
         self.install_disk_dropdown.set(disks[0])
+
+        # Trigger initial telemetry updates
+        self.update_gui_telemetry_pw(win_drives[0])
+        self.update_gui_telemetry_fat(all_drives[0])
+        self.update_gui_telemetry_boot(all_drives[0])
+        self.update_gui_telemetry_setup(all_drives[0])
+
+    def update_gui_telemetry_pw(self, val):
+        self.update_drive_telemetry_label(val, self.lbl_telemetry_pw)
+
+    def update_gui_telemetry_fat(self, val):
+        self.update_drive_telemetry_label(val, self.lbl_telemetry_fat)
+
+    def update_gui_telemetry_boot(self, val):
+        self.update_drive_telemetry_label(val, self.lbl_telemetry_boot)
+
+    def update_gui_telemetry_setup(self, val):
+        self.update_drive_telemetry_label(val, self.lbl_telemetry_setup)
+
+    def update_drive_telemetry_label(self, drive_letter, label_widget):
+        if not drive_letter:
+            label_widget.configure(text="📊 Stats: Drive selection empty")
+            return
+            
+        letter = drive_letter.split(":")[0].strip()
+        path = f"{letter}:\\"
+        
+        if not os.path.exists(path):
+            label_widget.configure(text=f"📊 Drive ({letter}:): Not accessible / disconnected")
+            return
+            
+        try:
+            import shutil
+            total, used, free = shutil.disk_usage(path)
+            
+            total_gb = total / (1024 * 1024 * 1024)
+            free_gb = free / (1024 * 1024 * 1024)
+            pct_used = int((used / total) * 100) if total > 0 else 0
+            
+            fs_name = "Unknown"
+            volume_name = ""
+            try:
+                import ctypes
+                volumeNameBuffer = ctypes.create_unicode_buffer(1024)
+                fileSystemNameBuffer = ctypes.create_unicode_buffer(1024)
+                ctypes.windll.kernel32.GetVolumeInformationW(
+                    ctypes.c_wchar_p(path),
+                    volumeNameBuffer,
+                    1024,
+                    None,
+                    None,
+                    None,
+                    fileSystemNameBuffer,
+                    1024
+                )
+                fs_name = fileSystemNameBuffer.value
+                volume_name = volumeNameBuffer.value
+            except:
+                pass
+            
+            vol_desc = f" [{volume_name}]" if volume_name else ""
+            label_text = f"📊 Drive Stats ({letter}:){vol_desc}: {fs_name} | {free_gb:.1f} GB Free of {total_gb:.1f} GB ({pct_used}% Used)"
+            label_widget.configure(text=label_text)
+        except Exception as e:
+            label_widget.configure(text=f"📊 Drive Stats ({letter}:): Unable to read partition info ({str(e)})")
 
     def detect_windows_drives(self):
         import string
