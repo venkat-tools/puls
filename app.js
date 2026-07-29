@@ -4052,4 +4052,3 @@ function showToast(title, message, type = "success") {
     }, 400);
   }, 4500);
 }
-}
