@@ -1,4 +1,4 @@
-﻿# Requires -RunAsAdministrator
+# Requires -RunAsAdministrator
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
     Exit
@@ -48,22 +48,22 @@ $xaml = @"
 
                 <!-- Brand logo/text -->
                 <StackPanel Grid.Row="0" Margin="20,20,20,10" VerticalAlignment="Center">
-                    <TextBlock Text="⚡ VenkatPulse AI" FontSize="18" FontWeight="Bold" Foreground="#38bdf8"/>
+                    <TextBlock Text="&#x26A1; VenkatPulse AI" FontSize="18" FontWeight="Bold" Foreground="#38bdf8"/>
                     <TextBlock Text="Windows Utility Suite" FontSize="10" Foreground="#6b7280" Margin="2,2,0,0"/>
                 </StackPanel>
 
                 <!-- Scrollable Navigation Items -->
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                     <StackPanel Margin="10,0,10,0">
-                        <Button Name="btn_dash" Content="🏠  Dashboard" Height="36" Margin="0,2,0,2" Background="Transparent" Foreground="#cbd5e1" BorderThickness="0" HorizontalContentAlignment="Left" Padding="15,0,0,0" FontSize="11.5" FontWeight="SemiBold"/>
-                        <Button Name="btn_soft" Content="📥  Software Installer" Height="36" Margin="0,2,0,2" Background="Transparent" Foreground="#cbd5e1" BorderThickness="0" HorizontalContentAlignment="Left" Padding="15,0,0,0" FontSize="11.5" FontWeight="SemiBold"/>
-                        <Button Name="btn_act" Content="🔑  Activation Suite" Height="36" Margin="0,2,0,2" Background="Transparent" Foreground="#cbd5e1" BorderThickness="0" HorizontalContentAlignment="Left" Padding="15,0,0,0" FontSize="11.5" FontWeight="SemiBold"/>
-                        <Button Name="btn_tweaks" Content="🔧  System Tweaks" Height="36" Margin="0,2,0,2" Background="Transparent" Foreground="#cbd5e1" BorderThickness="0" HorizontalContentAlignment="Left" Padding="15,0,0,0" FontSize="11.5" FontWeight="SemiBold"/>
-                        <Button Name="btn_bloat" Content="🧼  Bloatware &amp; Features" Height="36" Margin="0,2,0,2" Background="Transparent" Foreground="#cbd5e1" BorderThickness="0" HorizontalContentAlignment="Left" Padding="15,0,0,0" FontSize="11.5" FontWeight="SemiBold"/>
-                        <Button Name="btn_repairs" Content="🛠️  System Repairs" Height="36" Margin="0,2,0,2" Background="Transparent" Foreground="#cbd5e1" BorderThickness="0" HorizontalContentAlignment="Left" Padding="15,0,0,0" FontSize="11.5" FontWeight="SemiBold"/>
-                        <Button Name="btn_diag" Content="📊  Diagnostics &amp; Health" Height="36" Margin="0,2,0,2" Background="Transparent" Foreground="#cbd5e1" BorderThickness="0" HorizontalContentAlignment="Left" Padding="15,0,0,0" FontSize="11.5" FontWeight="SemiBold"/>
-                        <Button Name="btn_backups" Content="💾  Backups &amp; Migration" Height="36" Margin="0,2,0,2" Background="Transparent" Foreground="#cbd5e1" BorderThickness="0" HorizontalContentAlignment="Left" Padding="15,0,0,0" FontSize="11.5" FontWeight="SemiBold"/>
-                        <Button Name="btn_config" Content="⚙️  Windows Config" Height="36" Margin="0,2,0,2" Background="Transparent" Foreground="#cbd5e1" BorderThickness="0" HorizontalContentAlignment="Left" Padding="15,0,0,0" FontSize="11.5" FontWeight="SemiBold"/>
+                        <Button Name="btn_dash" Content="&#x1F3E0;  Dashboard" Height="36" Margin="0,2,0,2" Background="Transparent" Foreground="#cbd5e1" BorderThickness="0" HorizontalContentAlignment="Left" Padding="15,0,0,0" FontSize="11.5" FontWeight="SemiBold"/>
+                        <Button Name="btn_soft" Content="&#x1F4E5;  Software Installer" Height="36" Margin="0,2,0,2" Background="Transparent" Foreground="#cbd5e1" BorderThickness="0" HorizontalContentAlignment="Left" Padding="15,0,0,0" FontSize="11.5" FontWeight="SemiBold"/>
+                        <Button Name="btn_act" Content="&#x1F511;  Activation Suite" Height="36" Margin="0,2,0,2" Background="Transparent" Foreground="#cbd5e1" BorderThickness="0" HorizontalContentAlignment="Left" Padding="15,0,0,0" FontSize="11.5" FontWeight="SemiBold"/>
+                        <Button Name="btn_tweaks" Content="&#x1F527;  System Tweaks" Height="36" Margin="0,2,0,2" Background="Transparent" Foreground="#cbd5e1" BorderThickness="0" HorizontalContentAlignment="Left" Padding="15,0,0,0" FontSize="11.5" FontWeight="SemiBold"/>
+                        <Button Name="btn_bloat" Content="&#x1F9FC;  Bloatware &amp; Features" Height="36" Margin="0,2,0,2" Background="Transparent" Foreground="#cbd5e1" BorderThickness="0" HorizontalContentAlignment="Left" Padding="15,0,0,0" FontSize="11.5" FontWeight="SemiBold"/>
+                        <Button Name="btn_repairs" Content="&#x1F6E0;  System Repairs" Height="36" Margin="0,2,0,2" Background="Transparent" Foreground="#cbd5e1" BorderThickness="0" HorizontalContentAlignment="Left" Padding="15,0,0,0" FontSize="11.5" FontWeight="SemiBold"/>
+                        <Button Name="btn_diag" Content="&#x1F4CA;  Diagnostics &amp; Health" Height="36" Margin="0,2,0,2" Background="Transparent" Foreground="#cbd5e1" BorderThickness="0" HorizontalContentAlignment="Left" Padding="15,0,0,0" FontSize="11.5" FontWeight="SemiBold"/>
+                        <Button Name="btn_backups" Content="&#x1F4BE;  Backups &amp; Migration" Height="36" Margin="0,2,0,2" Background="Transparent" Foreground="#cbd5e1" BorderThickness="0" HorizontalContentAlignment="Left" Padding="15,0,0,0" FontSize="11.5" FontWeight="SemiBold"/>
+                        <Button Name="btn_config" Content="&#x2699;  Windows Config" Height="36" Margin="0,2,0,2" Background="Transparent" Foreground="#cbd5e1" BorderThickness="0" HorizontalContentAlignment="Left" Padding="15,0,0,0" FontSize="11.5" FontWeight="SemiBold"/>
                     </StackPanel>
                 </ScrollViewer>
 
@@ -82,7 +82,7 @@ $xaml = @"
             <!-- Header Panel -->
             <Border Grid.Row="0" Background="#111827" BorderBrush="#1f2937" BorderThickness="0,0,0,1">
                 <Grid Margin="20,0,20,0">
-                    <TextBlock Name="txt_header" Text="🏠 Dashboard Overview" FontSize="14" FontWeight="Bold" Foreground="#ffffff" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                    <TextBlock Name="txt_header" Text="Dashboard Overview" FontSize="14" FontWeight="Bold" Foreground="#ffffff" VerticalAlignment="Center" HorizontalAlignment="Left"/>
                     
                     <!-- Search Bar in Header -->
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
@@ -155,7 +155,7 @@ $xaml = @"
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
-                            <TextBlock Grid.Row="0" Text="📋 Recent Actions &amp; System Diagnostics Logs" FontSize="11" FontWeight="Bold" Foreground="#ffffff" Margin="0,0,0,10"/>
+                            <TextBlock Grid.Row="0" Text="&#x1F4CB; Recent Actions &amp; System Diagnostics Logs" FontSize="11" FontWeight="Bold" Foreground="#ffffff" Margin="0,0,0,10"/>
                             <ListView Grid.Row="1" Name="activity_tree" Background="#0b0f19" Foreground="#ffffff" BorderBrush="#374151" FontSize="11">
                                 <ListView.View>
                                     <GridView>
@@ -190,19 +190,19 @@ $xaml = @"
                             </StackPanel>
                             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                                 <StackPanel>
-                                    <TextBlock Text="🌐 Browsers" FontSize="11.5" FontWeight="Bold" Foreground="#38bdf8" Margin="5,5,5,5"/>
+                                    <TextBlock Text="&#x1F310; Browsers" FontSize="11.5" FontWeight="Bold" Foreground="#38bdf8" Margin="5,5,5,5"/>
                                     <WrapPanel Name="panel_soft_browsers" Orientation="Horizontal" Margin="0,0,0,15"/>
                                     
-                                    <TextBlock Text="💻 Microsoft Tools &amp; Platforms" FontSize="11.5" FontWeight="Bold" Foreground="#38bdf8" Margin="5,5,5,5"/>
+                                    <TextBlock Text="&#x1F4BB; Microsoft Tools &amp; Platforms" FontSize="11.5" FontWeight="Bold" Foreground="#38bdf8" Margin="5,5,5,5"/>
                                     <WrapPanel Name="panel_soft_msoft" Orientation="Horizontal" Margin="0,0,0,15"/>
                                     
-                                    <TextBlock Text="⚙️ Utilities &amp; Chat" FontSize="11.5" FontWeight="Bold" Foreground="#38bdf8" Margin="5,5,5,5"/>
+                                    <TextBlock Text="&#x2699; Utilities &amp; Chat" FontSize="11.5" FontWeight="Bold" Foreground="#38bdf8" Margin="5,5,5,5"/>
                                     <WrapPanel Name="panel_soft_utils" Orientation="Horizontal" Margin="0,0,0,15"/>
                                     
-                                    <TextBlock Text="🔧 Development &amp; Networking" FontSize="11.5" FontWeight="Bold" Foreground="#38bdf8" Margin="5,5,5,5"/>
+                                    <TextBlock Text="&#x1F527; Development &amp; Networking" FontSize="11.5" FontWeight="Bold" Foreground="#38bdf8" Margin="5,5,5,5"/>
                                     <WrapPanel Name="panel_soft_dev" Orientation="Horizontal" Margin="0,0,0,15"/>
 
-                                    <TextBlock Text="📄 Office, Design &amp; Media" FontSize="11.5" FontWeight="Bold" Foreground="#38bdf8" Margin="5,5,5,5"/>
+                                    <TextBlock Text="&#x1F4C4; Office, Design &amp; Media" FontSize="11.5" FontWeight="Bold" Foreground="#38bdf8" Margin="5,5,5,5"/>
                                     <WrapPanel Name="panel_soft_media" Orientation="Horizontal" Margin="0,0,0,15"/>
                                 </StackPanel>
                             </ScrollViewer>
@@ -217,11 +217,11 @@ $xaml = @"
                                 <RowDefinition Height="*"/>
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
-                            <TextBlock Grid.Row="0" Text="⚙️ Installation Terminal" FontSize="11" FontWeight="Bold" Foreground="#ffffff" Margin="0,0,0,10"/>
+                            <TextBlock Grid.Row="0" Text="&#x2699; Installation Terminal" FontSize="11" FontWeight="Bold" Foreground="#ffffff" Margin="0,0,0,10"/>
                             <TextBox Grid.Row="1" Name="txt_log_soft" Background="#0b0f19" Foreground="#10b981" BorderBrush="#374151" FontFamily="Consolas" FontSize="10" IsReadOnly="True" VerticalScrollBarVisibility="Auto" AcceptsReturn="True" TextWrapping="Wrap" Margin="0,0,0,10"/>
                             <StackPanel Grid.Row="2">
-                                <Button Name="btn_install_soft" Content="🚀 Install Selected" Height="36" Background="#059669" BorderThickness="0" FontWeight="Bold" Margin="0,0,0,5"/>
-                                <Button Name="btn_uninstall_soft" Content="🗑️ Uninstall Selected" Height="36" Background="#b91c1c" BorderThickness="0" FontWeight="Bold" Margin="0,5,0,0"/>
+                                <Button Name="btn_install_soft" Content="Install Selected" Height="36" Background="#059669" BorderThickness="0" FontWeight="Bold" Margin="0,0,0,5"/>
+                                <Button Name="btn_uninstall_soft" Content="Uninstall Selected" Height="36" Background="#b91c1c" BorderThickness="0" FontWeight="Bold" Margin="0,5,0,0"/>
                             </StackPanel>
                         </Grid>
                     </Border>
@@ -241,9 +241,8 @@ $xaml = @"
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
-                            <TextBlock Grid.Row="0" Text="📦 MICROSOFT OFFICE INSTALLER SUITE" FontSize="11" FontWeight="Bold" Foreground="#38bdf8" Margin="0,0,0,10"/>
+                            <TextBlock Grid.Row="0" Text="&#x1F4E6; MICROSOFT OFFICE INSTALLER SUITE" FontSize="11" FontWeight="Bold" Foreground="#38bdf8" Margin="0,0,0,10"/>
                             <UniformGrid Grid.Row="1" Columns="2" Rows="2">
-                                <!-- 4 Office options as cards -->
                                 <Border Background="#111827" BorderBrush="#374151" BorderThickness="1" CornerRadius="6" Padding="10" Margin="5">
                                     <Grid>
                                         <StackPanel VerticalAlignment="Center">
@@ -294,11 +293,11 @@ $xaml = @"
                         <!-- MAS Activator card -->
                         <Border Grid.Column="0" Background="#1f2937" BorderBrush="#374151" BorderThickness="1" CornerRadius="8" Padding="15" Margin="0,0,5,0">
                             <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="🔑 MAS WINDOWS &amp; OFFICE ACTIVATOR" FontSize="11" FontWeight="Bold" Foreground="#38bdf8" HorizontalAlignment="Center"/>
+                                <TextBlock Text="&#x1F511; MAS WINDOWS &amp; OFFICE ACTIVATOR" FontSize="11" FontWeight="Bold" Foreground="#38bdf8" HorizontalAlignment="Center"/>
                                 <TextBlock Text="Activates Windows HWID and Office Ohook via official open-source scripts." TextWrapping="Wrap" FontSize="10" Foreground="#9ca3af" Margin="0,5,0,15" TextAlignment="Center"/>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                    <Button Name="btn_launch_mas" Content="🚀 Launch MAS GUI" Height="32" Background="#059669" BorderThickness="0" FontWeight="Bold" Width="140" Margin="0,0,5,0"/>
-                                    <Button Name="btn_check_license" Content="🔍 Check License" Height="32" Background="#1f2937" BorderThickness="1" BorderBrush="#374151" FontWeight="Bold" Width="120" Margin="5,0,0,0"/>
+                                    <Button Name="btn_launch_mas" Content="Launch MAS GUI" Height="32" Background="#059669" BorderThickness="0" FontWeight="Bold" Width="140" Margin="0,0,5,0"/>
+                                    <Button Name="btn_check_license" Content="Check License" Height="32" Background="#1f2937" BorderThickness="1" BorderBrush="#374151" FontWeight="Bold" Width="120" Margin="5,0,0,0"/>
                                 </StackPanel>
                             </StackPanel>
                         </Border>
@@ -306,7 +305,7 @@ $xaml = @"
                         <!-- Edition Changer card -->
                         <Border Grid.Column="1" Background="#1f2937" BorderBrush="#374151" BorderThickness="1" CornerRadius="8" Padding="15" Margin="5,0,0,0">
                             <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="🔄 WINDOWS EDITION CHANGER" FontSize="11" FontWeight="Bold" Foreground="#38bdf8" HorizontalAlignment="Center"/>
+                                <TextBlock Text="&#x1F504; WINDOWS EDITION CHANGER" FontSize="11" FontWeight="Bold" Foreground="#38bdf8" HorizontalAlignment="Center"/>
                                 <TextBlock Text="Converts Windows Home edition to Professional edition losslessly." TextWrapping="Wrap" FontSize="10" Foreground="#9ca3af" Margin="0,5,0,15" TextAlignment="Center"/>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
@@ -337,12 +336,12 @@ $xaml = @"
                     <Border Grid.Row="1" Background="#1f2937" BorderBrush="#374151" BorderThickness="1" CornerRadius="8" Padding="15">
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
                             <StackPanel>
-                                <TextBlock Text="🔧 PERFORMANCE &amp; UI TWEAKS" FontSize="11" FontWeight="Bold" Foreground="#38bdf8" Margin="0,5,0,10"/>
+                                <TextBlock Text="&#x1F527; PERFORMANCE &amp; UI TWEAKS" FontSize="11" FontWeight="Bold" Foreground="#38bdf8" Margin="0,5,0,10"/>
                                 
                                 <Border BorderBrush="#374151" BorderThickness="0,0,0,1" Padding="0,0,0,10" Margin="0,0,0,10">
                                     <Grid>
                                         <StackPanel HorizontalAlignment="Left">
-                                            <TextBlock Text="📂 Windows 11 Classic Context Menu" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
+                                            <TextBlock Text="&#x1F4C1; Windows 11 Classic Context Menu" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
                                             <TextBlock Text="Restores traditional right-click menu layout instead of 'Show more options'." FontSize="10" Foreground="#9ca3af"/>
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
@@ -355,7 +354,7 @@ $xaml = @"
                                 <Border BorderBrush="#374151" BorderThickness="0,0,0,1" Padding="0,0,0,10" Margin="0,0,0,10">
                                     <Grid>
                                         <StackPanel HorizontalAlignment="Left">
-                                            <TextBlock Text="⚡ Enable Ultimate Performance Plan" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
+                                            <TextBlock Text="&#x26A1; Enable Ultimate Performance Plan" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
                                             <TextBlock Text="Unlocks and activates hidden maximum hardware speed power profile." FontSize="10" Foreground="#9ca3af"/>
                                         </StackPanel>
                                         <Button Name="btn_tweak_ultimate" Content="Unlock Scheme" Background="#d97706" BorderThickness="0" HorizontalAlignment="Right" Width="225"/>
@@ -365,7 +364,7 @@ $xaml = @"
                                 <Border BorderBrush="#374151" BorderThickness="0,0,0,1" Padding="0,0,0,10" Margin="0,0,0,10">
                                     <Grid>
                                         <StackPanel HorizontalAlignment="Left">
-                                            <TextBlock Text="🎮 Latency &amp; Gaming Optimization" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
+                                            <TextBlock Text="&#x1F3AE; Latency &amp; Gaming Optimization" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
                                             <TextBlock Text="Disables GameDVR, CPU throttling and configures network game packet latency." FontSize="10" Foreground="#9ca3af"/>
                                         </StackPanel>
                                         <Button Name="btn_tweak_gaming" Content="Apply Gaming Tweaks" Background="#059669" BorderThickness="0" HorizontalAlignment="Right" Width="225"/>
@@ -375,7 +374,7 @@ $xaml = @"
                                 <Border BorderBrush="#374151" BorderThickness="0,0,0,1" Padding="0,0,0,10" Margin="0,0,0,10">
                                     <Grid>
                                         <StackPanel HorizontalAlignment="Left">
-                                            <TextBlock Text="⚡ Windows Fast Startup Settings" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
+                                            <TextBlock Text="&#x26A1; Windows Fast Startup Settings" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
                                             <TextBlock Text="Toggles Hiberboot configuration to allow full kernel reload on power off." FontSize="10" Foreground="#9ca3af"/>
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
@@ -388,7 +387,7 @@ $xaml = @"
                                 <Border BorderBrush="#374151" BorderThickness="0,0,0,1" Padding="0,0,0,10" Margin="0,0,0,10">
                                     <Grid>
                                         <StackPanel HorizontalAlignment="Left">
-                                            <TextBlock Text="🖼️ Adjust Visual Effects for Performance" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
+                                            <TextBlock Text="&#x1F5BB; Adjust Visual Effects for Performance" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
                                             <TextBlock Text="Disables window shadows, animations, and transparency to speed up UI." FontSize="10" Foreground="#9ca3af"/>
                                         </StackPanel>
                                         <Button Name="btn_tweak_visuals" Content="Set Performance Mode" Background="#0284c7" BorderThickness="0" HorizontalAlignment="Right" Width="225"/>
@@ -398,19 +397,19 @@ $xaml = @"
                                 <Border BorderBrush="#374151" BorderThickness="0,0,0,1" Padding="0,0,0,10" Margin="0,0,0,10">
                                     <Grid>
                                         <StackPanel HorizontalAlignment="Left">
-                                            <TextBlock Text="🧠 Configure Optimal Virtual Memory (Pagefile)" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
+                                            <TextBlock Text="&#x1F9E0; Configure Optimal Virtual Memory (Pagefile)" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
                                             <TextBlock Text="Automatically sizes pagefile correctly based on installed physical RAM." FontSize="10" Foreground="#9ca3af"/>
                                         </StackPanel>
                                         <Button Name="btn_tweak_pagefile" Content="Optimize Virtual RAM" Background="#4f46e5" BorderThickness="0" HorizontalAlignment="Right" Width="225"/>
                                     </Grid>
                                 </Border>
 
-                                <TextBlock Text="🔒 SECURITY &amp; TELEMETRY PRIVACY POLICY TWEAKS" FontSize="11" FontWeight="Bold" Foreground="#38bdf8" Margin="0,15,0,10"/>
+                                <TextBlock Text="&#x1F512; SECURITY &amp; TELEMETRY PRIVACY POLICY TWEAKS" FontSize="11" FontWeight="Bold" Foreground="#38bdf8" Margin="0,15,0,10"/>
 
                                 <Border BorderBrush="#374151" BorderThickness="0,0,0,1" Padding="0,0,0,10" Margin="0,0,0,10">
                                     <Grid>
                                         <StackPanel HorizontalAlignment="Left">
-                                            <TextBlock Text="🔍 Disable Online Bing Search in Start Menu" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
+                                            <TextBlock Text="&#x1F512; Disable Online Bing Search in Start Menu" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
                                             <TextBlock Text="Hides web results inside the Start Menu search for faster local searches." FontSize="10" Foreground="#9ca3af"/>
                                         </StackPanel>
                                         <Button Name="btn_tweak_bing" Content="Disable Bing Search" Background="#4f46e5" BorderThickness="0" HorizontalAlignment="Right" Width="225"/>
@@ -420,7 +419,7 @@ $xaml = @"
                                 <Border BorderBrush="#374151" BorderThickness="0,0,0,1" Padding="0,0,0,10" Margin="0,0,0,10">
                                     <Grid>
                                         <StackPanel HorizontalAlignment="Left">
-                                            <TextBlock Text="🤖 Disable Cortana Assistant &amp; Windows Copilot" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
+                                            <TextBlock Text="&#x1F916; Disable Cortana Assistant &amp; Windows Copilot" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
                                             <TextBlock Text="Disables background voice services and hides modern desktop Copilot panels." FontSize="10" Foreground="#9ca3af"/>
                                         </StackPanel>
                                         <Button Name="btn_tweak_cortana" Content="Disable Assistants" Background="#b91c1c" BorderThickness="0" HorizontalAlignment="Right" Width="225"/>
@@ -430,7 +429,7 @@ $xaml = @"
                                 <Border BorderBrush="#374151" BorderThickness="0,0,0,1" Padding="0,0,0,10" Margin="0,0,0,10">
                                     <Grid>
                                         <StackPanel HorizontalAlignment="Left">
-                                            <TextBlock Text="📡 Turn Off Windows Feedback &amp; Diagnostic Telemetry" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
+                                            <TextBlock Text="&#x1F4E1; Turn Off Windows Feedback &amp; Diagnostic Telemetry" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
                                             <TextBlock Text="Blocks background data transmission and diagnostic reports to Microsoft." FontSize="10" Foreground="#9ca3af"/>
                                         </StackPanel>
                                         <Button Name="btn_tweak_telemetry" Content="Block Telemetry" Background="#374151" BorderThickness="1" BorderBrush="#374151" HorizontalAlignment="Right" Width="225"/>
@@ -440,7 +439,7 @@ $xaml = @"
                                 <Border BorderBrush="#374151" BorderThickness="0,0,0,1" Padding="0,0,0,10" Margin="0,0,0,10">
                                     <Grid>
                                         <StackPanel HorizontalAlignment="Left">
-                                            <TextBlock Text="📺 Disable Lock Screen Spotlight Ads &amp; Tips" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
+                                            <TextBlock Text="&#x1F4FA; Disable Lock Screen Spotlight Ads &amp; Tips" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
                                             <TextBlock Text="Disables promotional ads and lock screen background search tips." FontSize="10" Foreground="#9ca3af"/>
                                         </StackPanel>
                                         <Button Name="btn_tweak_ads" Content="Disable Lockscreen Ads" Background="#4f46e5" BorderThickness="0" HorizontalAlignment="Right" Width="225"/>
@@ -459,7 +458,7 @@ $xaml = @"
                     </Grid.RowDefinitions>
 
                     <Border Grid.Row="0" Background="#1e1b4b" BorderBrush="#312e81" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,0,15">
-                        <TextBlock Text="🧼 Wipes native Microsoft Windows bloatware packages, telemetry clients, and configures virtualization optional services." FontSize="11" Foreground="#cbd5e1"/>
+                        <TextBlock Text="&#x1F9FC; Wipes native Microsoft Windows bloatware packages, telemetry clients, and configures virtualization optional services." FontSize="11" Foreground="#cbd5e1"/>
                     </Border>
 
                     <Grid Grid.Row="1">
@@ -473,17 +472,17 @@ $xaml = @"
                             <StackPanel>
                                 <Border Background="#1f2937" BorderBrush="#374151" BorderThickness="1" CornerRadius="8" Padding="15" Margin="0,0,0,10">
                                     <StackPanel>
-                                        <TextBlock Text="🧼 UWP Bloatware Remover" FontSize="14" FontWeight="Bold" Foreground="#ef4444" Margin="0,0,0,10"/>
+                                        <TextBlock Text="&#x1F9FC; UWP Bloatware Remover" FontSize="14" FontWeight="Bold" Foreground="#ef4444" Margin="0,0,0,10"/>
                                         <TextBlock Text="Purges pre-installed apps such as Xbox, Skype, Solitaire, MSN Weather, and Microsoft Maps." TextWrapping="Wrap" FontSize="11" Foreground="#9ca3af" Margin="0,0,0,20"/>
-                                        <Button Name="btn_remove_bloat" Content="🧼 Uninstall Windows Bloatware" Height="40" Background="#b91c1c" BorderThickness="0" FontWeight="Bold"/>
+                                        <Button Name="btn_remove_bloat" Content="Uninstall Windows Bloatware" Height="40" Background="#b91c1c" BorderThickness="0" FontWeight="Bold"/>
                                     </StackPanel>
                                 </Border>
                                 <Border Background="#1f2937" BorderBrush="#374151" BorderThickness="1" CornerRadius="8" Padding="15" Margin="0,10,0,0">
                                     <StackPanel>
-                                        <TextBlock Text="🗑️ TELEMETRY &amp; EDGE CLEANERS" FontSize="13" FontWeight="Bold" Foreground="#38bdf8" Margin="0,0,0,10"/>
+                                        <TextBlock Text="&#x1F5D1; TELEMETRY &amp; EDGE CLEANERS" FontSize="13" FontWeight="Bold" Foreground="#38bdf8" Margin="0,0,0,10"/>
                                         <TextBlock Text="Wipe deep-rooted telemetry services and system background clients." FontSize="10.5" Foreground="#9ca3af" Margin="0,0,0,15" TextWrapping="Wrap"/>
-                                        <Button Name="btn_bloat_onedrive" Content="☁️ Completely Purge OneDrive Client" Height="32" Background="#374151" BorderThickness="0" FontWeight="Bold" Margin="0,0,0,5"/>
-                                        <Button Name="btn_bloat_edge" Content="🧭 Turn Off Edge Browser Telemetry" Height="32" Background="#374151" BorderThickness="0" FontWeight="Bold" Margin="5,5,0,0"/>
+                                        <Button Name="btn_bloat_onedrive" Content="Completely Purge OneDrive Client" Height="32" Background="#374151" BorderThickness="0" FontWeight="Bold" Margin="0,0,0,5"/>
+                                        <Button Name="btn_bloat_edge" Content="Turn Off Edge Browser Telemetry" Height="32" Background="#374151" BorderThickness="0" FontWeight="Bold" Margin="5,5,0,0"/>
                                     </StackPanel>
                                 </Border>
                             </StackPanel>
@@ -492,14 +491,14 @@ $xaml = @"
                         <!-- Right Card: Optional Features -->
                         <Border Grid.Column="1" Background="#1f2937" BorderBrush="#374151" BorderThickness="1" CornerRadius="8" Padding="15" Margin="10,0,0,0">
                             <StackPanel>
-                                <TextBlock Text="🔌 Windows Optional Features" FontSize="14" FontWeight="Bold" Foreground="#38bdf8" Margin="0,0,0,10"/>
+                                <TextBlock Text="&#x1F50C; Windows Optional Features" FontSize="14" FontWeight="Bold" Foreground="#38bdf8" Margin="0,0,0,10"/>
                                 <CheckBox Name="cb_feat_lpd" Content="Enable LPD Printing Service" Foreground="#ffffff" Margin="0,5,0,5"/>
                                 <CheckBox Name="cb_feat_lpr" Content="Enable LPR Port Monitor Service" Foreground="#ffffff" Margin="0,5,0,5"/>
                                 <CheckBox Name="cb_feat_smb" Content="Enable SMB1 Protocol Service" Foreground="#ffffff" Margin="0,5,0,5"/>
                                 <CheckBox Name="cb_feat_hyperv" Content="Enable Hyper-V Platform Virtualization" Foreground="#ffffff" Margin="0,5,0,5"/>
                                 <CheckBox Name="cb_feat_sandbox" Content="Enable Windows Sandbox Isolation" Foreground="#ffffff" Margin="0,5,0,5"/>
                                 <CheckBox Name="cb_feat_wsl" Content="Enable Windows Subsystem for Linux (WSL)" Foreground="#ffffff" Margin="0,5,0,15"/>
-                                <Button Name="btn_apply_features" Content="⚡ Apply Windows Features" Height="40" Background="#059669" BorderThickness="0" FontWeight="Bold"/>
+                                <Button Name="btn_apply_features" Content="Apply Windows Features" Height="40" Background="#059669" BorderThickness="0" FontWeight="Bold"/>
                             </StackPanel>
                         </Border>
                     </Grid>
@@ -516,39 +515,39 @@ $xaml = @"
                     <Border Grid.Column="0" Background="#1f2937" BorderBrush="#374151" BorderThickness="1" CornerRadius="8" Padding="15" Margin="0,0,10,0">
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
                             <StackPanel>
-                                <TextBlock Text="🛡️ SYSTEM SCANS &amp; REPAIRS" FontSize="11" FontWeight="Bold" Foreground="#38bdf8" Margin="0,0,0,6"/>
-                                <Button Name="btn_rep_sfc" Content="🛡️ Run System File Check (sfc /scannow)" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
-                                <Button Name="btn_rep_dism" Content="⚙️ Repair Image Health (DISM /RestoreHealth)" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
-                                <Button Name="btn_rep_dism_check" Content="🔍 Quick Check Image Corruption Status (DISM /CheckHealth)" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
-                                <Button Name="btn_rep_wu" Content="🔄 Reset Windows Update Components &amp; Cache" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
-                                <Button Name="btn_rep_engines" Content="🛠️ Repair Windows Native Repair Engines (SFC &amp; DISM Fix)" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
-                                <Button Name="btn_rep_dll" Content="⚙️ Re-Register Core Windows System DLL Libraries (regsvr32)" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
-                                <Button Name="btn_rep_dns" Content="🧹 Flush System DNS Resolver Cache" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
-                                <Button Name="btn_rep_winsock" Content="🔌 Reset Network Winsock Catalog Bindings" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
-                                <Button Name="btn_rep_firewall" Content="🔥 Reset Windows Firewall Rules to Default" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
-                                <Button Name="btn_rep_store" Content="🛍️ Re-register &amp; Repair Microsoft Store &amp; Default Apps" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
-                                <Button Name="btn_rep_wsreset" Content="🛍️ Reset Windows Store Cache (wsreset.exe)" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
-                                <Button Name="btn_rep_wmi" Content="⚙️ Rebuild Corrupted Windows WMI Repository Database" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
-                                <Button Name="btn_rep_search" Content="🔍 Rebuild Windows Search Indexer Database Index" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
-                                <Button Name="btn_rep_net" Content="📡 Run Comprehensive Network Stack &amp; Adapter Reset" Height="30" Margin="0,2,0,15" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <TextBlock Text="&#x1F6E1; SYSTEM SCANS &amp; REPAIRS" FontSize="11" FontWeight="Bold" Foreground="#38bdf8" Margin="0,0,0,6"/>
+                                <Button Name="btn_rep_sfc" Content="Run System File Check (sfc /scannow)" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <Button Name="btn_rep_dism" Content="Repair Image Health (DISM /RestoreHealth)" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <Button Name="btn_rep_dism_check" Content="Quick Check Image Corruption Status (DISM /CheckHealth)" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <Button Name="btn_rep_wu" Content="Reset Windows Update Components &amp; Cache" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <Button Name="btn_rep_engines" Content="Repair Windows Native Repair Engines (SFC &amp; DISM Fix)" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <Button Name="btn_rep_dll" Content="Re-Register Core Windows System DLL Libraries (regsvr32)" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <Button Name="btn_rep_dns" Content="Flush System DNS Resolver Cache" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <Button Name="btn_rep_winsock" Content="Reset Network Winsock Catalog Bindings" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <Button Name="btn_rep_firewall" Content="Reset Windows Firewall Rules to Default" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <Button Name="btn_rep_store" Content="Re-register &amp; Repair Microsoft Store &amp; Default Apps" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <Button Name="btn_rep_wsreset" Content="Reset Windows Store Cache (wsreset.exe)" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <Button Name="btn_rep_wmi" Content="Rebuild Corrupted Windows WMI Repository Database" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <Button Name="btn_rep_search" Content="Rebuild Windows Search Indexer Database Index" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <Button Name="btn_rep_net" Content="Run Comprehensive Network Stack &amp; Adapter Reset" Height="30" Margin="0,2,0,15" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
 
-                                <TextBlock Text="🧹 SYSTEM CLEANERS &amp; RAM CACHE OPTIMIZERS" FontSize="11" FontWeight="Bold" Foreground="#38bdf8" Margin="0,10,0,6"/>
-                                <Button Name="btn_rep_clean_ram_wpf" Content="🧠 Empty Active Process Working Sets (API RAM Booster)" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
-                                <Button Name="btn_rep_clean_ram" Content="🧠 Optimize &amp; Flush System RAM Cache (GC Collect)" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
-                                <Button Name="btn_rep_clean_browser" Content="🧹 Clean Web Browser Cache &amp; Temp Files (Chrome, Edge, Firefox)" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
-                                <Button Name="btn_rep_clean_mgr" Content="🧹 Run Deep Windows System Disk Cleanup (cleanmgr /autoclean)" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
-                                <Button Name="btn_rep_clean_resetbase" Content="🧹 Purge Superseded Components Cache (DISM Component ResetBase)" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
-                                <Button Name="btn_rep_clean_temp" Content="🧹 Delete All User and System TEMP Directories Cache Files" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
-                                <Button Name="btn_rep_recycle" Content="🗑️ Silent Empty Recycle Bin database on all drives" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
-                                <Button Name="btn_rep_defrag" Content="💿 Optimize / Defragment All Connected SSD and HDD volumes" Height="30" Margin="0,2,0,15" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <TextBlock Text="&#x1F9FB; SYSTEM CLEANERS &amp; RAM CACHE OPTIMIZERS" FontSize="11" FontWeight="Bold" Foreground="#38bdf8" Margin="0,10,0,6"/>
+                                <Button Name="btn_rep_clean_ram_wpf" Content="Empty Active Process Working Sets (API RAM Booster)" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <Button Name="btn_rep_clean_ram" Content="Optimize &amp; Flush System RAM Cache (GC Collect)" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <Button Name="btn_rep_clean_browser" Content="Clean Web Browser Cache &amp; Temp Files (Chrome, Edge, Firefox)" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <Button Name="btn_rep_clean_mgr" Content="Run Deep Windows System Disk Cleanup (cleanmgr /autoclean)" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <Button Name="btn_rep_clean_resetbase" Content="Purge Superseded Components Cache (DISM Component ResetBase)" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <Button Name="btn_rep_clean_temp" Content="Delete All User and System TEMP Directories Cache Files" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <Button Name="btn_rep_recycle" Content="Silent Empty Recycle Bin database on all drives" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <Button Name="btn_rep_defrag" Content="Optimize / Defragment All Connected SSD and HDD volumes" Height="30" Margin="0,2,0,15" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
 
-                                <TextBlock Text="🛠️ SYSTEM RECOVERY &amp; BOOT MANAGEMENT" FontSize="11" FontWeight="Bold" Foreground="#38bdf8" Margin="0,10,0,6"/>
-                                <Button Name="btn_rep_winre_en" Content="💪 Enable Windows Recovery Environment (WinRE)" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
-                                <Button Name="btn_rep_winre_stat" Content="🔍 Check WinRE Environment Configuration Status" Height="30" Margin="0,2,0,15" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <TextBlock Text="&#x1F6E1; SYSTEM RECOVERY &amp; BOOT MANAGEMENT" FontSize="11" FontWeight="Bold" Foreground="#38bdf8" Margin="0,10,0,6"/>
+                                <Button Name="btn_rep_winre_en" Content="Enable Windows Recovery Environment (WinRE)" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <Button Name="btn_rep_winre_stat" Content="Check WinRE Environment Configuration Status" Height="30" Margin="0,2,0,15" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
 
-                                <TextBlock Text="⚙️ MICROSOFT OFFICE &amp; OUTLOOK DIAGNOSTICS &amp; REPAIRS" FontSize="11" FontWeight="Bold" Foreground="#38bdf8" Margin="0,10,0,6"/>
-                                <Button Name="btn_rep_off_quick" Content="🛠️ Run Microsoft Office Quick Repair (Click-to-Run)" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
-                                <Button Name="btn_rep_off_pst" Content="📧 Launch Outlook PST File Repair Tool (ScanPST)" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <TextBlock Text="&#x1F6E1; MICROSOFT OFFICE &amp; OUTLOOK DIAGNOSTICS &amp; REPAIRS" FontSize="11" FontWeight="Bold" Foreground="#38bdf8" Margin="0,10,0,6"/>
+                                <Button Name="btn_rep_off_quick" Content="Run Microsoft Office Quick Repair (Click-to-Run)" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <Button Name="btn_rep_off_pst" Content="Launch Outlook PST File Repair Tool (ScanPST)" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
                                 <!-- Safe mode row -->
                                 <Grid Margin="0,2,0,15">
                                     <Grid.ColumnDefinitions>
@@ -564,24 +563,24 @@ $xaml = @"
                                     </UniformGrid>
                                 </Grid>
 
-                                <TextBlock Text="💻 WINDOWS BOOT SECTOR &amp; EFI REPAIR" FontSize="11" FontWeight="Bold" Foreground="#38bdf8" Margin="0,10,0,6"/>
-                                <Button Name="btn_rep_bcd" Content="💻 Rebuild Windows Boot configuration partition files (BCDBoot)" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
-                                <Button Name="btn_rep_rec_boot" Content="🔄 Reboot System directly into Startup Repair / Recovery Menu" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
-                                <Button Name="btn_rep_fail_menu" Content="🚦 Enable Windows Boot Failures Menu Display Policy" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
-                                <Button Name="btn_rep_chkdsk" Content="📂 Schedule Boot-Time Disk Volume Scan &amp; Repair (Chkdsk /f /r)" Height="30" Margin="0,2,0,15" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <TextBlock Text="&#x1F4BB; WINDOWS BOOT SECTOR &amp; EFI REPAIR" FontSize="11" FontWeight="Bold" Foreground="#38bdf8" Margin="0,10,0,6"/>
+                                <Button Name="btn_rep_bcd" Content="Rebuild Windows Boot configuration partition files (BCDBoot)" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <Button Name="btn_rep_rec_boot" Content="Reboot System directly into Startup Repair / Recovery Menu" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <Button Name="btn_rep_fail_menu" Content="Enable Windows Boot Failures Menu Display Policy" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <Button Name="btn_rep_chkdsk" Content="Schedule Boot-Time Disk Volume Scan &amp; Repair (Chkdsk /f /r)" Height="30" Margin="0,2,0,15" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
 
-                                <TextBlock Text="🖨️ PRINTER SERVICE &amp; SHARING REPAIRS" FontSize="11" FontWeight="Bold" Foreground="#38bdf8" Margin="0,10,0,6"/>
-                                <Button Name="btn_rep_printer_11b" Content="🔓 Fix Shared Printer Error 0x0000011b (Set RpcAuthnLevelPrivacyEnabled=0)" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
-                                <Button Name="btn_rep_printer_policy" Content="📜 Configure Group Policy Printer Sharing &amp; RPC Connection Settings" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
-                                <Button Name="btn_rep_printer_lpd" Content="⚙️ Enable Windows LPD Print Service &amp; LPR Port Monitor Optional Features" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
-                                <Button Name="btn_rep_printer_disc" Content="🌐 Restart Network Discovery &amp; Printer Sharing Dependency Services" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
-                                <Button Name="btn_rep_printer_spool" Content="🧹 Flush Print Spooler Service &amp; Clear Pending Queue" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
-                                <Button Name="btn_rep_printer_diag" Content="🔍 Launch Native Windows Printer Troubleshooter Diagnostic Wizard" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
-                                <Button Name="btn_rep_printer_offline" Content="🖨️ Fix Network Printer False Offline Registry Settings status bug" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
-                                <Button Name="btn_rep_printer_drivers" Content="🖨️ Wipe Corrupted Print Drivers Registry Configurations list" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
-                                <Button Name="btn_rep_printer_dis_spooler" Content="🖨️ Completely Stop &amp; Disable Windows Print Spooler service" Height="30" Margin="0,2,0,15" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <TextBlock Text="&#x1F5A8; PRINTER SERVICE &amp; SHARING REPAIRS" FontSize="11" FontWeight="Bold" Foreground="#38bdf8" Margin="0,10,0,6"/>
+                                <Button Name="btn_rep_printer_11b" Content="Fix Shared Printer Error 0x0000011b (Set RpcAuthnLevelPrivacyEnabled=0)" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <Button Name="btn_rep_printer_policy" Content="Configure Group Policy Printer Sharing &amp; RPC Connection Settings" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <Button Name="btn_rep_printer_lpd" Content="Enable Windows LPD Print Service &amp; LPR Port Monitor Optional Features" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <Button Name="btn_rep_printer_disc" Content="Restart Network Discovery &amp; Printer Sharing Dependency Services" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <Button Name="btn_rep_printer_spool" Content="Flush Print Spooler Service &amp; Clear Pending Queue" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <Button Name="btn_rep_printer_diag" Content="Launch Native Windows Printer Troubleshooter Diagnostic Wizard" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <Button Name="btn_rep_printer_offline" Content="Fix Network Printer False Offline Registry Settings status bug" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <Button Name="btn_rep_printer_drivers" Content="Wipe Corrupted Print Drivers Registry Configurations list" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <Button Name="btn_rep_printer_dis_spooler" Content="Completely Stop &amp; Disable Windows Print Spooler service" Height="30" Margin="0,2,0,15" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
 
-                                <TextBlock Text="🎛️ LOSSLESS DRIVE &amp; DISK STYLE CONVERTERS" FontSize="11" FontWeight="Bold" Foreground="#38bdf8" Margin="0,10,0,6"/>
+                                <TextBlock Text="&#x1F39B; LOSSLESS DRIVE &amp; DISK STYLE CONVERTERS" FontSize="11" FontWeight="Bold" Foreground="#38bdf8" Margin="0,10,0,6"/>
                                 <!-- NTFS converter -->
                                 <Grid Margin="0,2,0,4">
                                     <Grid.ColumnDefinitions>
@@ -614,26 +613,26 @@ $xaml = @"
                                     <Button Grid.Column="2" Name="btn_conv_gpt" Content="Convert MBR to GPT" Height="28" Background="#ef4444" BorderThickness="0" FontSize="10" FontWeight="Bold"/>
                                 </Grid>
 
-                                <TextBlock Text="🛡️ WINDOWS SERVICES &amp; SHIELD REPAIRS" FontSize="11" FontWeight="Bold" Foreground="#38bdf8" Margin="0,10,0,6"/>
-                                <Button Name="btn_rep_shield_wu" Content="⚙️ Run Comprehensive Windows Update Service &amp; Cache Repair Engine" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <TextBlock Text="&#x1F6E1; WINDOWS SERVICES &amp; SHIELD REPAIRS" FontSize="11" FontWeight="Bold" Foreground="#38bdf8" Margin="0,10,0,6"/>
+                                <Button Name="btn_rep_shield_wu" Content="Run Comprehensive Windows Update Service &amp; Cache Repair Engine" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
                                 <!-- Windows update block frame -->
                                 <Grid Margin="0,2,0,4">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-                                    <Button Grid.Column="0" Name="btn_rep_shield_block_wu" Content="🔒 Block Windows Updates" Height="30" Margin="0,2,5,2" Background="#b91c1c" BorderThickness="0" FontSize="10" FontWeight="Bold"/>
-                                    <Button Grid.Column="1" Name="btn_rep_shield_enable_wu" Content="🔓 Enable Windows Updates" Height="30" Margin="5,2,0,2" Background="#059669" BorderThickness="0" FontSize="10" FontWeight="Bold"/>
+                                    <Button Grid.Column="0" Name="btn_rep_shield_block_wu" Content="Block Windows Updates" Height="30" Margin="0,2,5,2" Background="#b91c1c" BorderThickness="0" FontSize="10" FontWeight="Bold"/>
+                                    <Button Grid.Column="1" Name="btn_rep_shield_enable_wu" Content="Enable Windows Updates" Height="30" Margin="5,2,0,2" Background="#059669" BorderThickness="0" FontSize="10" FontWeight="Bold"/>
                                 </Grid>
-                                <Button Name="btn_rep_shield_defender" Content="🛡️ Reset Windows Defender Policies &amp; Restart Antivirus Services" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
-                                <Button Name="btn_rep_shield_firewall" Content="🧱 Restore Default Windows Firewall Settings and Rules" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
-                                <Button Name="btn_rep_shield_audio" Content="🎧 Reset &amp; Restart Windows Audio Playback Services" Height="30" Margin="0,2,0,15" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <Button Name="btn_rep_shield_defender" Content="Reset Windows Defender Policies &amp; Restart Antivirus Services" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <Button Name="btn_rep_shield_firewall" Content="Restore Default Windows Firewall Settings and Rules" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <Button Name="btn_rep_shield_audio" Content="Reset &amp; Restart Windows Audio Playback Services" Height="30" Margin="0,2,0,15" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
 
-                                <TextBlock Text="🚀 SHELL OPTIMIZERS &amp; DATA WIPERS" FontSize="11" FontWeight="Bold" Foreground="#38bdf8" Margin="0,10,0,6"/>
-                                <Button Name="btn_rep_shell_explorer" Content="🚀 Restart Windows Explorer Shell (Quick Freeze Fix)" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
-                                <Button Name="btn_rep_shell_events" Content="💽 Clear All Windows System, Application &amp; Security Event Logs" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
-                                <Button Name="btn_rep_shell_icon" Content="🖼️ Rebuild Windows Desktop Icon &amp; Thumbnail Cache Data" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
-                                <Button Name="btn_rep_shell_font" Content="🔤 Rebuild Windows System Font Cache Database" Height="30" Margin="0,2,0,15" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <TextBlock Text="&#x1F6E0; SHELL OPTIMIZERS &amp; DATA WIPERS" FontSize="11" FontWeight="Bold" Foreground="#38bdf8" Margin="0,10,0,6"/>
+                                <Button Name="btn_rep_shell_explorer" Content="Restart Windows Explorer Shell (Quick Freeze Fix)" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <Button Name="btn_rep_shell_events" Content="Clear All Windows System, Application &amp; Security Event Logs" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <Button Name="btn_rep_shell_icon" Content="Rebuild Windows Desktop Icon &amp; Thumbnail Cache Data" Height="30" Margin="0,2,0,4" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
+                                <Button Name="btn_rep_shell_font" Content="Rebuild Windows System Font Cache Database" Height="30" Margin="0,2,0,15" Background="#111827" BorderBrush="#374151" HorizontalContentAlignment="Left" Padding="10,0,0,0"/>
                             </StackPanel>
                         </ScrollViewer>
                     </Border>
@@ -670,7 +669,7 @@ $xaml = @"
                                             <ColumnDefinition Width="220"/>
                                         </Grid.ColumnDefinitions>
                                         <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                            <TextBlock Text="📡 Active Network Ping Latency Diagnostic Test Utility" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
+                                            <TextBlock Text="Active Network Ping Latency Diagnostic Test Utility" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
                                             <TextBlock Text="Enter a hostname or IP to measure ping response times in the log." FontSize="10" Foreground="#9ca3af"/>
                                         </StackPanel>
                                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
@@ -680,12 +679,12 @@ $xaml = @"
                                     </Grid>
                                 </Border>
 
-                                <TextBlock Text="📶 WI-FI &amp; DHCP NETWORK DIAGNOSTICS" FontSize="11" FontWeight="Bold" Foreground="#38bdf8" Margin="0,5,0,10"/>
+                                <TextBlock Text="WI-FI &amp; DHCP NETWORK DIAGNOSTICS" FontSize="11" FontWeight="Bold" Foreground="#38bdf8" Margin="0,5,0,10"/>
 
                                 <Border BorderBrush="#374151" BorderThickness="0,0,0,1" Padding="0,0,0,10" Margin="0,0,0,10">
                                     <Grid>
                                         <StackPanel HorizontalAlignment="Left">
-                                            <TextBlock Text="🔑 Show Saved Wi-Fi Passwords list" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
+                                            <TextBlock Text="Show Saved Wi-Fi Passwords list" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
                                             <TextBlock Text="Decrypts and displays all saved wireless networks SSIDs and security keys." FontSize="10" Foreground="#9ca3af"/>
                                         </StackPanel>
                                         <Button Name="btn_rep_wifi_pass" Content="Show Passwords" Background="#1e293b" BorderBrush="#374151" HorizontalAlignment="Right" Width="200"/>
@@ -695,7 +694,7 @@ $xaml = @"
                                 <Border BorderBrush="#374151" BorderThickness="0,0,0,1" Padding="0,0,0,10" Margin="0,0,0,10">
                                     <Grid>
                                         <StackPanel HorizontalAlignment="Left">
-                                            <TextBlock Text="🔌 Export Decrypted Saved Wi-Fi Profiles to Desktop" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
+                                            <TextBlock Text="Export Decrypted Saved Wi-Fi Profiles to Desktop" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
                                             <TextBlock Text="Saves wireless XML connection configurations profile files to Desktop." FontSize="10" Foreground="#9ca3af"/>
                                         </StackPanel>
                                         <Button Name="btn_rep_wifi_export" Content="Export Wi-Fi XMLs" Background="#4f46e5" BorderThickness="0" HorizontalAlignment="Right" Width="200"/>
@@ -705,7 +704,7 @@ $xaml = @"
                                 <Border BorderBrush="#374151" BorderThickness="0,0,0,1" Padding="0,0,0,10" Margin="0,0,0,10">
                                     <Grid>
                                         <StackPanel HorizontalAlignment="Left">
-                                            <TextBlock Text="📡 Release &amp; Renew Adapter DHCP IP Address" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
+                                            <TextBlock Text="Release &amp; Renew Adapter DHCP IP Address" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
                                             <TextBlock Text="Performs ipconfig /release and renew to refresh router network leases." FontSize="10" Foreground="#9ca3af"/>
                                         </StackPanel>
                                         <Button Name="btn_rep_dhcp" Content="Renew DHCP IP" Background="#0284c7" BorderThickness="0" HorizontalAlignment="Right" Width="200"/>
@@ -715,7 +714,7 @@ $xaml = @"
                                 <Border BorderBrush="#374151" BorderThickness="0,0,0,1" Padding="0,0,0,10" Margin="0,0,0,10">
                                     <Grid>
                                         <StackPanel HorizontalAlignment="Left">
-                                            <TextBlock Text="📡 Disable / Enable IPv6 network protocol status" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
+                                            <TextBlock Text="Disable / Enable IPv6 network protocol status" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
                                             <TextBlock Text="Toggles IPv6 binding on network adapters to resolve network routing bugs." FontSize="10" Foreground="#9ca3af"/>
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
@@ -725,12 +724,12 @@ $xaml = @"
                                     </Grid>
                                 </Border>
 
-                                <TextBlock Text="🔍 STANDARD HARDWARE &amp; STATUS REPORTS" FontSize="11" FontWeight="Bold" Foreground="#38bdf8" Margin="0,15,0,10"/>
+                                <TextBlock Text="STANDARD HARDWARE &amp; STATUS REPORTS" FontSize="11" FontWeight="Bold" Foreground="#38bdf8" Margin="0,15,0,10"/>
 
                                 <Border BorderBrush="#374151" BorderThickness="0,0,0,1" Padding="0,0,0,10" Margin="0,0,0,10">
                                     <Grid>
                                         <StackPanel HorizontalAlignment="Left">
-                                            <TextBlock Text="📈 List Top Processes by CPU and Memory allocations resource usage" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
+                                            <TextBlock Text="List Top Processes by CPU and Memory allocations resource usage" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
                                             <TextBlock Text="Scans processes list and displays the highest hardware usage active targets." FontSize="10" Foreground="#9ca3af"/>
                                         </StackPanel>
                                         <Button Name="btn_diag_top_proc" Content="Show Top Processes" Background="#1e293b" BorderBrush="#374151" HorizontalAlignment="Right" Width="200"/>
@@ -740,7 +739,7 @@ $xaml = @"
                                 <Border BorderBrush="#374151" BorderThickness="0,0,0,1" Padding="0,0,0,10" Margin="0,0,0,10">
                                     <Grid>
                                         <StackPanel HorizontalAlignment="Left">
-                                            <TextBlock Text="🔌 Export Active System Hardware Drivers list registry to Desktop" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
+                                            <TextBlock Text="Export Active System Hardware Drivers list registry to Desktop" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
                                             <TextBlock Text="Generates driver list and saves it as SystemDriversList.txt on your desktop." FontSize="10" Foreground="#9ca3af"/>
                                         </StackPanel>
                                         <Button Name="btn_diag_export_drivers" Content="Export Driver List" Background="#4f46e5" BorderThickness="0" HorizontalAlignment="Right" Width="200"/>
@@ -750,7 +749,7 @@ $xaml = @"
                                 <Border BorderBrush="#374151" BorderThickness="0,0,0,1" Padding="0,0,0,10" Margin="0,0,0,10">
                                     <Grid>
                                         <StackPanel HorizontalAlignment="Left">
-                                            <TextBlock Text="💾 Check Connected Physical Drive Health Status (SMART Scan)" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
+                                            <TextBlock Text="Check Connected Physical Drive Health Status (SMART Scan)" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
                                             <TextBlock Text="Queries hardware sensors on connected physical drives to check reliability." FontSize="10" Foreground="#9ca3af"/>
                                         </StackPanel>
                                         <Button Name="btn_diag_disk" Content="Run SMART Drive Check" Background="#4f46e5" BorderThickness="0" HorizontalAlignment="Right" Width="200"/>
@@ -760,7 +759,7 @@ $xaml = @"
                                 <Border BorderBrush="#374151" BorderThickness="0,0,0,1" Padding="0,0,0,10" Margin="0,0,0,10">
                                     <Grid>
                                         <StackPanel HorizontalAlignment="Left">
-                                            <TextBlock Text="🔋 Generate Windows Battery Lifecycle &amp; Wear Health Report" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
+                                            <TextBlock Text="Generate Windows Battery Lifecycle &amp; Wear Health Report" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
                                             <TextBlock Text="Generates HTML power battery wear diagnostic status chart." FontSize="10" Foreground="#9ca3af"/>
                                         </StackPanel>
                                         <Button Name="btn_diag_battery" Content="Generate Battery Report" Background="#10b981" BorderThickness="0" HorizontalAlignment="Right" Width="200"/>
@@ -770,7 +769,7 @@ $xaml = @"
                                 <Border BorderBrush="#374151" BorderThickness="0,0,0,1" Padding="0,0,0,10" Margin="0,0,0,10">
                                     <Grid>
                                         <StackPanel HorizontalAlignment="Left">
-                                            <TextBlock Text="🧠 Analyze Installed RAM Modules &amp; Speed Specifications" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
+                                            <TextBlock Text="Analyze Installed RAM Modules &amp; Speed Specifications" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
                                             <TextBlock Text="Queries WMIC to identify installed memory module speeds and clock cycles." FontSize="10" Foreground="#9ca3af"/>
                                         </StackPanel>
                                         <Button Name="btn_diag_ram" Content="Show Memory Specs" Background="#374151" BorderThickness="0" HorizontalAlignment="Right" Width="200"/>
@@ -780,7 +779,7 @@ $xaml = @"
                                 <Border BorderBrush="#374151" BorderThickness="0,0,0,1" Padding="0,0,0,10" Margin="0,0,0,10">
                                     <Grid>
                                         <StackPanel HorizontalAlignment="Left">
-                                            <TextBlock Text="🔋 Verify Windows OS License Activation Status" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
+                                            <TextBlock Text="Verify Windows OS License Activation Status" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
                                             <TextBlock Text="Queries software licensing services to check activation." FontSize="10" Foreground="#9ca3af"/>
                                         </StackPanel>
                                         <Button Name="btn_diag_act" Content="Check Activation Status" Background="#1f2937" BorderThickness="1" BorderBrush="#374151" HorizontalAlignment="Right" Width="200"/>
@@ -790,7 +789,7 @@ $xaml = @"
                                 <Border BorderBrush="#374151" BorderThickness="0,0,0,1" Padding="0,0,0,10" Margin="0,0,0,10">
                                     <Grid>
                                         <StackPanel HorizontalAlignment="Left">
-                                            <TextBlock Text="📝 Generate Comprehensive Windows Hardware &amp; System Info Summary" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
+                                            <TextBlock Text="Generate Comprehensive Windows Hardware &amp; System Info Summary" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
                                             <TextBlock Text="Generates CPU, GPU, Motherboard, and BIOS properties summary." FontSize="10" Foreground="#9ca3af"/>
                                         </StackPanel>
                                         <Button Name="btn_diag_specs" Content="Generate Specs Info" Background="#0284c7" BorderThickness="0" HorizontalAlignment="Right" Width="200"/>
@@ -800,7 +799,7 @@ $xaml = @"
                                 <Border BorderBrush="#374151" BorderThickness="0,0,0,1" Padding="0,0,0,10" Margin="0,0,0,10">
                                     <Grid>
                                         <StackPanel HorizontalAlignment="Left">
-                                            <TextBlock Text="🔄 Schedule Windows Memory Diagnostic Scanner (mdsched.exe)" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
+                                            <TextBlock Text="Schedule Windows Memory Diagnostic Scanner (mdsched.exe)" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
                                             <TextBlock Text="Sets up Windows Memory Diagnostic to check physical RAM hardware during restart." FontSize="10" Foreground="#9ca3af"/>
                                         </StackPanel>
                                         <Button Name="btn_diag_mdsched" Content="Schedule RAM Scan" Background="#0284c7" BorderThickness="0" HorizontalAlignment="Right" Width="200"/>
@@ -810,7 +809,7 @@ $xaml = @"
                                 <Border BorderBrush="#374151" BorderThickness="0,0,0,1" Padding="0,0,0,10" Margin="0,0,0,10">
                                     <Grid>
                                         <StackPanel HorizontalAlignment="Left">
-                                            <TextBlock Text="🌐 Configure Secure Network DNS Servers (Cloudflare 1.1.1.1)" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
+                                            <TextBlock Text="Configure Secure Network DNS Servers (Cloudflare 1.1.1.1)" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
                                             <TextBlock Text="Configures adapter DNS settings to use Cloudflare secure DNS." FontSize="10" Foreground="#9ca3af"/>
                                         </StackPanel>
                                         <Button Name="btn_diag_dns" Content="Apply Secure DNS" Background="#4f46e5" BorderThickness="0" HorizontalAlignment="Right" Width="200"/>
@@ -820,7 +819,7 @@ $xaml = @"
                                 <Border BorderBrush="#374151" BorderThickness="0,0,0,1" Padding="0,0,0,10" Margin="0,0,0,10">
                                     <Grid>
                                         <StackPanel HorizontalAlignment="Left">
-                                            <TextBlock Text="📡 Run Real-Time Internet Download Speed Test" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
+                                            <TextBlock Text="Run Real-Time Internet Download Speed Test" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
                                             <TextBlock Text="Downloads a test file from Cloudflare CDN to calculate internet bandwidth." FontSize="10" Foreground="#9ca3af"/>
                                         </StackPanel>
                                         <Button Name="btn_diag_speed" Content="Run Download Speed Test" Background="#10b981" BorderThickness="0" HorizontalAlignment="Right" Width="200"/>
@@ -841,7 +840,7 @@ $xaml = @"
                     <!-- Left Card: Robocopy Migration -->
                     <Border Grid.Column="0" Background="#1f2937" BorderBrush="#374151" BorderThickness="1" CornerRadius="8" Padding="15" Margin="0,0,10,0">
                         <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="📂 FOLDER MIGRATION (ROBOCOPY)" FontSize="13" FontWeight="Bold" Foreground="#38bdf8" Margin="0,0,0,15"/>
+                            <TextBlock Text="FOLDER MIGRATION (ROBOCOPY)" FontSize="13" FontWeight="Bold" Foreground="#38bdf8" Margin="0,0,0,15"/>
                             
                             <TextBlock Text="Source Folder Path:" FontSize="11" Foreground="#9ca3af" Margin="0,0,0,5"/>
                             <Grid Margin="0,0,0,15">
@@ -863,19 +862,19 @@ $xaml = @"
                                 <Button Grid.Column="1" Name="btn_backup_browse_dst" Content="Browse" Height="30" Margin="5,0,0,0"/>
                             </Grid>
 
-                            <Button Name="btn_start_backup" Content="⚡ Start Robocopy Backup Migration" Height="40" Background="#059669" BorderThickness="0" FontWeight="Bold" FontSize="13"/>
+                            <Button Name="btn_start_backup" Content="Start Robocopy Backup Migration" Height="40" Background="#059669" BorderThickness="0" FontWeight="Bold" FontSize="13"/>
                         </StackPanel>
                     </Border>
 
                     <!-- Right Card: System Restore Points -->
                     <Border Grid.Column="1" Background="#1f2937" BorderBrush="#374151" BorderThickness="1" CornerRadius="8" Padding="15" Margin="10,0,0,0">
                         <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="🛡️ WINDOWS SYSTEM RESTORE UTILITIES" FontSize="13" FontWeight="Bold" Foreground="#38bdf8" Margin="0,0,0,15"/>
+                            <TextBlock Text="WINDOWS SYSTEM RESTORE UTILITIES" FontSize="13" FontWeight="Bold" Foreground="#38bdf8" Margin="0,0,0,15"/>
                             <TextBlock Text="Manage active system restore points protection schemes to recover from crashes." FontSize="10.5" Foreground="#9ca3af" Margin="0,0,0,25" TextWrapping="Wrap"/>
                             
-                            <Button Name="btn_backup_enable_restore" Content="🔧 Enable System Protection Restore on C: Drive" Height="36" Background="#374151" BorderThickness="0" FontWeight="Bold" Margin="0,0,0,8"/>
-                            <Button Name="btn_backup_create_restore" Content="🛡️ Create Instant System Restore Point" Height="36" Background="#0284c7" BorderThickness="0" FontWeight="Bold" Margin="0,8,0,8"/>
-                            <Button Name="btn_backup_launch_restore" Content="🔄 Launch Windows Recovery System Restore Wizard" Height="36" Background="#4f46e5" BorderThickness="0" FontWeight="Bold" Margin="0,8,0,0"/>
+                            <Button Name="btn_backup_enable_restore" Content="Enable System Protection Restore on C: Drive" Height="36" Background="#374151" BorderThickness="0" FontWeight="Bold" Margin="0,0,0,8"/>
+                            <Button Name="btn_backup_create_restore" Content="Create Instant System Restore Point" Height="36" Background="#0284c7" BorderThickness="0" FontWeight="Bold" Margin="0,8,0,8"/>
+                            <Button Name="btn_backup_launch_restore" Content="Launch Windows Recovery System Restore Wizard" Height="36" Background="#4f46e5" BorderThickness="0" FontWeight="Bold" Margin="0,8,0,0"/>
                         </StackPanel>
                     </Border>
                 </Grid>
@@ -892,20 +891,20 @@ $xaml = @"
                     <Border Grid.Row="1" Background="#1f2937" BorderBrush="#374151" BorderThickness="1" CornerRadius="8" Padding="15">
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
                             <StackPanel>
-                                <TextBlock Text="⚙️ STANDARD CONTROL CONSOLES SHORTCUTS" FontSize="11.5" FontWeight="Bold" Foreground="#38bdf8" Margin="5,5,5,10"/>
+                                <TextBlock Text="STANDARD CONTROL CONSOLES SHORTCUTS" FontSize="11.5" FontWeight="Bold" Foreground="#38bdf8" Margin="5,5,5,10"/>
                                 <UniformGrid Columns="3" Margin="0,0,0,20">
-                                    <Button Name="btn_cfg_panel" Content="⚙️ Control Panel" Height="45" Margin="5" FontSize="10.5" FontWeight="Bold"/>
-                                    <Button Name="btn_cfg_reg" Content="📁 Registry Editor" Height="45" Margin="5" FontSize="10.5" FontWeight="Bold"/>
-                                    <Button Name="btn_cfg_dev" Content="🔌 Device Manager" Height="45" Margin="5" FontSize="10.5" FontWeight="Bold"/>
-                                    <Button Name="btn_cfg_disk" Content="💾 Disk Management" Height="45" Margin="5" FontSize="10.5" FontWeight="Bold"/>
-                                    <Button Name="btn_cfg_services" Content="🛠️ System Services" Height="45" Margin="5" FontSize="10.5" FontWeight="Bold"/>
-                                    <Button Name="btn_cfg_event" Content="📋 Event Viewer" Height="45" Margin="5" FontSize="10.5" FontWeight="Bold"/>
-                                    <Button Name="btn_cfg_task" Content="📈 Task Manager" Height="45" Margin="5" FontSize="10.5" FontWeight="Bold"/>
-                                    <Button Name="btn_cfg_gp" Content="📜 Group Policy Editor" Height="45" Margin="5" FontSize="10.5" FontWeight="Bold"/>
-                                    <Button Name="btn_cfg_sys" Content="💻 System Properties" Height="45" Margin="5" FontSize="10.5" FontWeight="Bold"/>
+                                    <Button Name="btn_cfg_panel" Content="Control Panel" Height="45" Margin="5" FontSize="10.5" FontWeight="Bold"/>
+                                    <Button Name="btn_cfg_reg" Content="Registry Editor" Height="45" Margin="5" FontSize="10.5" FontWeight="Bold"/>
+                                    <Button Name="btn_cfg_dev" Content="Device Manager" Height="45" Margin="5" FontSize="10.5" FontWeight="Bold"/>
+                                    <Button Name="btn_cfg_disk" Content="Disk Management" Height="45" Margin="5" FontSize="10.5" FontWeight="Bold"/>
+                                    <Button Name="btn_cfg_services" Content="System Services" Height="45" Margin="5" FontSize="10.5" FontWeight="Bold"/>
+                                    <Button Name="btn_cfg_event" Content="Event Viewer" Height="45" Margin="5" FontSize="10.5" FontWeight="Bold"/>
+                                    <Button Name="btn_cfg_task" Content="Task Manager" Height="45" Margin="5" FontSize="10.5" FontWeight="Bold"/>
+                                    <Button Name="btn_cfg_gp" Content="Group Policy Editor" Height="45" Margin="5" FontSize="10.5" FontWeight="Bold"/>
+                                    <Button Name="btn_cfg_sys" Content="System Properties" Height="45" Margin="5" FontSize="10.5" FontWeight="Bold"/>
                                 </UniformGrid>
 
-                                <TextBlock Text="👤 LOCAL USER ACCOUNTS &amp; AUTO-LOGIN MANAGER" FontSize="11.5" FontWeight="Bold" Foreground="#38bdf8" Margin="5,5,5,10"/>
+                                <TextBlock Text="LOCAL USER ACCOUNTS &amp; AUTO-LOGIN MANAGER" FontSize="11.5" FontWeight="Bold" Foreground="#38bdf8" Margin="5,5,5,10"/>
                                 <Border Background="#111827" BorderBrush="#374151" BorderThickness="1" CornerRadius="6" Padding="12" Margin="5">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
@@ -925,7 +924,7 @@ $xaml = @"
                                     </Grid>
                                 </Border>
 
-                                <TextBlock Text="💾 BIOS &amp; DEVICE TELEMETRY INFORMATION" FontSize="11.5" FontWeight="Bold" Foreground="#38bdf8" Margin="5,15,5,10"/>
+                                <TextBlock Text="BIOS &amp; DEVICE TELEMETRY INFORMATION" FontSize="11.5" FontWeight="Bold" Foreground="#38bdf8" Margin="5,15,5,10"/>
                                 <Border Background="#111827" BorderBrush="#374151" BorderThickness="1" CornerRadius="6" Padding="12" Margin="5">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
@@ -963,7 +962,6 @@ $xmlDoc.SelectNodes("//*[@Name]") | ForEach-Object {
 $activities = New-Object System.Collections.ObjectModel.ObservableCollection[PSObject]
 $activity_tree.ItemsSource = $activities
 
-# Keep references to prevent PowerShell instances from being garbage collected
 $script:runspaces = [System.Collections.ArrayList]::new()
 
 function Run-Async ($scriptBlock, $argsList=@()) {
@@ -1004,15 +1002,15 @@ function Log-Message ($msg) {
 function Switch-View ($viewName) {
     $views = @("grid_dash", "grid_soft", "grid_act", "grid_tweaks", "grid_bloat", "grid_repairs", "grid_diag", "grid_backups", "grid_config")
     $titles = @{
-        "grid_dash" = "🏠 Dashboard Overview"
-        "grid_soft" = "📥 Silent Software Installer Hub"
-        "grid_act"  = "🔑 Windows & Office Activation (MAS)"
-        "grid_tweaks" = "🔧 Premium OS Registry Tweaks"
-        "grid_bloat" = "🧼 Windows Bloatware & Features"
-        "grid_repairs" = "🛠️ System Command & Cache Repairs"
-        "grid_diag" = "📊 Hardware Diagnostics & Reports"
-        "grid_backups" = "💾 Backups & Data Migration"
-        "grid_config" = "⚙️ Windows Configuration Consoles"
+        "grid_dash" = "Dashboard Overview"
+        "grid_soft" = "Silent Software Installer Hub"
+        "grid_act"  = "Windows & Office Activation (MAS)"
+        "grid_tweaks" = "Premium OS Registry Tweaks"
+        "grid_bloat" = "Windows Bloatware & Features"
+        "grid_repairs" = "System Command & Cache Repairs"
+        "grid_diag" = "Hardware Diagnostics & Reports"
+        "grid_backups" = "Backups & Data Migration"
+        "grid_config" = "Windows Configuration Consoles"
     }
 
     $views | ForEach-Object {
@@ -1146,12 +1144,10 @@ Run-Async {
     param($win, $c, $r, $d, $u)
     while ($true) {
         try {
-            # CPU
             $cpu = (Get-CimInstance -ClassName Win32_Processor | Measure-Object -Property LoadPercentage -Average).Average
             if ($cpu -eq $null) { $cpu = 0 }
             $cpuStr = "$([Math]::Round($cpu))%"
 
-            # RAM
             $os = Get-CimInstance Win32_OperatingSystem
             $freeRam = $os.FreePhysicalMemory
             $totalRam = $os.TotalVisibleMemorySize
@@ -1159,16 +1155,13 @@ Run-Async {
             $ramPct = ($usedRam / $totalRam) * 100
             $ramStr = "$([Math]::Round($ramPct))%"
 
-            # Disk
             $disk = Get-PSDrive C
             $freeGB = [Math]::Round($disk.Free / 1GB)
             $diskStr = "$freeGB GB Free"
 
-            # Uptime
             $uptime = (Get-Date) - $os.LastBootUpTime
             $uptimeStr = "Uptime: $($uptime.Days)d $($uptime.Hours)h $($uptime.Minutes)m"
 
-            # Update UI controls safely on the UI thread
             $win.Dispatcher.Invoke([Action]{
                 $c.Text = $cpuStr
                 $r.Text = $ramStr
@@ -1212,12 +1205,12 @@ $btn_install_soft.Add_Click({
             $proc = Start-Process winget -ArgumentList "install --id $id --silent --accept-source-agreements --accept-package-agreements" -NoNewWindow -PassThru -Wait
             if ($proc.ExitCode -eq 0) {
                 $win.Dispatcher.Invoke([Action]{ 
-                    Log-Message "[✓] $name installed successfully."
+                    Log-Message "[OK] $name installed successfully."
                     Add-Activity "WinGet Installer" "$name installed successfully" "Success"
                 })
             } else {
                 $win.Dispatcher.Invoke([Action]{ 
-                    Log-Message "[X] $name failed or was already installed."
+                    Log-Message "[FAIL] $name failed or was already installed."
                     Add-Activity "WinGet Installer" "$name install failed" "Failed"
                 })
             }
@@ -1255,12 +1248,12 @@ $btn_uninstall_soft.Add_Click({
             $proc = Start-Process winget -ArgumentList "uninstall --id $id --silent" -NoNewWindow -PassThru -Wait
             if ($proc.ExitCode -eq 0) {
                 $win.Dispatcher.Invoke([Action]{ 
-                    Log-Message "[✓] $name uninstalled successfully."
+                    Log-Message "[OK] $name uninstalled successfully."
                     Add-Activity "WinGet Installer" "$name uninstalled successfully" "Success"
                 })
             } else {
                 $win.Dispatcher.Invoke([Action]{ 
-                    Log-Message "[X] $name failed to uninstall."
+                    Log-Message "[FAIL] $name failed to uninstall."
                     Add-Activity "WinGet Installer" "$name uninstall failed" "Failed"
                 })
             }
@@ -1278,25 +1271,23 @@ function Start-OfficeDeployment ($pkgId, $title) {
     Add-Activity "Office Installer" "Deploying $title..." "Running"
     
     if ($pkgId -eq "Microsoft.Office") {
-        # Deploy Microsoft 365 silent using WinGet
         Run-Async {
             param($win, $t)
             $win.Dispatcher.Invoke([Action]{ Log-Message "Installing Microsoft 365 Apps silently via WinGet..." })
             $proc = Start-Process winget -ArgumentList "install --id Microsoft.Office --silent --accept-source-agreements --accept-package-agreements" -NoNewWindow -PassThru -Wait
             if ($proc.ExitCode -eq 0) {
                 $win.Dispatcher.Invoke([Action]{ 
-                    Log-Message "[✓] Microsoft 365 installed successfully."
+                    Log-Message "[OK] Microsoft 365 installed successfully."
                     Add-Activity "Office Installer" "M365 installed successfully" "Success"
                 })
             } else {
                 $win.Dispatcher.Invoke([Action]{ 
-                    Log-Message "[X] Microsoft 365 installation failed."
+                    Log-Message "[FAIL] Microsoft 365 installation failed."
                     Add-Activity "Office Installer" "M365 install failed" "Failed"
                 })
             }
         } @($title)
     } else {
-        # Custom ODT deployment for LTSC
         Run-Async {
             param($win, $id, $t)
             $odtDir = "C:\OfficeODT"
@@ -1306,7 +1297,6 @@ function Start-OfficeDeployment ($pkgId, $title) {
             $setupExe = "C:\Program Files\OfficeDeploymentTool\setup.exe"
             if (-not (Test-Path $setupExe)) { $setupExe = "C:\Program Files (x86)\OfficeDeploymentTool\setup.exe" }
             if (-not (Test-Path $setupExe)) {
-                # Fallback direct download
                 $url = "https://download.microsoft.com/download/6c1eeb25-cf8b-41d9-8d0d-cc1dbc032140/officedeploymenttool_20228-20124.exe"
                 $odtInstaller = "$odtDir\odt_installer.exe"
                 Invoke-WebRequest -Uri $url -OutFile $odtInstaller
@@ -1314,7 +1304,6 @@ function Start-OfficeDeployment ($pkgId, $title) {
                 $setupExe = "$odtDir\setup.exe"
             }
             
-            # Configure XML
             $channel = "PerpetualVL2019"
             $product = "ProPlus2019Volume"
             if ($id -like "*2021*") {
@@ -1341,12 +1330,12 @@ function Start-OfficeDeployment ($pkgId, $title) {
             $proc = Start-Process $setupExe -ArgumentList "/configure $odtDir\configuration.xml" -Wait -PassThru
             if ($proc.ExitCode -eq 0) {
                 $win.Dispatcher.Invoke([Action]{ 
-                    Log-Message "[✓] $t installed successfully."
+                    Log-Message "[OK] $t installed successfully."
                     Add-Activity "Office Installer" "$t installed" "Success"
                 })
             } else {
                 $win.Dispatcher.Invoke([Action]{ 
-                    Log-Message "[X] $t failed (Exit code: $($proc.ExitCode))."
+                    Log-Message "[FAIL] $t failed (Exit code: $($proc.ExitCode))."
                     Add-Activity "Office Installer" "$t install failed" "Failed"
                 })
             }
@@ -1364,7 +1353,7 @@ $btn_launch_mas.Add_Click({
     Log-Message "Launching MAS Console..."
     Add-Activity "System Activation" "Launching MAS GUI" "Running"
     Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; iex(irm https://get.activated.win)"
-    Log-Message "[✓] MAS process initialized."
+    Log-Message "[OK] MAS process initialized."
     Add-Activity "System Activation" "MAS GUI opened successfully" "Success"
 })
 
@@ -1440,7 +1429,7 @@ $btn_rep_wu.Add_Click({
         Start-Service wuauserv -ErrorAction SilentlyContinue
         Start-Service bits -ErrorAction SilentlyContinue
         $win.Dispatcher.Invoke([Action]{ 
-            Log-Message "[✓] Windows Update services cache reset completed." 
+            Log-Message "[OK] Windows Update services cache reset completed." 
             Add-Activity "System Repair" "Reset Update Cache completed" "Success"
         })
     }
@@ -1454,7 +1443,7 @@ $btn_rep_engines.Add_Click({
         Remove-Item "$env:SystemRoot\Logs\CBS\CBS.log" -Force -ErrorAction SilentlyContinue
         dism /online /cleanup-image /startcomponentcleanup | Out-Null
         $win.Dispatcher.Invoke([Action]{ 
-            Log-Message "[✓] Native repair engines refreshed successfully." 
+            Log-Message "[OK] Native repair engines refreshed successfully." 
             Add-Activity "System Repair" "Repair Native Engines completed" "Success"
         })
     }
@@ -1472,7 +1461,7 @@ $btn_rep_dll.Add_Click({
             if ($proc.ExitCode -eq 0) { $success++ }
         }
         $win.Dispatcher.Invoke([Action]{ 
-            Log-Message "[✓] Re-registered $success system DLL files." 
+            Log-Message "[OK] Re-registered $success system DLL files." 
             Add-Activity "System Repair" "Re-register DLLs completed" "Success"
         })
     }
@@ -1481,7 +1470,7 @@ $btn_rep_dll.Add_Click({
 $btn_rep_dns.Add_Click({
     Log-Message "Flushing DNS resolver cache..."
     ipconfig /flushdns | Out-Null
-    Log-Message "[✓] DNS cache flushed."
+    Log-Message "[OK] DNS cache flushed."
     Add-Activity "System Repair" "Flush DNS Cache" "Success"
 })
 
@@ -1497,7 +1486,7 @@ $btn_rep_store.Add_Click({
             Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"
         }
         $win.Dispatcher.Invoke([Action]{ 
-            Log-Message "[✓] Microsoft App Store packages re-registered." 
+            Log-Message "[OK] Microsoft App Store packages re-registered." 
             Add-Activity "System Repair" "Repair App Store completed" "Success"
         })
     }
@@ -1511,7 +1500,7 @@ $btn_rep_wsreset.Add_Click({
         param($win)
         $proc = Start-Process wsreset.exe -PassThru -Wait
         $win.Dispatcher.Invoke([Action]{ 
-            Log-Message "[✓] wsreset process completed successfully."
+            Log-Message "[OK] wsreset process completed successfully."
             Add-Activity "System Repair" "wsreset completed" "Success"
         })
     }
@@ -1525,7 +1514,7 @@ $btn_rep_wmi.Add_Click({
         param($win)
         $proc = Start-Process winmgmt.exe -ArgumentList "/salvagerepository" -NoNewWindow -PassThru -Wait
         $win.Dispatcher.Invoke([Action]{ 
-            Log-Message "[✓] WMI Salvage command finished with exit code: $($proc.ExitCode)."
+            Log-Message "[OK] WMI Salvage command finished with exit code: $($proc.ExitCode)."
             Add-Activity "System Repair" "WMI Rebuilt" "Success"
         })
     }
@@ -1538,10 +1527,10 @@ $btn_rep_search.Add_Click({
         Stop-Service wsearch -Force -ErrorAction SilentlyContinue
         Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows Search" -Name "SetupCompletedSuccessfully" -Value 0 -Force
         Start-Service wsearch -ErrorAction SilentlyContinue
-        Log-Message "[✓] Search indexer database reset. Windows is now rebuilding the index in the background."
+        Log-Message "[OK] Search indexer database reset. Windows is now rebuilding the index in the background."
         Add-Activity "System Tweak" "Rebuilt Search Index" "Success"
     } catch {
-        Log-Message "[X] Error resetting Search Index: $_"
+        Log-Message "[FAIL] Error resetting Search Index: $_"
     }
 })
 
@@ -1555,7 +1544,7 @@ $btn_rep_net.Add_Click({
         $win.Dispatcher.Invoke([Action]{ Log-Message "Resetting TCP/IP stack..." })
         netsh int ip reset | Out-Null
         $win.Dispatcher.Invoke([Action]{ 
-            Log-Message "[✓] Network reset completed. Please restart your system." 
+            Log-Message "[OK] Network reset completed. Please restart your system." 
             Add-Activity "System Repair" "Network Reset completed" "Success"
         })
     }
@@ -1571,7 +1560,7 @@ $btn_rep_off_quick.Add_Click({
         param($win)
         $proc = Start-Process "C:\Program Files\Common Files\microsoft shared\ClickToRun\OfficeClickToRun.exe" -ArgumentList "scenario=Repair platform=x64 culture=en-us ForceRepair=1" -NoNewWindow -PassThru -Wait
         $win.Dispatcher.Invoke([Action]{ 
-            Log-Message "[✓] Office Quick Repair finished." 
+            Log-Message "[OK] Office Quick Repair finished." 
             Add-Activity "System Repair" "Office Quick Repair completed" "Success"
         })
     }
@@ -1594,9 +1583,9 @@ $btn_rep_off_pst.Add_Click({
             }
         }
         if (-not $found) {
-            $win.Dispatcher.Invoke([Action]{ Log-Message "[X] ScanPST.exe could not be found in default Office directories." })
+            $win.Dispatcher.Invoke([Action]{ Log-Message "[FAIL] ScanPST.exe could not be found in default Office directories." })
         } else {
-            $win.Dispatcher.Invoke([Action]{ Log-Message "[✓] Launched ScanPST successfully." })
+            $win.Dispatcher.Invoke([Action]{ Log-Message "[OK] Launched ScanPST successfully." })
         }
     }
 })
@@ -1622,7 +1611,7 @@ $btn_rep_chkdsk.Add_Click({
     Run-Async {
         param($win)
         $proc = Start-Process chkdsk -ArgumentList "C: /f /r" -RedirectStandardInput "$env:temp\y.txt" -NoNewWindow -PassThru -Wait
-        $win.Dispatcher.Invoke([Action]{ Log-Message "[✓] Boot check scheduled. Please reboot your machine to scan." })
+        $win.Dispatcher.Invoke([Action]{ Log-Message "[OK] Boot check scheduled. Please reboot your machine to scan." })
     }
 })
 
@@ -1630,10 +1619,10 @@ $btn_rep_printer_11b.Add_Click({
     Log-Message "Fixing Printer Sharing Error 0x0000011b..."
     try {
         Set-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Print" -Name "RpcAuthnLevelPrivacyEnabled" -Value 0 -Force
-        Log-Message "[✓] Applied RPC privacy key registry bypass."
+        Log-Message "[OK] Applied RPC privacy key registry bypass."
         Add-Activity "Printer Repair" "Error 0x0000011b Fixed" "Success"
     } catch {
-        Log-Message "[X] Failed to modify print registry keys: $_"
+        Log-Message "[FAIL] Failed to modify print registry keys: $_"
         Add-Activity "Printer Repair" "Error 0x0000011b Fix Failed" "Failed"
     }
 })
@@ -1647,10 +1636,10 @@ $btn_rep_printer_policy.Add_Click({
         New-Item -Path "HKLM:\Software\Policies\Microsoft\Windows NT\Printers" -Force -ErrorAction SilentlyContinue | Out-Null
         Set-ItemProperty -Path "HKLM:\Software\Policies\Microsoft\Windows NT\Printers" -Name "RpcOverTcp" -Value 1 -Force
         
-        Log-Message "[✓] Printer GPO Point and Print / RPC rules applied."
+        Log-Message "[OK] Printer GPO Point and Print / RPC rules applied."
         Add-Activity "Printer Repair" "GPO Printer Policies Applied" "Success"
     } catch {
-        Log-Message "[X] Failed to write print GPO keys: $_"
+        Log-Message "[FAIL] Failed to write print GPO keys: $_"
     }
 })
 
@@ -1662,7 +1651,7 @@ $btn_rep_printer_lpd.Add_Click({
         Enable-WindowsOptionalFeature -Online -FeatureName "LPDPrintService" -NoRestart | Out-Null
         Enable-WindowsOptionalFeature -Online -FeatureName "LPRPortMonitor" -NoRestart | Out-Null
         $win.Dispatcher.Invoke([Action]{ 
-            Log-Message "[✓] LPD Print service and LPR Port Monitor features enabled." 
+            Log-Message "[OK] LPD Print service and LPR Port Monitor features enabled." 
             Add-Activity "Printer Repair" "LPD/LPR Features Enabled" "Success"
         })
     }
@@ -1677,7 +1666,7 @@ $btn_rep_printer_disc.Add_Click({
             Set-Service -Name $s -StartupType Automatic -ErrorAction SilentlyContinue
             Restart-Service -Name $s -Force -ErrorAction SilentlyContinue
         }
-        $win.Dispatcher.Invoke([Action]{ Log-Message "[✓] Network discovery dependency services restarted." })
+        $win.Dispatcher.Invoke([Action]{ Log-Message "[OK] Network discovery dependency services restarted." })
     }
 })
 
@@ -1688,7 +1677,7 @@ $btn_rep_printer_spool.Add_Click({
     Remove-Item "$env:SystemRoot\system32\spool\PRINTERS\*" -Force -Recurse -ErrorAction SilentlyContinue
     Log-Message "Starting Print Spooler..."
     Start-Service spooler
-    Log-Message "[✓] Print Spooler restarted and queue cleared successfully."
+    Log-Message "[OK] Print Spooler restarted and queue cleared successfully."
     Add-Activity "Printer Repair" "Spooler Cleaned" "Success"
 })
 
@@ -1701,10 +1690,10 @@ $btn_rep_printer_offline.Add_Click({
         Get-ChildItem -Path "HKLM:\System\CurrentControlSet\Control\Print\Monitors\Standard TCP/IP Port\Ports" | ForEach-Object {
             Set-ItemProperty -Path $_.PSPath -Name "SNMP Enabled" -Value 0 -Force
         }
-        Log-Message "[✓] Disabled SNMP Enabled flags for all TCP/IP printer ports."
+        Log-Message "[OK] Disabled SNMP Enabled flags for all TCP/IP printer ports."
         Add-Activity "Printer Repair" "SNMP Offline Status Fix" "Success"
     } catch {
-        Log-Message "[X] Error disabling SNMP status: $_"
+        Log-Message "[FAIL] Error disabling SNMP status: $_"
     }
 })
 
@@ -1716,10 +1705,10 @@ $btn_rep_printer_drivers.Add_Click({
         Remove-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Print\Environments\Windows x64\Drivers\Version-3\*" -Force -Recurse -ErrorAction SilentlyContinue
         Remove-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Print\Environments\Windows x64\Drivers\Version-4\*" -Force -Recurse -ErrorAction SilentlyContinue
         Start-Service spooler
-        Log-Message "[✓] Corrupted printer driver configuration keys cleaned."
+        Log-Message "[OK] Corrupted printer driver configuration keys cleaned."
         Add-Activity "Printer Repair" "Wiped Corrupted Drivers" "Success"
     } catch {
-        Log-Message "[X] Failed to wipe printer driver keys: $_"
+        Log-Message "[FAIL] Failed to wipe printer driver keys: $_"
     }
 })
 
@@ -1729,10 +1718,10 @@ $btn_rep_printer_dis_spooler.Add_Click({
     try {
         Stop-Service spooler -Force
         Set-Service -Name spooler -StartupType Disabled
-        Log-Message "[✓] Print Spooler stopped and disabled successfully."
+        Log-Message "[OK] Print Spooler stopped and disabled successfully."
         Add-Activity "Printer Repair" "Print Spooler Disabled" "Success"
     } catch {
-        Log-Message "[X] Failed to disable Spooler: $_"
+        Log-Message "[FAIL] Failed to disable Spooler: $_"
     }
 })
 
@@ -1785,7 +1774,7 @@ $btn_rep_clean_ram_wpf.Add_Click({
         Add-Type -TypeDefinition $csharp -ErrorAction SilentlyContinue
         $optimizedCount = [MemoryOptimizer]::Optimize()
         $win.Dispatcher.Invoke([Action]{ 
-            Log-Message "[✓] EWS RAM API Optimizer completed. Purged working sets of $optimizedCount active processes." 
+            Log-Message "[OK] EWS RAM API Optimizer completed. Purged working sets of $optimizedCount active processes." 
             Add-Activity "Memory Optimization" "EWS API RAM Optimizer completed" "Success"
         })
     }
@@ -1795,7 +1784,7 @@ $btn_rep_clean_ram.Add_Click({
     Log-Message "Flushing Standby List memory allocations..."
     Add-Activity "Memory Optimization" "Flushing RAM cache standby list" "Running"
     [System.GC]::Collect()
-    Log-Message "[✓] Process working sets GC collected."
+    Log-Message "[OK] Process working sets GC collected."
     Add-Activity "Memory Optimization" "Flushed standby lists successfully" "Success"
 })
 
@@ -1806,7 +1795,7 @@ $btn_rep_clean_browser.Add_Click({
         Remove-Item "$env:LOCALAPPDATA\Google\Chrome\User Data\Default\Cache\*" -Force -Recurse -ErrorAction SilentlyContinue
         Remove-Item "$env:LOCALAPPDATA\Microsoft\Edge\User Data\Default\Cache\*" -Force -Recurse -ErrorAction SilentlyContinue
         Remove-Item "$env:LOCALAPPDATA\Mozilla\Firefox\Profiles\*\cache2\*" -Force -Recurse -ErrorAction SilentlyContinue
-        $win.Dispatcher.Invoke([Action]{ Log-Message "[✓] Web Browser Cache cleared successfully." })
+        $win.Dispatcher.Invoke([Action]{ Log-Message "[OK] Web Browser Cache cleared successfully." })
     }
 })
 
@@ -1818,7 +1807,7 @@ $btn_rep_clean_mgr.Add_Click({
         param($win)
         $proc = Start-Process cleanmgr.exe -ArgumentList "/autoclean" -NoNewWindow -PassThru -Wait
         $win.Dispatcher.Invoke([Action]{ 
-            Log-Message "[✓] Deep disk cleanup manager finished." 
+            Log-Message "[OK] Deep disk cleanup manager finished." 
             Add-Activity "Disk Cleaning" "Deep Disk Cleanup completed" "Success"
         })
     }
@@ -1832,7 +1821,7 @@ $btn_rep_clean_resetbase.Add_Click({
         param($win)
         $proc = Start-Process dism.exe -ArgumentList "/online /cleanup-image /startcomponentcleanup /resetbase" -NoNewWindow -PassThru -Wait
         $win.Dispatcher.Invoke([Action]{ 
-            Log-Message "[✓] Component Store ResetBase completed (Exit code: $($proc.ExitCode))." 
+            Log-Message "[OK] Component Store ResetBase completed (Exit code: $($proc.ExitCode))." 
             Add-Activity "Disk Cleaning" "Component Store ResetBase completed" "Success"
         })
     }
@@ -1852,7 +1841,7 @@ $btn_rep_clean_temp.Add_Click({
             Remove-Item -Path $p -Force -Recurse -ErrorAction SilentlyContinue
         }
         $win.Dispatcher.Invoke([Action]{ 
-            Log-Message "[✓] Completed cleaning temporary directories." 
+            Log-Message "[OK] Completed cleaning temporary directories." 
             Add-Activity "Disk Cleaning" "TEMP Files cleaned" "Success"
         })
     }
@@ -1866,7 +1855,7 @@ $btn_rep_recycle.Add_Click({
         param($win)
         Clear-RecycleBin -Force -ErrorAction SilentlyContinue
         $win.Dispatcher.Invoke([Action]{ 
-            Log-Message "[✓] Recycle Bin emptied successfully." 
+            Log-Message "[OK] Recycle Bin emptied successfully." 
             Add-Activity "Disk Cleaning" "Recycle Bin Emptied" "Success"
         })
     }
@@ -1878,10 +1867,9 @@ $btn_rep_defrag.Add_Click({
     Add-Activity "Disk Cleaning" "Optimize/Defrag Volumes" "Running"
     Run-Async {
         param($win)
-        # Optimize C:
         Optimize-Volume -DriveLetter C -Defrag -Verbose | Out-Null
         $win.Dispatcher.Invoke([Action]{ 
-            Log-Message "[✓] Completed volume defragmentation and trimming optimization passes."
+            Log-Message "[OK] Completed volume defragmentation and trimming optimization passes."
             Add-Activity "Disk Cleaning" "Optimize/Defrag Completed" "Success"
         })
     }
@@ -1899,7 +1887,7 @@ $btn_rep_shield_wu.Add_Click({
         Start-Service wuauserv -ErrorAction SilentlyContinue
         Start-Service bits -ErrorAction SilentlyContinue
         $win.Dispatcher.Invoke([Action]{ 
-            Log-Message "[✓] Windows Update components registered and services restarted." 
+            Log-Message "[OK] Windows Update components registered and services restarted." 
             Add-Activity "System Repair" "Windows Update Service Repair completed" "Success"
         })
     }
@@ -1914,10 +1902,10 @@ $btn_rep_shield_block_wu.Add_Click({
         
         New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" -Force -ErrorAction SilentlyContinue | Out-Null
         Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" -Name "NoAutoUpdate" -Value 1 -Force
-        Log-Message "[✓] Windows Update service disabled and GPO block applied."
+        Log-Message "[OK] Windows Update service disabled and GPO block applied."
         Add-Activity "Shield Tweak" "Windows Updates Blocked" "Success"
     } catch {
-        Log-Message "[X] Failed to block Windows Updates: $_"
+        Log-Message "[FAIL] Failed to block Windows Updates: $_"
     }
 })
 
@@ -1927,10 +1915,10 @@ $btn_rep_shield_enable_wu.Add_Click({
         Remove-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" -Name "NoAutoUpdate" -Force -ErrorAction SilentlyContinue
         Set-Service -Name wuauserv -StartupType Automatic -ErrorAction SilentlyContinue
         Start-Service wuauserv -ErrorAction SilentlyContinue
-        Log-Message "[✓] Windows Update service enabled and GPO block removed."
+        Log-Message "[OK] Windows Update service enabled and GPO block removed."
         Add-Activity "Shield Tweak" "Windows Updates Enabled" "Success"
     } catch {
-        Log-Message "[X] Failed to enable Windows Updates: $_"
+        Log-Message "[FAIL] Failed to enable Windows Updates: $_"
     }
 })
 
@@ -1940,10 +1928,10 @@ $btn_rep_shield_defender.Add_Click({
     try {
         Remove-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender" -Recurse -Force -ErrorAction SilentlyContinue
         Start-Service WinDefend -ErrorAction SilentlyContinue
-        Log-Message "[✓] Windows Defender policies reset successfully."
+        Log-Message "[OK] Windows Defender policies reset successfully."
         Add-Activity "System Repair" "Reset Windows Defender Policies completed" "Success"
     } catch {
-        Log-Message "[X] Failed to reset Defender: $_"
+        Log-Message "[FAIL] Failed to reset Defender: $_"
     }
 })
 
@@ -1957,7 +1945,7 @@ $btn_rep_shield_audio.Add_Click({
         Stop-Service AudioEndpointBuilder -Force -ErrorAction SilentlyContinue
         Start-Service AudioEndpointBuilder -ErrorAction SilentlyContinue
         Start-Service AudioSrv -ErrorAction SilentlyContinue
-        $win.Dispatcher.Invoke([Action]{ Log-Message "[✓] AudioSrv and AudioEndpointBuilder restarted successfully." })
+        $win.Dispatcher.Invoke([Action]{ Log-Message "[OK] AudioSrv and AudioEndpointBuilder restarted successfully." })
     }
 })
 
@@ -1965,7 +1953,7 @@ $btn_rep_shell_explorer.Add_Click({
     Log-Message "Restarting Windows Explorer shell..."
     Stop-Process -Name explorer -Force -ErrorAction SilentlyContinue
     Start-Process explorer
-    Log-Message "[✓] Explorer restarted."
+    Log-Message "[OK] Explorer restarted."
 })
 
 $btn_rep_shell_events.Add_Click({
@@ -1975,7 +1963,7 @@ $btn_rep_shell_events.Add_Click({
         param($win)
         wevtutil el | Foreach-Object { wevtutil cl $_ }
         $win.Dispatcher.Invoke([Action]{ 
-            Log-Message "[✓] Windows Event Logs cleared successfully." 
+            Log-Message "[OK] Windows Event Logs cleared successfully." 
             Add-Activity "System Repair" "Clear Event Logs completed" "Success"
         })
     }
@@ -1989,7 +1977,7 @@ $btn_rep_shell_icon.Add_Click({
         Remove-Item "$env:localappdata\IconCache.db" -Force -ErrorAction SilentlyContinue
         Remove-Item "$env:localappdata\Microsoft\Windows\Explorer\thumbcache_*.db" -Force -ErrorAction SilentlyContinue
         Start-Process explorer
-        $win.Dispatcher.Invoke([Action]{ Log-Message "[✓] Icon and thumbnail cache rebuilt successfully." })
+        $win.Dispatcher.Invoke([Action]{ Log-Message "[OK] Icon and thumbnail cache rebuilt successfully." })
     }
 })
 
@@ -2000,7 +1988,7 @@ $btn_rep_shell_font.Add_Click({
         Stop-Service -Name "FontCache" -Force -ErrorAction SilentlyContinue
         Remove-Item "$env:SystemRoot\ServiceProfiles\LocalService\AppData\Local\FontCache\*" -Force -Recurse -ErrorAction SilentlyContinue
         Start-Service -Name "FontCache" -ErrorAction SilentlyContinue
-        $win.Dispatcher.Invoke([Action]{ Log-Message "[✓] Font Cache rebuilt and service restarted." })
+        $win.Dispatcher.Invoke([Action]{ Log-Message "[OK] Font Cache rebuilt and service restarted." })
     }
 })
 
@@ -2015,7 +2003,7 @@ $btn_remove_bloat.Add_Click({
             Get-AppxPackage -AllUsers $b | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue
         }
         $win.Dispatcher.Invoke([Action]{ 
-            Log-Message "[✓] Windows bloatware packages removed." 
+            Log-Message "[OK] Windows bloatware packages removed." 
             Add-Activity "System Repair" "Remove Bloatware UWP Apps completed" "Success"
         })
     }
@@ -2034,7 +2022,7 @@ $btn_bloat_onedrive.Add_Click({
             $proc = Start-Process "$env:SystemRoot\SysWOW64\OneDriveSetup.exe" -ArgumentList "/uninstall" -Wait -PassThru
         }
         $win.Dispatcher.Invoke([Action]{ 
-            Log-Message "[✓] OneDrive Client uninstall command triggered." 
+            Log-Message "[OK] OneDrive Client uninstall command triggered." 
             Add-Activity "Bloatware Purge" "Purged OneDrive Client" "Success"
         })
     }
@@ -2049,10 +2037,10 @@ $btn_bloat_edge.Add_Click({
         New-Item -Path "HKLM:\SOFTWARE\Microsoft\EdgeUpdate" -Force -ErrorAction SilentlyContinue | Out-Null
         Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\EdgeUpdate" -Name "AutoUpdateDisableUntilTime" -Value 1 -Force
         
-        Log-Message "[✓] Edge browser telemetry disabled."
+        Log-Message "[OK] Edge browser telemetry disabled."
         Add-Activity "Telemetry Tweak" "Edge Telemetry Blocked" "Success"
     } catch {
-        Log-Message "[X] Error blocking Edge telemetry: $_"
+        Log-Message "[FAIL] Error blocking Edge telemetry: $_"
     }
 })
 
@@ -2091,7 +2079,7 @@ $btn_apply_features.Add_Click({
             $win.Dispatcher.Invoke([Action]{ Log-Message "Enabling WSL Platform..." })
             Enable-WindowsOptionalFeature -Online -FeatureName "Microsoft-Windows-Subsystem-Linux" -NoRestart | Out-Null
         }
-        $win.Dispatcher.Invoke([Action]{ Log-Message "[✓] Optional features configuration completed." })
+        $win.Dispatcher.Invoke([Action]{ Log-Message "[OK] Optional features configuration completed." })
     } -ArgumentList $lpd, $lpr, $smb, $hyp, $snd, $wsl
 })
 
@@ -2102,9 +2090,9 @@ $btn_tweak_classic.Add_Click({
         New-Item -Path "HKCU:\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}" -Force | Out-Null
         New-Item -Path "HKCU:\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" -Force | Out-Null
         Set-ItemProperty -Path "HKCU:\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" -Name "(Default)" -Value "" -Force
-        Log-Message "[✓] Classic Right-click context menu enabled. Restart Explorer to apply."
+        Log-Message "[OK] Classic Right-click context menu enabled. Restart Explorer to apply."
     } catch {
-        Log-Message "[X] Error applying context menu tweak: $_"
+        Log-Message "[FAIL] Error applying context menu tweak: $_"
     }
 })
 
@@ -2112,9 +2100,9 @@ $btn_tweak_default_ctx.Add_Click({
     Log-Message "Reverting to Win11 Default Context Menu..."
     try {
         Remove-Item -Path "HKCU:\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}" -Recurse -Force -ErrorAction SilentlyContinue
-        Log-Message "[✓] Default modern menu layout restored. Restart Explorer to apply."
+        Log-Message "[OK] Default modern menu layout restored. Restart Explorer to apply."
     } catch {
-        Log-Message "[X] Error removing context menu tweak: $_"
+        Log-Message "[FAIL] Error removing context menu tweak: $_"
     }
 })
 
@@ -2122,7 +2110,7 @@ $btn_tweak_ultimate.Add_Click({
     Log-Message "Unlocking Ultimate Performance Power Scheme..."
     $res = powercfg -duplicatescheme e9a22db2-565e-4b6e-82f0-8022c5e3430b
     Log-Message $res
-    Log-Message "[✓] Power plan scheme unlocked."
+    Log-Message "[OK] Power plan scheme unlocked."
 })
 
 $btn_tweak_gaming.Add_Click({
@@ -2134,14 +2122,14 @@ $btn_tweak_gaming.Add_Click({
         New-Item -Path "HKLM:\SOFTWARE\Microsoft\PolicyManager\default\ApplicationManagement\AllowGameDVR" -Force -ErrorAction SilentlyContinue | Out-Null
         Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\PolicyManager\default\ApplicationManagement\AllowGameDVR" -Name "value" -Value 0 -Force
         
-        Log-Message "[✓] Disallowed GameDVR overlays."
+        Log-Message "[OK] Disallowed GameDVR overlays."
         
         New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" -Force -ErrorAction SilentlyContinue | Out-Null
         Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" -Name "SystemResponsiveness" -Value 0 -Force
         
-        Log-Message "[✓] Optimized game process latency bindings."
+        Log-Message "[OK] Optimized game process latency bindings."
     } catch {
-        Log-Message "[X] Failed to apply some gaming tweaks: $_"
+        Log-Message "[FAIL] Failed to apply some gaming tweaks: $_"
     }
 })
 
@@ -2150,9 +2138,9 @@ $btn_tweak_bing.Add_Click({
     try {
         New-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Search" -Force -ErrorAction SilentlyContinue | Out-Null
         Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Search" -Name "BingSearchEnabled" -Value 0 -Force
-        Log-Message "[✓] Online Bing Start Menu results disabled."
+        Log-Message "[OK] Online Bing Start Menu results disabled."
     } catch {
-        Log-Message "[X] Failed to apply Bing Search GPO registry key: $_"
+        Log-Message "[FAIL] Failed to apply Bing Search GPO registry key: $_"
     }
 })
 
@@ -2160,9 +2148,9 @@ $btn_tweak_fast_on.Add_Click({
     Log-Message "Enabling Windows Fast Startup..."
     try {
         Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power" -Name "HiberbootEnabled" -Value 1 -Force
-        Log-Message "[✓] Hiberboot Enabled successfully."
+        Log-Message "[OK] Hiberboot Enabled successfully."
     } catch {
-        Log-Message "[X] Failed to enable Fast Startup: $_"
+        Log-Message "[FAIL] Failed to enable Fast Startup: $_"
     }
 })
 
@@ -2170,9 +2158,9 @@ $btn_tweak_fast_off.Add_Click({
     Log-Message "Disabling Windows Fast Startup..."
     try {
         Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power" -Name "HiberbootEnabled" -Value 0 -Force
-        Log-Message "[✓] Hiberboot Disabled successfully."
+        Log-Message "[OK] Hiberboot Disabled successfully."
     } catch {
-        Log-Message "[X] Failed to disable Fast Startup: $_"
+        Log-Message "[FAIL] Failed to disable Fast Startup: $_"
     }
 })
 
@@ -2182,10 +2170,10 @@ $btn_tweak_visuals.Add_Click({
     try {
         Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "VisualFXSetting" -Value 2 -Force
         Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "UserPreferencesMask" -Value ([byte[]](0x90,0x12,0x01,0x80,0x10,0x00,0x00,0x00)) -Force
-        Log-Message "[✓] Visual options configured for Maximum Performance. Restart Explorer to see differences."
+        Log-Message "[OK] Visual options configured for Maximum Performance. Restart Explorer to see differences."
         Add-Activity "Visual Tweak" "Set Performance Visuals" "Success"
     } catch {
-        Log-Message "[X] Error modifying visual properties: $_"
+        Log-Message "[FAIL] Error modifying visual properties: $_"
     }
 })
 
@@ -2196,10 +2184,10 @@ $btn_tweak_pagefile.Add_Click({
         $wmi = Get-CimInstance Win32_ComputerSystem
         $wmi.AutomaticManagedPagefile = $true
         Set-CimInstance -InputObject $wmi
-        Log-Message "[✓] Enabled Windows Automatic Managed Pagefile configuration."
+        Log-Message "[OK] Enabled Windows Automatic Managed Pagefile configuration."
         Add-Activity "Memory Tweak" "Pagefile Auto-managed" "Success"
     } catch {
-        Log-Message "[X] Error writing virtual memory flags: $_"
+        Log-Message "[FAIL] Error writing virtual memory flags: $_"
     }
 })
 
@@ -2213,10 +2201,10 @@ $btn_tweak_cortana.Add_Click({
         New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search" -Force -ErrorAction SilentlyContinue | Out-Null
         Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search" -Name "AllowCortana" -Value 0 -Force
         
-        Log-Message "[✓] Disallowed Cortana Search and Copilot taskbar interfaces."
+        Log-Message "[OK] Disallowed Cortana Search and Copilot taskbar interfaces."
         Add-Activity "Privacy Tweak" "Disabled Assistants" "Success"
     } catch {
-        Log-Message "[X] Error writing registry key properties: $_"
+        Log-Message "[FAIL] Error writing registry key properties: $_"
     }
 })
 
@@ -2229,10 +2217,10 @@ $btn_tweak_telemetry.Add_Click({
         New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Force -ErrorAction SilentlyContinue | Out-Null
         Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "AllowTelemetry" -Value 0 -Force
         
-        Log-Message "[✓] Telmetry services blocked and registry GPO applied."
+        Log-Message "[OK] Telmetry services blocked and registry GPO applied."
         Add-Activity "Privacy Tweak" "Blocked Diagnostic Telemetry" "Success"
     } catch {
-        Log-Message "[X] Error stopping telemetry bindings: $_"
+        Log-Message "[FAIL] Error stopping telemetry bindings: $_"
     }
 })
 
@@ -2243,10 +2231,10 @@ $btn_tweak_ads.Add_Click({
         Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" -Name "SubscribedContent-338387Enabled" -Value 0 -Force
         Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" -Name "SubscribedContent-338389Enabled" -Value 0 -Force
         
-        Log-Message "[✓] Turned off lockscreen Spotlight promotional tips."
+        Log-Message "[OK] Turned off lockscreen Spotlight promotional tips."
         Add-Activity "Privacy Tweak" "Disabled Lockscreen Ads" "Success"
     } catch {
-        Log-Message "[X] Error disabling Spotlight properties: $_"
+        Log-Message "[FAIL] Error disabling Spotlight properties: $_"
     }
 })
 
@@ -2281,7 +2269,7 @@ $btn_diag_ping_start.Add_Click({
                     Log-Message "Ping response from ${t}: Reply latency = ${time} ms." 
                 })
             } catch {
-                $win.Dispatcher.Invoke([Action]{ Log-Message "[X] Ping timed out or failed to reach host: $t" })
+                $win.Dispatcher.Invoke([Action]{ Log-Message "[FAIL] Ping timed out or failed to reach host: $t" })
             }
             Start-Sleep -Seconds 1
         }
@@ -2302,9 +2290,9 @@ $btn_rep_wifi_pass.Add_Click({
             $passLine = $res | Select-String "Key Content"
             if ($passLine) {
                 $pwd = $passLine.ToString().Split(":")[1].Trim()
-                $win.Dispatcher.Invoke([Action]{ Log-Message " ➜ Wireless SSID: $p | Security Key: $pwd" })
+                $win.Dispatcher.Invoke([Action]{ Log-Message " -> Wireless SSID: $p | Security Key: $pwd" })
             } else {
-                $win.Dispatcher.Invoke([Action]{ Log-Message " ➜ Wireless SSID: $p | Security Key: [Open / No Password]" })
+                $win.Dispatcher.Invoke([Action]{ Log-Message " -> Wireless SSID: $p | Security Key: [Open / No Password]" })
             }
         }
         $win.Dispatcher.Invoke([Action]{ Add-Activity "Diagnostics" "Wi-Fi Passwords Decrypted" "Success" })
@@ -2320,7 +2308,7 @@ $btn_rep_wifi_export.Add_Click({
         $desktop = [Environment]::GetFolderPath("Desktop")
         netsh wlan export profile folder="$desktop" key=clear | Out-Null
         $win.Dispatcher.Invoke([Action]{ 
-            Log-Message "[✓] All decrypted Wi-Fi XML profiles exported to directory: $desktop" 
+            Log-Message "[OK] All decrypted Wi-Fi XML profiles exported to directory: $desktop" 
             Add-Activity "Diagnostics" "Wi-Fi XML Profiles Exported" "Success"
         })
     }
@@ -2335,7 +2323,7 @@ $btn_rep_dhcp.Add_Click({
         ipconfig /release | Out-Null
         ipconfig /renew | Out-Null
         $win.Dispatcher.Invoke([Action]{ 
-            Log-Message "[✓] Completed adapter IP refresh and renewed DHCP connection."
+            Log-Message "[OK] Completed adapter IP refresh and renewed DHCP connection."
             Add-Activity "Diagnostics" "DHCP IP Address Renewed" "Success"
         })
     }
@@ -2346,10 +2334,10 @@ $btn_rep_ipv6_dis.Add_Click({
     Log-Message "Disabling IPv6 bindings on all active network adapters..."
     try {
         Disable-NetAdapterBinding -Name "*" -ComponentID "ms_tcpip6" -ErrorAction Stop
-        Log-Message "[✓] IPv6 protocol disabled on all adapters."
+        Log-Message "[OK] IPv6 protocol disabled on all adapters."
         Add-Activity "Network Tweak" "IPv6 Disabled" "Success"
     } catch {
-        Log-Message "[X] Failed to disable IPv6 binding: $_"
+        Log-Message "[FAIL] Failed to disable IPv6 binding: $_"
     }
 })
 
@@ -2357,10 +2345,10 @@ $btn_rep_ipv6_en.Add_Click({
     Log-Message "Enabling IPv6 bindings on all active network adapters..."
     try {
         Enable-NetAdapterBinding -Name "*" -ComponentID "ms_tcpip6" -ErrorAction Stop
-        Log-Message "[✓] IPv6 protocol enabled on all adapters."
+        Log-Message "[OK] IPv6 protocol enabled on all adapters."
         Add-Activity "Network Tweak" "IPv6 Enabled" "Success"
     } catch {
-        Log-Message "[X] Failed to enable IPv6 binding: $_"
+        Log-Message "[FAIL] Failed to enable IPv6 binding: $_"
     }
 })
 
@@ -2377,14 +2365,14 @@ $btn_diag_top_proc.Add_Click({
         foreach ($p in $cpuProc) {
             $cpuSecs = [Math]::Round($p.CPU)
             $name = $p.ProcessName
-            $win.Dispatcher.Invoke([Action]{ Log-Message "  ➜ Process Name: $name ($cpuSecs CPU-seconds)" })
+            $win.Dispatcher.Invoke([Action]{ Log-Message "  -> Process Name: $name ($cpuSecs CPU-seconds)" })
         }
         
         $win.Dispatcher.Invoke([Action]{ Log-Message "--- TOP PROCESSES BY MEMORY WORKING SET ---" })
         foreach ($p in $ramProc) {
             $wsMB = [Math]::Round($p.WorkingSet / 1MB)
             $name = $p.ProcessName
-            $win.Dispatcher.Invoke([Action]{ Log-Message "  ➜ Process Name: $name ($wsMB MB RAM alloc)" })
+            $win.Dispatcher.Invoke([Action]{ Log-Message "  -> Process Name: $name ($wsMB MB RAM alloc)" })
         }
         $win.Dispatcher.Invoke([Action]{ Add-Activity "Diagnostics" "Processes Scanned" "Success" })
     }
@@ -2399,7 +2387,7 @@ $btn_diag_export_drivers.Add_Click({
         $outFile = "$env:USERPROFILE\Desktop\SystemDriversList.txt"
         Get-CimInstance Win32_SystemDriver | Select-Object Name, DisplayName, State, StartMode | Out-File -FilePath $outFile -Encoding utf8
         $win.Dispatcher.Invoke([Action]{
-            Log-Message "[✓] Completed driver manifest export. Document saved: $outFile"
+            Log-Message "[OK] Completed driver manifest export. Document saved: $outFile"
             Add-Activity "Diagnostics" "Driver List Exported" "Success"
         })
     }
@@ -2433,7 +2421,7 @@ $btn_diag_battery.Add_Click({
         param($win)
         powercfg /batteryreport /output "$env:USERPROFILE\Desktop\BatteryReport.html" | Out-Null
         $win.Dispatcher.Invoke([Action]{ 
-            Log-Message "[✓] HTML Battery Report generated on your Desktop (BatteryReport.html)."
+            Log-Message "[OK] HTML Battery Report generated on your Desktop (BatteryReport.html)."
             Add-Activity "Diagnostics" "Battery Report generated" "Success"
         })
     }
@@ -2447,16 +2435,16 @@ $btn_diag_disk.Add_Click({
         $status = Get-CimInstance -Namespace root\wmi -ClassName MSStorageDriver_FailurePredictStatus -ErrorAction SilentlyContinue
         if ($status -eq $null) {
             $win.Dispatcher.Invoke([Action]{ 
-                Log-Message "[✓] SMART reports all connected drives are healthy."
+                Log-Message "[OK] SMART reports all connected drives are healthy."
                 Add-Activity "Diagnostics" "SMART Disk Scan completed" "Success"
             })
         } else {
             foreach ($drive in $status) {
                 $inst = $drive.InstanceName
                 if ($drive.PredictFailure) {
-                    $win.Dispatcher.Invoke([Action]{ Log-Message "[!] WARNING: Failure predicted on drive: $inst" })
+                    $win.Dispatcher.Invoke([Action]{ Log-Message "[FAIL] WARNING: Failure predicted on drive: $inst" })
                 } else {
-                    $win.Dispatcher.Invoke([Action]{ Log-Message "[✓] Drive healthy: $inst" })
+                    $win.Dispatcher.Invoke([Action]{ Log-Message "[OK] Drive healthy: $inst" })
                 }
             }
             $win.Dispatcher.Invoke([Action]{ Add-Activity "Diagnostics" "SMART Disk Scan completed" "Success" })
@@ -2485,7 +2473,7 @@ $btn_diag_ram.Add_Click({
 $btn_diag_mdsched.Add_Click({
     Log-Message "Scheduling Windows Memory Diagnostic scan (mdsched.exe)..."
     Start-Process mdsched.exe
-    Log-Message "[✓] Memory diagnostic utility opened."
+    Log-Message "[OK] Memory diagnostic utility opened."
 })
 
 $btn_diag_dns.Add_Click({
@@ -2495,7 +2483,7 @@ $btn_diag_dns.Add_Click({
         foreach ($a in $adapters) {
             Set-DnsClientServerAddress -InterfaceAlias $a.Name -ServerAddresses ("1.1.1.1", "1.0.0.1") -ErrorAction SilentlyContinue
         }
-        Log-Message "[✓] Cloudflare DNS configuration completed."
+        Log-Message "[OK] Cloudflare DNS configuration completed."
     }
 })
 
@@ -2514,12 +2502,12 @@ $btn_diag_speed.Add_Click({
             $speedMbps = [Math]::Round((10 * 8) / $elapsed.TotalSeconds, 2)
             Remove-Item $tempFile -Force
             $win.Dispatcher.Invoke([Action]{ 
-                Log-Message "[✓] Speed test finished. Current Bandwidth: $speedMbps Mbps." 
+                Log-Message "[OK] Speed test finished. Current Bandwidth: $speedMbps Mbps." 
                 Add-Activity "Diagnostics" "Speed Test Completed: $speedMbps Mbps" "Success"
             })
         } catch {
             $win.Dispatcher.Invoke([Action]{ 
-                Log-Message "[X] Speed test failed. Please check internet connection." 
+                Log-Message "[FAIL] Speed test failed. Please check internet connection." 
                 Add-Activity "Diagnostics" "Speed Test Failed" "Failed"
             })
         }
@@ -2584,10 +2572,10 @@ $btn_backup_enable_restore.Add_Click({
     try {
         Enable-ComputerRestore -Drive "C:\" -ErrorAction Stop
         vssadmin resize shadowstorage /on=C: /for=C: /maxsize=10% | Out-Null
-        Log-Message "[✓] Computer System Protection enabled for Drive C: with 10% max allocation limit."
+        Log-Message "[OK] Computer System Protection enabled for Drive C: with 10% max allocation limit."
         Add-Activity "Restore Point" "Enabled System Protection" "Success"
     } catch {
-        Log-Message "[X] Error enabling System Restore protection: $_"
+        Log-Message "[FAIL] Error enabling System Restore protection: $_"
     }
 })
 
@@ -2599,13 +2587,13 @@ $btn_backup_create_restore.Add_Click({
         try {
             Checkpoint-Computer -Description "VenkatPulse_AI_RestorePoint" -RestorePointType "MODIFY_SETTINGS" -ErrorAction Stop
             $win.Dispatcher.Invoke([Action]{ 
-                Log-Message "[✓] Immediate System Restore Point created successfully!"
+                Log-Message "[OK] Immediate System Restore Point created successfully!"
                 Add-Activity "Restore Point" "System Restore Point Created" "Success"
             })
         } catch {
             $err = $_.ToString()
             $win.Dispatcher.Invoke([Action]{ 
-                Log-Message "[X] Failed to create restore point: $err" 
+                Log-Message "[FAIL] Failed to create restore point: $err" 
                 Log-Message "[!] Make sure System Protection is Enabled on C: Drive and you haven't created another restore point in the last 24 hours (Windows limit)."
                 Add-Activity "Restore Point" "Restore Point Creation Failed" "Failed"
             })
@@ -2628,7 +2616,7 @@ function Start-ConfigShortcut ($bin, $args="") {
             Start-Process $bin
         }
     } catch {
-        Log-Message "[X] Failed to launch console component: $_"
+        Log-Message "[FAIL] Failed to launch console component: $_"
     }
 }
 
@@ -2647,10 +2635,10 @@ $btn_cfg_admin_en.Add_Click({
     Log-Message "Enabling the built-in Windows Administrator account..."
     try {
         net user administrator /active:yes | Out-Null
-        Log-Message "[✓] Default Administrator account activated."
+        Log-Message "[OK] Default Administrator account activated."
         Add-Activity "User Accounts" "Enabled Built-in Admin" "Success"
     } catch {
-        Log-Message "[X] Failed to enable Administrator account: $_"
+        Log-Message "[FAIL] Failed to enable Administrator account: $_"
     }
 })
 
@@ -2658,10 +2646,10 @@ $btn_cfg_admin_dis.Add_Click({
     Log-Message "Disabling the built-in Windows Administrator account..."
     try {
         net user administrator /active:no | Out-Null
-        Log-Message "[✓] Default Administrator account deactivated."
+        Log-Message "[OK] Default Administrator account deactivated."
         Add-Activity "User Accounts" "Disabled Built-in Admin" "Success"
     } catch {
-        Log-Message "[X] Failed to disable Administrator account: $_"
+        Log-Message "[FAIL] Failed to disable Administrator account: $_"
     }
 })
 
@@ -2673,10 +2661,10 @@ $btn_cfg_reset_pass.Add_Click({
         
         Log-Message "Resetting password for local user '$username'..."
         net user $username $password | Out-Null
-        Log-Message "[✓] Password for user '$username' has been reset successfully."
+        Log-Message "[OK] Password for user '$username' has been reset successfully."
         Add-Activity "User Accounts" "Reset Password for $username" "Success"
     } catch {
-        Log-Message "[X] Failed to reset user password: $_"
+        Log-Message "[FAIL] Failed to reset user password: $_"
     }
 })
 
@@ -2693,10 +2681,10 @@ $btn_cfg_autologin.Add_Click({
         Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" -Name "DefaultPassword" -Value $password -Force
         Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" -Name "DefaultDomainName" -Value $domain -Force
         
-        Log-Message "[✓] Windows auto-login configured successfully. System will automatically login on boot."
+        Log-Message "[OK] Windows auto-login configured successfully. System will automatically login on boot."
         Add-Activity "User Accounts" "Auto-Login configured for $username" "Success"
     } catch {
-        Log-Message "[X] Failed to configure auto-login: $_"
+        Log-Message "[FAIL] Failed to configure auto-login: $_"
     }
 })
 
@@ -2775,14 +2763,14 @@ $btn_search.Add_Click({
     }
     
     if ($matches.Count -eq 0) {
-        Log-Message "[!] No matching tools found. Try keywords like: 'printer', 'sfc', 'dism', 'ram', 'activation', 'bing'."
+        Log-Message "[INFO] No matching tools found. Try keywords like: 'printer', 'sfc', 'dism', 'ram', 'activation', 'bing'."
         return
     }
     
     $matches = $matches | Sort-Object Score -Descending
     Log-Message "Found $($matches.Count) matching tools:"
     foreach ($m in $matches) {
-        Log-Message "  ➜ $($m.Tool.Name) - View: $($m.Tool.View.Replace('grid_', ''))"
+        Log-Message "  -> $($m.Tool.Name) - View: $($m.Tool.View.Replace('grid_', ''))"
         Log-Message "    $($m.Tool.Desc)"
     }
     
