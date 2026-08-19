@@ -967,12 +967,20 @@ $script:runspaces = [System.Collections.ArrayList]::new()
 
 function Run-Async ($scriptBlock, $argsList=@()) {
     $ps = [PowerShell]::Create()
+    
+    # Create and configure a separate dedicated runspace with UseNewThread option to run fully asynchronously
+    $rs = [System.Management.Automation.Runspaces.RunspaceFactory]::CreateRunspace()
+    $rs.ApartmentState = "STA"
+    $rs.ThreadOptions = "UseNewThread"
+    $rs.Open()
+    $ps.Runspace = $rs
+    
     $ps.AddScript($scriptBlock) | Out-Null
     $ps.AddArgument($window) | Out-Null
     foreach ($arg in $argsList) {
         $ps.AddArgument($arg) | Out-Null
     }
-    $script:runspaces.Add($ps) | Out-Null
+    $script:runspaces.Add(@{ PS = $ps; RS = $rs }) | Out-Null
     $ps.BeginInvoke() | Out-Null
 }
 
@@ -1138,20 +1146,24 @@ $btn_soft_desel_all.Add_Click({
 })
 
 # --- SYSTEM STATS BACKGROUND MONITOR ---
-$osPlatform = (Get-CimInstance Win32_OperatingSystem).Caption
+$osPlatform = (Get-CimInstance -Query "SELECT Caption FROM Win32_OperatingSystem").Caption
 $txt_os.Text = "Win 10/11"
 
 Run-Async {
     param($win, $c, $r, $d, $u)
+    # Instantiate .NET ComputerInfo for instant memory calculations
+    $computerInfo = New-Object Microsoft.VisualBasic.Devices.ComputerInfo
+    $bootTime = (Get-CimInstance -Query "SELECT LastBootUpTime FROM Win32_OperatingSystem").LastBootUpTime
     while ($true) {
         try {
-            $cpu = (Get-CimInstance -ClassName Win32_Processor | Measure-Object -Property LoadPercentage -Average).Average
+            # CPU query via selective property Select to run WMI extremely fast
+            $cpu = (Get-CimInstance -Query "SELECT LoadPercentage FROM Win32_Processor" -ErrorAction SilentlyContinue | Measure-Object -Property LoadPercentage -Average).Average
             if ($cpu -eq $null) { $cpu = 0 }
             $cpuStr = "$([Math]::Round($cpu))%"
 
-            $os = Get-CimInstance Win32_OperatingSystem
-            $freeRam = $os.FreePhysicalMemory
-            $totalRam = $os.TotalVisibleMemorySize
+            # RAM query via native .NET (Instant: 0ms execution)
+            $totalRam = $computerInfo.TotalPhysicalMemory
+            $freeRam = $computerInfo.AvailablePhysicalMemory
             $usedRam = $totalRam - $freeRam
             $ramPct = ($usedRam / $totalRam) * 100
             $ramStr = "$([Math]::Round($ramPct))%"
@@ -1160,7 +1172,8 @@ Run-Async {
             $freeGB = [Math]::Round($disk.Free / 1GB)
             $diskStr = "$freeGB GB Free"
 
-            $uptime = (Get-Date) - $os.LastBootUpTime
+            # Uptime calculation via static BootTime reference
+            $uptime = (Get-Date) - $bootTime
             $uptimeStr = "Uptime: $($uptime.Days)d $($uptime.Hours)h $($uptime.Minutes)m"
 
             $win.Dispatcher.Invoke([Action]{
@@ -1170,7 +1183,7 @@ Run-Async {
                 $u.Text = $uptimeStr
             })
         } catch {}
-        Start-Sleep -Seconds 3
+        Start-Sleep -Seconds 4
     }
 } @($txt_cpu, $txt_ram, $txt_disk, $txt_uptime)
 
@@ -2778,6 +2791,72 @@ $btn_search.Add_Click({
     # Switch to the view of the top match
     $topView = $matches[0].Tool.View
     Switch-View $topView
+})
+
+# Keyboard Navigation: Up/Down/Left/Right arrow keys change sidebar views (unless typing in a TextBox)
+$script:viewOrder = @("grid_dash", "grid_soft", "grid_act", "grid_tweaks", "grid_bloat", "grid_repairs", "grid_diag", "grid_backups", "grid_config")
+$script:currentViewIndex = 0
+
+function Switch-View ($viewName) {
+    $views = @("grid_dash", "grid_soft", "grid_act", "grid_tweaks", "grid_bloat", "grid_repairs", "grid_diag", "grid_backups", "grid_config")
+    $titles = @{
+        "grid_dash" = "Dashboard Overview"
+        "grid_soft" = "Silent Software Installer Hub"
+        "grid_act"  = "Windows & Office Activation (MAS)"
+        "grid_tweaks" = "Premium OS Registry Tweaks"
+        "grid_bloat" = "Windows Bloatware & Features"
+        "grid_repairs" = "System Command & Cache Repairs"
+        "grid_diag" = "Hardware Diagnostics & Reports"
+        "grid_backups" = "Backups & Data Migration"
+        "grid_config" = "Windows Configuration Consoles"
+    }
+
+    # Update index pointer
+    $script:currentViewIndex = [System.Array]::IndexOf($script:viewOrder, $viewName)
+
+    $views | ForEach-Object {
+        $v = Get-Variable -Name $_ -ValueOnly
+        if ($_ -eq $viewName) {
+            $v.Visibility = "Visible"
+            $txt_header.Text = $titles[$_]
+        } else {
+            $v.Visibility = "Collapsed"
+        }
+    }
+}
+
+$window.add_KeyDown({
+    param($sender, $e)
+    
+    # Check if focused element is a text input field to allow normal typing
+    $focused = [System.Windows.Input.FocusManager]::GetFocusedElement($window)
+    if ($focused -ne $null -and $focused.GetType().Name -eq "TextBox") {
+        return
+    }
+
+    if ($e.Key -eq [System.Windows.Input.Key]::Up -or $e.Key -eq [System.Windows.Input.Key]::Left) {
+        $e.Handled = $true
+        $nextIndex = $script:currentViewIndex - 1
+        if ($nextIndex -lt 0) { $nextIndex = $script:viewOrder.Length - 1 }
+        Switch-View $script:viewOrder[$nextIndex]
+    }
+    elseif ($e.Key -eq [System.Windows.Input.Key]::Down -or $e.Key -eq [System.Windows.Input.Key]::Right) {
+        $e.Handled = $true
+        $nextIndex = $script:currentViewIndex + 1
+        if ($nextIndex -ge $script:viewOrder.Length) { $nextIndex = 0 }
+        Switch-View $script:viewOrder[$nextIndex]
+    }
+})
+
+# Cleanup runspaces when window closes to avoid memory leakage
+$window.Add_Closed({
+    foreach ($item in $script:runspaces) {
+        try {
+            $item.PS.Dispose()
+            $item.RS.Close()
+            $item.RS.Dispose()
+        } catch {}
+    }
 })
 
 $window.ShowDialog() | Out-Null
