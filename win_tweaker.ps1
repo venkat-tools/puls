@@ -760,10 +760,40 @@ Add-Type -AssemblyName Microsoft.VisualBasic
                                 <Border BorderBrush="#374151" BorderThickness="0,0,0,1" Padding="0,0,0,10" Margin="0,0,0,10">
                                     <Grid>
                                         <StackPanel HorizontalAlignment="Left">
+                                            <TextBlock Text="🔋 Generate Windows Battery Lifecycle &amp; Wear Health Report" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
+                                            <TextBlock Text="Generates HTML power battery wear diagnostic status chart." FontSize="10" Foreground="#9ca3af"/>
+                                        </StackPanel>
+                                        <Button Name="btn_diag_battery" Content="Generate Battery Report" Background="#10b981" BorderThickness="0" HorizontalAlignment="Right" Width="200"/>
+                                    </Grid>
+                                </Border>
+
+                                <Border BorderBrush="#374151" BorderThickness="0,0,0,1" Padding="0,0,0,10" Margin="0,0,0,10">
+                                    <Grid>
+                                        <StackPanel HorizontalAlignment="Left">
                                             <TextBlock Text="🧠 Analyze Installed RAM Modules &amp; Speed Specifications" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
                                             <TextBlock Text="Queries WMIC to identify installed memory module speeds and clock cycles." FontSize="10" Foreground="#9ca3af"/>
                                         </StackPanel>
                                         <Button Name="btn_diag_ram" Content="Show Memory Specs" Background="#374151" BorderThickness="0" HorizontalAlignment="Right" Width="200"/>
+                                    </Grid>
+                                </Border>
+
+                                <Border BorderBrush="#374151" BorderThickness="0,0,0,1" Padding="0,0,0,10" Margin="0,0,0,10">
+                                    <Grid>
+                                        <StackPanel HorizontalAlignment="Left">
+                                            <TextBlock Text="🔋 Verify Windows OS License Activation Status" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
+                                            <TextBlock Text="Queries software licensing services to check activation." FontSize="10" Foreground="#9ca3af"/>
+                                        </StackPanel>
+                                        <Button Name="btn_diag_act" Content="Check Activation Status" Background="#1f2937" BorderThickness="1" BorderBrush="#374151" HorizontalAlignment="Right" Width="200"/>
+                                    </Grid>
+                                </Border>
+
+                                <Border BorderBrush="#374151" BorderThickness="0,0,0,1" Padding="0,0,0,10" Margin="0,0,0,10">
+                                    <Grid>
+                                        <StackPanel HorizontalAlignment="Left">
+                                            <TextBlock Text="📝 Generate Comprehensive Windows Hardware &amp; System Info Summary" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
+                                            <TextBlock Text="Generates CPU, GPU, Motherboard, and BIOS properties summary." FontSize="10" Foreground="#9ca3af"/>
+                                        </StackPanel>
+                                        <Button Name="btn_diag_specs" Content="Generate Specs Info" Background="#0284c7" BorderThickness="0" HorizontalAlignment="Right" Width="200"/>
                                     </Grid>
                                 </Border>
 
@@ -794,36 +824,6 @@ Add-Type -AssemblyName Microsoft.VisualBasic
                                             <TextBlock Text="Downloads a test file from Cloudflare CDN to calculate internet bandwidth." FontSize="10" Foreground="#9ca3af"/>
                                         </StackPanel>
                                         <Button Name="btn_diag_speed" Content="Run Download Speed Test" Background="#10b981" BorderThickness="0" HorizontalAlignment="Right" Width="200"/>
-                                    </Grid>
-                                </Border>
-
-                                <Border BorderBrush="#374151" BorderThickness="0,0,0,1" Padding="0,0,0,10" Margin="0,0,0,10">
-                                    <Grid>
-                                        <StackPanel HorizontalAlignment="Left">
-                                            <TextBlock Text="🔋 Generate Windows Battery Lifecycle &amp; Wear Health Report" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
-                                            <TextBlock Text="Generates HTML power battery wear diagnostic status chart." FontSize="10" Foreground="#9ca3af"/>
-                                        </StackPanel>
-                                        <Button Name="btn_diag_battery" Content="Generate Battery Report" Background="#10b981" BorderThickness="0" HorizontalAlignment="Right" Width="200"/>
-                                    </Grid>
-                                </Border>
-
-                                <Border BorderBrush="#374151" BorderThickness="0,0,0,1" Padding="0,0,0,10" Margin="0,0,0,10">
-                                    <Grid>
-                                        <StackPanel HorizontalAlignment="Left">
-                                            <TextBlock Text="🔑 Verify Windows OS License Activation Status" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
-                                            <TextBlock Text="Queries software licensing services to check activation." FontSize="10" Foreground="#9ca3af"/>
-                                        </StackPanel>
-                                        <Button Name="btn_diag_act" Content="Check Activation Status" Background="#1f2937" BorderThickness="1" BorderBrush="#374151" HorizontalAlignment="Right" Width="200"/>
-                                    </Grid>
-                                </Border>
-
-                                <Border BorderBrush="#374151" BorderThickness="0,0,0,1" Padding="0,0,0,10" Margin="0,0,0,10">
-                                    <Grid>
-                                        <StackPanel HorizontalAlignment="Left">
-                                            <TextBlock Text="📝 Generate Comprehensive Windows Hardware &amp; System Info Summary" FontSize="12" FontWeight="Bold" Foreground="#ffffff"/>
-                                            <TextBlock Text="Generates CPU, GPU, Motherboard, and BIOS properties summary." FontSize="10" Foreground="#9ca3af"/>
-                                        </StackPanel>
-                                        <Button Name="btn_diag_specs" Content="Generate Specs Info" Background="#0284c7" BorderThickness="0" HorizontalAlignment="Right" Width="200"/>
                                     </Grid>
                                 </Border>
                             </StackPanel>
@@ -950,7 +950,7 @@ Add-Type -AssemblyName Microsoft.VisualBasic
 </Window>
 "@
 
-$reader = (New-Object System.Xml.XmlNodeReader $xaml)
+$reader = (New-Object System.Xml.XmlTextReader (New-Object System.IO.StringReader $xaml))
 $window = [Windows.Markup.XamlReader]::Load($reader)
 
 # Map all Named XAML elements to script variables
@@ -961,6 +961,20 @@ $xaml.SelectNodes("//*[@Name]") | ForEach-Object {
 # --- GLOBAL UTILITY FUNCTIONS ---
 $activities = New-Object System.Collections.ObjectModel.ObservableCollection[PSObject]
 $activity_tree.ItemsSource = $activities
+
+# Keep references to prevent PowerShell instances from being garbage collected
+$script:runspaces = [System.Collections.ArrayList]::new()
+
+function Run-Async ($scriptBlock, $argsList=@()) {
+    $ps = [PowerShell]::Create()
+    $ps.AddScript($scriptBlock) | Out-Null
+    $ps.AddArgument($window) | Out-Null
+    foreach ($arg in $argsList) {
+        $ps.AddArgument($arg) | Out-Null
+    }
+    $script:runspaces.Add($ps) | Out-Null
+    $ps.BeginInvoke() | Out-Null
+}
 
 function Add-Activity ($op, $desc, $status) {
     $window.Dispatcher.Invoke([Action]{
@@ -1022,7 +1036,7 @@ $btn_diag.Add_Click({ Switch-View "grid_diag" })
 $btn_backups.Add_Click({ Switch-View "grid_backups" })
 $btn_config.Add_Click({ Switch-View "grid_config" })
 
-# --- INITIALIZE SOFTWARE LIST WITH GROUPS (100% Matching Python catalog) ---
+# --- INITIALIZE SOFTWARE LIST WITH GROUPS ---
 $browsers = @(
     @{ Name = "Google Chrome"; Id = "Google.Chrome" }
     @{ Name = "Mozilla Firefox"; Id = "Mozilla.Firefox" }
@@ -1127,11 +1141,12 @@ $btn_soft_desel_all.Add_Click({
 $osPlatform = (Get-CimInstance Win32_OperatingSystem).Caption
 $txt_os.Text = "Win 10/11"
 
-Start-ThreadJob {
+Run-Async {
+    param($win, $c, $r, $d, $u)
     while ($true) {
         try {
             # CPU
-            $cpu = Get-CimInstance -ClassName Win32_Processor | Measure-Object -Property LoadPercentage -Average | Select-Object -ExpandProperty Average
+            $cpu = (Get-CimInstance -ClassName Win32_Processor | Measure-Object -Property LoadPercentage -Average).Average
             if ($cpu -eq $null) { $cpu = 0 }
             $cpuStr = "$([Math]::Round($cpu))%"
 
@@ -1153,16 +1168,16 @@ Start-ThreadJob {
             $uptimeStr = "Uptime: $($uptime.Days)d $($uptime.Hours)h $($uptime.Minutes)m"
 
             # Update UI controls safely on the UI thread
-            $window.Dispatcher.Invoke([Action]{
-                $txt_cpu.Text = $cpuStr
-                $txt_ram.Text = $ramStr
-                $txt_disk.Text = $diskStr
-                $txt_uptime.Text = $uptimeStr
+            $win.Dispatcher.Invoke([Action]{
+                $c.Text = $cpuStr
+                $r.Text = $ramStr
+                $d.Text = $diskStr
+                $u.Text = $uptimeStr
             })
         } catch {}
         Start-Sleep -Seconds 3
     }
-}
+} @($txt_cpu, $txt_ram, $txt_disk, $txt_uptime)
 
 Add-Activity "Launch Utility" "Ready" "Success"
 Log-Message "System Utility Toolkit initialized."
@@ -1181,25 +1196,36 @@ $btn_install_soft.Add_Click({
     Log-Message "Starting installation batch..."
     Add-Activity "Software Installer" "Starting installation batch" "Running"
     
-    Start-ThreadJob {
-        param($items)
+    $itemsArray = @()
+    foreach ($item in $selected) {
+        $itemsArray += @{ Name = $item.Content; Id = $item.Tag }
+    }
+
+    Run-Async {
+        param($win, $items)
         foreach ($item in $items) {
-            $name = $item.Content
-            $id = $item.Tag
-            [Action[string]]{ param($n) Log-Message "Installing $n..." }.Invoke($name)
+            $name = $item.Name
+            $id = $item.Id
+            $win.Dispatcher.Invoke([Action]{ Log-Message "Installing $name..." })
             
             $proc = Start-Process winget -ArgumentList "install --id $id --silent --accept-source-agreements --accept-package-agreements" -NoNewWindow -PassThru -Wait
             if ($proc.ExitCode -eq 0) {
-                [Action[string]]{ param($n) Log-Message "[✓] $n installed successfully." }.Invoke($name)
-                [Action[string]]{ param($n) Add-Activity "WinGet Installer" "$n installed successfully" "Success" }.Invoke($name)
+                $win.Dispatcher.Invoke([Action]{ 
+                    Log-Message "[✓] $name installed successfully."
+                    Add-Activity "WinGet Installer" "$name installed successfully" "Success"
+                })
             } else {
-                [Action[string]]{ param($n) Log-Message "[X] $n failed or was already installed." }.Invoke($name)
-                [Action[string]]{ param($n) Add-Activity "WinGet Installer" "$n install failed" "Failed" }.Invoke($name)
+                $win.Dispatcher.Invoke([Action]{ 
+                    Log-Message "[X] $name failed or was already installed."
+                    Add-Activity "WinGet Installer" "$name install failed" "Failed"
+                })
             }
         }
-        [Action]{ Log-Message "Installation batch completed." }.Invoke()
-        [Action]{ Add-Activity "Software Installer" "Installation batch completed" "Success" }.Invoke()
-    } -ArgumentList (,$selected)
+        $win.Dispatcher.Invoke([Action]{ 
+            Log-Message "Installation batch completed." 
+            Add-Activity "Software Installer" "Installation batch completed" "Success"
+        })
+    } @(,$itemsArray)
 })
 
 # Software Uninstallation
@@ -1213,25 +1239,36 @@ $btn_uninstall_soft.Add_Click({
     Log-Message "Starting uninstallation batch..."
     Add-Activity "Software Installer" "Starting uninstallation batch" "Running"
     
-    Start-ThreadJob {
-        param($items)
+    $itemsArray = @()
+    foreach ($item in $selected) {
+        $itemsArray += @{ Name = $item.Content; Id = $item.Tag }
+    }
+
+    Run-Async {
+        param($win, $items)
         foreach ($item in $items) {
-            $name = $item.Content
-            $id = $item.Tag
-            [Action[string]]{ param($n) Log-Message "Uninstalling $n..." }.Invoke($name)
+            $name = $item.Name
+            $id = $item.Id
+            $win.Dispatcher.Invoke([Action]{ Log-Message "Uninstalling $name..." })
             
             $proc = Start-Process winget -ArgumentList "uninstall --id $id --silent" -NoNewWindow -PassThru -Wait
             if ($proc.ExitCode -eq 0) {
-                [Action[string]]{ param($n) Log-Message "[✓] $n uninstalled successfully." }.Invoke($name)
-                [Action[string]]{ param($n) Add-Activity "WinGet Installer" "$n uninstalled successfully" "Success" }.Invoke($name)
+                $win.Dispatcher.Invoke([Action]{ 
+                    Log-Message "[✓] $name uninstalled successfully."
+                    Add-Activity "WinGet Installer" "$name uninstalled successfully" "Success"
+                })
             } else {
-                [Action[string]]{ param($n) Log-Message "[X] $n failed to uninstall." }.Invoke($name)
-                [Action[string]]{ param($n) Add-Activity "WinGet Installer" "$n uninstall failed" "Failed" }.Invoke($name)
+                $win.Dispatcher.Invoke([Action]{ 
+                    Log-Message "[X] $name failed to uninstall."
+                    Add-Activity "WinGet Installer" "$name uninstall failed" "Failed"
+                })
             }
         }
-        [Action]{ Log-Message "Uninstallation batch completed." }.Invoke()
-        [Action]{ Add-Activity "Software Installer" "Uninstallation batch completed" "Success" }.Invoke()
-    } -ArgumentList (,$selected)
+        $win.Dispatcher.Invoke([Action]{ 
+            Log-Message "Uninstallation batch completed." 
+            Add-Activity "Software Installer" "Uninstallation batch completed" "Success"
+        })
+    } @(,$itemsArray)
 })
 
 # Deploy custom Microsoft Office suites (M365, LTSC 2019, 2021, 2024)
@@ -1241,25 +1278,30 @@ function Start-OfficeDeployment ($pkgId, $title) {
     
     if ($pkgId -eq "Microsoft.Office") {
         # Deploy Microsoft 365 silent using WinGet
-        Start-ThreadJob {
-            [Action]{ Log-Message "Installing Microsoft 365 Apps silently via WinGet..." }.Invoke()
+        Run-Async {
+            param($win, $t)
+            $win.Dispatcher.Invoke([Action]{ Log-Message "Installing Microsoft 365 Apps silently via WinGet..." })
             $proc = Start-Process winget -ArgumentList "install --id Microsoft.Office --silent --accept-source-agreements --accept-package-agreements" -NoNewWindow -PassThru -Wait
             if ($proc.ExitCode -eq 0) {
-                [Action]{ Log-Message "[✓] Microsoft 365 installed successfully." }.Invoke()
-                [Action]{ Add-Activity "Office Installer" "M365 installed successfully" "Success" }.Invoke()
+                $win.Dispatcher.Invoke([Action]{ 
+                    Log-Message "[✓] Microsoft 365 installed successfully."
+                    Add-Activity "Office Installer" "M365 installed successfully" "Success"
+                })
             } else {
-                [Action]{ Log-Message "[X] Microsoft 365 installation failed." }.Invoke()
-                [Action]{ Add-Activity "Office Installer" "M365 install failed" "Failed" }.Invoke()
+                $win.Dispatcher.Invoke([Action]{ 
+                    Log-Message "[X] Microsoft 365 installation failed."
+                    Add-Activity "Office Installer" "M365 install failed" "Failed"
+                })
             }
-        }
+        } @($title)
     } else {
         # Custom ODT deployment for LTSC
-        Start-ThreadJob {
-            param($id, $t)
+        Run-Async {
+            param($win, $id, $t)
             $odtDir = "C:\OfficeODT"
             if (-not (Test-Path $odtDir)) { New-Item -ItemType Directory -Path $odtDir | Out-Null }
             
-            [Action]{ Log-Message "Downloading Microsoft Office Deployment Tool (ODT) setup..." }.Invoke()
+            $win.Dispatcher.Invoke([Action]{ Log-Message "Downloading Microsoft Office Deployment Tool (ODT) setup..." })
             $setupExe = "C:\Program Files\OfficeDeploymentTool\setup.exe"
             if (-not (Test-Path $setupExe)) { $setupExe = "C:\Program Files (x86)\OfficeDeploymentTool\setup.exe" }
             if (-not (Test-Path $setupExe)) {
@@ -1294,16 +1336,20 @@ function Start-OfficeDeployment ($pkgId, $title) {
 "@
             $configXml | Out-File -FilePath "$odtDir\configuration.xml" -Encoding utf8
             
-            [Action]{ Log-Message "Running setup.exe /configure configuration.xml (Follow the Microsoft UI)..." }.Invoke()
-            $proc = Start-Process $using:setupExe -ArgumentList "/configure $odtDir\configuration.xml" -Wait -PassThru
+            $win.Dispatcher.Invoke([Action]{ Log-Message "Running setup.exe /configure configuration.xml (Follow the Microsoft UI)..." })
+            $proc = Start-Process $setupExe -ArgumentList "/configure $odtDir\configuration.xml" -Wait -PassThru
             if ($proc.ExitCode -eq 0) {
-                [Action[string]]{ param($title) Log-Message "[✓] $title installed successfully." }.Invoke($t)
-                [Action[string]]{ param($title) Add-Activity "Office Installer" "$title installed" "Success" }.Invoke($t)
+                $win.Dispatcher.Invoke([Action]{ 
+                    Log-Message "[✓] $t installed successfully."
+                    Add-Activity "Office Installer" "$t installed" "Success"
+                })
             } else {
-                [Action[string]]{ param($title) Log-Message "[X] $title failed (Exit code: $($proc.ExitCode))." }.Invoke($t)
-                [Action[string]]{ param($title) Add-Activity "Office Installer" "$title install failed" "Failed" }.Invoke($t)
+                $win.Dispatcher.Invoke([Action]{ 
+                    Log-Message "[X] $t failed (Exit code: $($proc.ExitCode))."
+                    Add-Activity "Office Installer" "$t install failed" "Failed"
+                })
             }
-        } -ArgumentList $pkgId, $title
+        } @($pkgId, $title)
     }
 }
 
@@ -1325,15 +1371,15 @@ $btn_launch_mas.Add_Click({
 $btn_check_license.Add_Click({
     Log-Message "Checking Windows activation status details..."
     Add-Activity "Diagnostics" "Checking activation status..." "Running"
-    Start-ThreadJob {
+    Run-Async {
+        param($win)
         $res = cscript //nologo $env:SystemRoot\system32\slmgr.vbs /dli
         $joined = $res -join "`r`n"
-        [Action[string]]{ 
-            param($txt)
+        $win.Dispatcher.Invoke([Action]{ 
             Log-Message "License details returned:" 
-            Log-Message $txt
+            Log-Message $joined
             Add-Activity "Diagnostics" "Activation Checked" "Success"
-        }.Invoke($joined)
+        })
     }
 })
 
@@ -1350,16 +1396,15 @@ $btn_change_edition.Add_Click({
     }
     
     $key = $keys[$selectedEdition]
-    Start-ThreadJob {
-        param($k, $ed)
-        [Action[string]]{ param($txt) Log-Message "Installing product key: $txt..." }.Invoke($k)
+    Run-Async {
+        param($win, $k, $ed)
+        $win.Dispatcher.Invoke([Action]{ Log-Message "Installing product key: $k..." })
         
         $proc = Start-Process changepk.exe -ArgumentList "/ProductKey $k" -NoNewWindow -PassThru -Wait
-        [Action[string, string]]{ 
-            param($code, $e) 
-            Log-Message "Edition upgrade process completed (Exit code: $code)."
-            Add-Activity "Edition Changer" "Upgraded to $e" "Success"
-        }.Invoke($proc.ExitCode, $ed)
+        $win.Dispatcher.Invoke([Action]{ 
+            Log-Message "Edition upgrade process completed (Exit code: $($proc.ExitCode))."
+            Add-Activity "Edition Changer" "Upgraded to $ed" "Success"
+        })
     } -ArgumentList $key, $selectedEdition
 })
 
@@ -1367,14 +1412,13 @@ $btn_change_edition.Add_Click({
 function Run-RepairCommand ($argsList, $opName) {
     Log-Message "Initiating command: $($argsList -join ' ')..."
     Add-Activity "System Repair" "Running $opName" "Running"
-    Start-ThreadJob {
-        param($cmd, $args, $name)
+    Run-Async {
+        param($win, $cmd, $args, $name)
         $proc = Start-Process $cmd -ArgumentList $args -NoNewWindow -PassThru -Wait
-        [Action[string, string]]{ 
-            param($code, $n) 
-            Log-Message "$n finished with exit code: $code" 
-            Add-Activity "System Repair" "$n completed" "Success"
-        }.Invoke($proc.ExitCode, $name)
+        $win.Dispatcher.Invoke([Action]{ 
+            Log-Message "$name finished with exit code: $($proc.ExitCode)" 
+            Add-Activity "System Repair" "$name completed" "Success"
+        })
     } -ArgumentList $argsList[0], ($argsList[1..($argsList.Length-1)] -join ' '), $opName
 }
 
@@ -1384,46 +1428,52 @@ $btn_rep_dism_check.Add_Click({ Run-RepairCommand @("dism", "/online", "/cleanup
 $btn_rep_wu.Add_Click({
     Log-Message "Resetting Windows Update components cache..."
     Add-Activity "System Repair" "Resetting Update Cache" "Running"
-    Start-ThreadJob {
+    Run-Async {
+        param($win)
         Stop-Service wuauserv -Force -ErrorAction SilentlyContinue
         Stop-Service bits -Force -ErrorAction SilentlyContinue
         
-        [Action]{ Log-Message "Deleting SoftwareDistribution download cache..." }.Invoke()
+        $win.Dispatcher.Invoke([Action]{ Log-Message "Deleting SoftwareDistribution download cache..." })
         Remove-Item "$env:SystemRoot\SoftwareDistribution\Download\*" -Recurse -Force -ErrorAction SilentlyContinue
         
         Start-Service wuauserv -ErrorAction SilentlyContinue
         Start-Service bits -ErrorAction SilentlyContinue
-        [Action]{ Log-Message "[✓] Windows Update services cache reset completed." }.Invoke()
-        [Action]{ Add-Activity "System Repair" "Reset Update Cache completed" "Success" }.Invoke()
+        $win.Dispatcher.Invoke([Action]{ 
+            Log-Message "[✓] Windows Update services cache reset completed." 
+            Add-Activity "System Repair" "Reset Update Cache completed" "Success"
+        })
     }
 })
 
 $btn_rep_engines.Add_Click({
     Log-Message "Repairing Windows native repair engines (SFC/DISM Fix)..."
     Add-Activity "System Repair" "Repair Native Engines" "Running"
-    Start-ThreadJob {
+    Run-Async {
+        param($win)
         Remove-Item "$env:SystemRoot\Logs\CBS\CBS.log" -Force -ErrorAction SilentlyContinue
         dism /online /cleanup-image /startcomponentcleanup | Out-Null
-        [Action]{ Log-Message "[✓] Native repair engines refreshed successfully." }.Invoke()
-        [Action]{ Add-Activity "System Repair" "Repair Native Engines completed" "Success" }.Invoke()
+        $win.Dispatcher.Invoke([Action]{ 
+            Log-Message "[✓] Native repair engines refreshed successfully." 
+            Add-Activity "System Repair" "Repair Native Engines completed" "Success"
+        })
     }
 })
 
 $btn_rep_dll.Add_Click({
     Log-Message "Re-registering core Windows System DLL Libraries..."
     Add-Activity "System Repair" "Re-register DLLs" "Running"
-    Start-ThreadJob {
+    Run-Async {
+        param($win)
         $dlls = @("atl.dll", "urlmon.dll", "mshtml.dll", "shdocvw.dll", "browseui.dll", "jscript.dll", "vbscript.dll", "scrrun.dll", "msxml.dll", "msxml3.dll", "msxml6.dll", "actxprxy.dll", "softpub.dll", "wintrust.dll", "dssenh.dll", "gpkcsp.dll", "sccbase.dll", "slbcsp.dll", "cryptdlg.dll", "ole32.dll", "oleaut32.dll", "initpki.dll", "msi.dll")
         $success = 0
         foreach ($dll in $dlls) {
             $proc = Start-Process regsvr32.exe -ArgumentList "/s $dll" -NoNewWindow -PassThru -Wait
             if ($proc.ExitCode -eq 0) { $success++ }
         }
-        [Action[string]]{ 
-            param($s) 
-            Log-Message "[✓] Re-registered $s system DLL files." 
+        $win.Dispatcher.Invoke([Action]{ 
+            Log-Message "[✓] Re-registered $success system DLL files." 
             Add-Activity "System Repair" "Re-register DLLs completed" "Success"
-        }.Invoke($success)
+        })
     }
 })
 
@@ -1440,14 +1490,15 @@ $btn_rep_firewall.Add_Click({ Run-RepairCommand @("netsh", "advfirewall", "reset
 $btn_rep_store.Add_Click({
     Log-Message "Re-registering Microsoft App Store packages..."
     Add-Activity "System Repair" "Repair App Store" "Running"
-    Start-ThreadJob {
+    Run-Async {
+        param($win)
         Get-AppXPackage -AllUsers -Name "Microsoft.WindowsStore" | Foreach-Object {
             Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"
         }
-        [Action]{ 
+        $win.Dispatcher.Invoke([Action]{ 
             Log-Message "[✓] Microsoft App Store packages re-registered." 
             Add-Activity "System Repair" "Repair App Store completed" "Success"
-        }.Invoke()
+        })
     }
 })
 
@@ -1455,12 +1506,13 @@ $btn_rep_store.Add_Click({
 $btn_rep_wsreset.Add_Click({
     Log-Message "Resetting Microsoft Store Cache (wsreset.exe)..."
     Add-Activity "System Repair" "wsreset cache reset" "Running"
-    Start-ThreadJob {
+    Run-Async {
+        param($win)
         $proc = Start-Process wsreset.exe -PassThru -Wait
-        [Action]{ 
+        $win.Dispatcher.Invoke([Action]{ 
             Log-Message "[✓] wsreset process completed successfully."
             Add-Activity "System Repair" "wsreset completed" "Success"
-        }.Invoke()
+        })
     }
 })
 
@@ -1468,13 +1520,13 @@ $btn_rep_wsreset.Add_Click({
 $btn_rep_wmi.Add_Click({
     Log-Message "Attempting salvage / rebuild of corrupted Windows WMI Repository..."
     Add-Activity "System Repair" "Rebuild WMI Repository" "Running"
-    Start-ThreadJob {
+    Run-Async {
+        param($win)
         $proc = Start-Process winmgmt.exe -ArgumentList "/salvagerepository" -NoNewWindow -PassThru -Wait
-        [Action[string]]{ 
-            param($code)
-            Log-Message "[✓] WMI Salvage command finished with exit code: $code."
+        $win.Dispatcher.Invoke([Action]{ 
+            Log-Message "[✓] WMI Salvage command finished with exit code: $($proc.ExitCode)."
             Add-Activity "System Repair" "WMI Rebuilt" "Success"
-        }.Invoke($proc.ExitCode)
+        })
     }
 })
 
@@ -1495,13 +1547,16 @@ $btn_rep_search.Add_Click({
 $btn_rep_net.Add_Click({
     Log-Message "Running complete network adapter reset..."
     Add-Activity "System Repair" "Network Adapter Reset" "Running"
-    Start-ThreadJob {
-        [Action]{ Log-Message "Resetting Winsock catalog..." }.Invoke()
+    Run-Async {
+        param($win)
+        $win.Dispatcher.Invoke([Action]{ Log-Message "Resetting Winsock catalog..." })
         netsh winsock reset | Out-Null
-        [Action]{ Log-Message "Resetting TCP/IP stack..." }.Invoke()
+        $win.Dispatcher.Invoke([Action]{ Log-Message "Resetting TCP/IP stack..." })
         netsh int ip reset | Out-Null
-        [Action]{ Log-Message "[✓] Network reset completed. Please restart your system." }.Invoke()
-        [Action]{ Add-Activity "System Repair" "Network Reset completed" "Success" }.Invoke()
+        $win.Dispatcher.Invoke([Action]{ 
+            Log-Message "[✓] Network reset completed. Please restart your system." 
+            Add-Activity "System Repair" "Network Reset completed" "Success"
+        })
     }
 })
 
@@ -1511,18 +1566,20 @@ $btn_rep_winre_stat.Add_Click({ Run-RepairCommand @("reagentc", "/info") "WinRE 
 $btn_rep_off_quick.Add_Click({
     Log-Message "Running Microsoft Office Quick Repair (Click-to-Run)..."
     Add-Activity "System Repair" "Office Quick Repair" "Running"
-    Start-ThreadJob {
+    Run-Async {
+        param($win)
         $proc = Start-Process "C:\Program Files\Common Files\microsoft shared\ClickToRun\OfficeClickToRun.exe" -ArgumentList "scenario=Repair platform=x64 culture=en-us ForceRepair=1" -NoNewWindow -PassThru -Wait
-        [Action]{ 
+        $win.Dispatcher.Invoke([Action]{ 
             Log-Message "[✓] Office Quick Repair finished." 
             Add-Activity "System Repair" "Office Quick Repair completed" "Success"
-        }.Invoke()
+        })
     }
 })
 
 $btn_rep_off_pst.Add_Click({
     Log-Message "Searching and launching Outlook ScanPST tool..."
-    Start-ThreadJob {
+    Run-Async {
+        param($win)
         $paths = @(
             "C:\Program Files\Microsoft Office\root\Office16\SCANPST.EXE"
             "C:\Program Files (x86)\Microsoft Office\root\Office16\SCANPST.EXE"
@@ -1536,9 +1593,9 @@ $btn_rep_off_pst.Add_Click({
             }
         }
         if (-not $found) {
-            [Action]{ Log-Message "[X] ScanPST.exe could not be found in default Office directories." }.Invoke()
+            $win.Dispatcher.Invoke([Action]{ Log-Message "[X] ScanPST.exe could not be found in default Office directories." })
         } else {
-            [Action]{ Log-Message "[✓] Launched ScanPST successfully." }.Invoke()
+            $win.Dispatcher.Invoke([Action]{ Log-Message "[✓] Launched ScanPST successfully." })
         }
     }
 })
@@ -1561,9 +1618,10 @@ $btn_rep_rec_boot.Add_Click({
 $btn_rep_fail_menu.Add_Click({ Run-RepairCommand @("bcdedit", "/set", "{current}", "bootstatuspolicy", "displayallfailures") "Boot failure menu policy" })
 $btn_rep_chkdsk.Add_Click({
     Log-Message "Scheduling Boot-time Chkdsk /f /r scan on drive C:..."
-    Start-ThreadJob {
+    Run-Async {
+        param($win)
         $proc = Start-Process chkdsk -ArgumentList "C: /f /r" -RedirectStandardInput "$env:temp\y.txt" -NoNewWindow -PassThru -Wait
-        [Action]{ Log-Message "[✓] Boot check scheduled. Please reboot your machine to scan." }.Invoke()
+        $win.Dispatcher.Invoke([Action]{ Log-Message "[✓] Boot check scheduled. Please reboot your machine to scan." })
     }
 })
 
@@ -1598,25 +1656,27 @@ $btn_rep_printer_policy.Add_Click({
 $btn_rep_printer_lpd.Add_Click({
     Log-Message "Enabling Windows LPD Print Service & LPR Port Monitor Optional Features..."
     Add-Activity "Printer Repair" "Enable LPD/LPR Features" "Running"
-    Start-ThreadJob {
+    Run-Async {
+        param($win)
         Enable-WindowsOptionalFeature -Online -FeatureName "LPDPrintService" -NoRestart | Out-Null
         Enable-WindowsOptionalFeature -Online -FeatureName "LPRPortMonitor" -NoRestart | Out-Null
-        [Action]{ 
+        $win.Dispatcher.Invoke([Action]{ 
             Log-Message "[✓] LPD Print service and LPR Port Monitor features enabled." 
             Add-Activity "Printer Repair" "LPD/LPR Features Enabled" "Success"
-        }.Invoke()
+        })
     }
 })
 
 $btn_rep_printer_disc.Add_Click({
     Log-Message "Restarting Network Discovery and Printer sharing dependency services..."
-    Start-ThreadJob {
+    Run-Async {
+        param($win)
         $services = @("FDResPub", "SSDPSrv", "UPnPHost", "Dnscache")
         foreach ($s in $services) {
             Set-Service -Name $s -StartupType Automatic -ErrorAction SilentlyContinue
             Restart-Service -Name $s -Force -ErrorAction SilentlyContinue
         }
-        [Action]{ Log-Message "[✓] Network discovery dependency services restarted." }.Invoke()
+        $win.Dispatcher.Invoke([Action]{ Log-Message "[✓] Network discovery dependency services restarted." })
     }
 })
 
@@ -1679,10 +1739,10 @@ $btn_rep_printer_dis_spooler.Add_Click({
 $btn_conv_ntfs.Add_Click({
     $drv = $cb_ntfs_drive.Text
     Log-Message "Converting drive $drv to NTFS partition style losslessly..."
-    Start-ThreadJob {
-        param($d)
+    Run-Async {
+        param($win, $d)
         $proc = Start-Process convert.exe -ArgumentList "$d /fs:ntfs" -NoNewWindow -PassThru -Wait
-        [Action[string]]{ param($code) Log-Message "NTFS conversion completed (Exit code: $code)." }.Invoke($proc.ExitCode)
+        $win.Dispatcher.Invoke([Action]{ Log-Message "NTFS conversion completed (Exit code: $($proc.ExitCode))." })
     } -ArgumentList $drv
 })
 
@@ -1690,10 +1750,10 @@ $btn_conv_ntfs.Add_Click({
 $btn_conv_gpt.Add_Click({
     $disk = $cb_gpt_disk.Text.Replace("Disk ", "")
     Log-Message "Converting disk $disk from MBR to GPT partition style..."
-    Start-ThreadJob {
-        param($dk)
+    Run-Async {
+        param($win, $dk)
         $proc = Start-Process mbr2gpt.exe -ArgumentList "/convert /disk:$dk /allowFullOS" -NoNewWindow -PassThru -Wait
-        [Action[string]]{ param($code) Log-Message "MBR2GPT completed (Exit code: $code)." }.Invoke($proc.ExitCode)
+        $win.Dispatcher.Invoke([Action]{ Log-Message "MBR2GPT completed (Exit code: $($proc.ExitCode))." })
     } -ArgumentList $disk
 })
 
@@ -1701,7 +1761,8 @@ $btn_conv_gpt.Add_Click({
 $btn_rep_clean_ram_wpf.Add_Click({
     Log-Message "Running Advanced Memory API Optimizer (EmptyWorkingSet P/Invoke)..."
     Add-Activity "Memory Optimization" "API Empty Working Set Memory optimization" "Running"
-    Start-ThreadJob {
+    Run-Async {
+        param($win)
         $csharp = @"
         using System;
         using System.Runtime.InteropServices;
@@ -1722,11 +1783,10 @@ $btn_rep_clean_ram_wpf.Add_Click({
 "@
         Add-Type -TypeDefinition $csharp -ErrorAction SilentlyContinue
         $optimizedCount = [MemoryOptimizer]::Optimize()
-        [Action[string]]{ 
-            param($count) 
-            Log-Message "[✓] EWS RAM API Optimizer completed. Purged working sets of $count active processes." 
+        $win.Dispatcher.Invoke([Action]{ 
+            Log-Message "[✓] EWS RAM API Optimizer completed. Purged working sets of $optimizedCount active processes." 
             Add-Activity "Memory Optimization" "EWS API RAM Optimizer completed" "Success"
-        }.Invoke($optimizedCount)
+        })
     }
 })
 
@@ -1740,11 +1800,12 @@ $btn_rep_clean_ram.Add_Click({
 
 $btn_rep_clean_browser.Add_Click({
     Log-Message "Cleaning browser caches..."
-    Start-ThreadJob {
+    Run-Async {
+        param($win)
         Remove-Item "$env:LOCALAPPDATA\Google\Chrome\User Data\Default\Cache\*" -Force -Recurse -ErrorAction SilentlyContinue
         Remove-Item "$env:LOCALAPPDATA\Microsoft\Edge\User Data\Default\Cache\*" -Force -Recurse -ErrorAction SilentlyContinue
         Remove-Item "$env:LOCALAPPDATA\Mozilla\Firefox\Profiles\*\cache2\*" -Force -Recurse -ErrorAction SilentlyContinue
-        [Action]{ Log-Message "[✓] Web Browser Cache cleared successfully." }.Invoke()
+        $win.Dispatcher.Invoke([Action]{ Log-Message "[✓] Web Browser Cache cleared successfully." })
     }
 })
 
@@ -1752,12 +1813,13 @@ $btn_rep_clean_browser.Add_Click({
 $btn_rep_clean_mgr.Add_Click({
     Log-Message "Launching deep cleanmgr command scan..."
     Add-Activity "Disk Cleaning" "Deep Disk Cleanup" "Running"
-    Start-ThreadJob {
+    Run-Async {
+        param($win)
         $proc = Start-Process cleanmgr.exe -ArgumentList "/autoclean" -NoNewWindow -PassThru -Wait
-        [Action]{ 
+        $win.Dispatcher.Invoke([Action]{ 
             Log-Message "[✓] Deep disk cleanup manager finished." 
             Add-Activity "Disk Cleaning" "Deep Disk Cleanup completed" "Success"
-        }.Invoke()
+        })
     }
 })
 
@@ -1765,13 +1827,13 @@ $btn_rep_clean_mgr.Add_Click({
 $btn_rep_clean_resetbase.Add_Click({
     Log-Message "Purging superseded updates from system Component Store (ResetBase)..."
     Add-Activity "Disk Cleaning" "Component Store ResetBase Purge" "Running"
-    Start-ThreadJob {
+    Run-Async {
+        param($win)
         $proc = Start-Process dism.exe -ArgumentList "/online /cleanup-image /startcomponentcleanup /resetbase" -NoNewWindow -PassThru -Wait
-        [Action[string]]{ 
-            param($code) 
-            Log-Message "[✓] Component Store ResetBase completed (Exit code: $code)." 
+        $win.Dispatcher.Invoke([Action]{ 
+            Log-Message "[✓] Component Store ResetBase completed (Exit code: $($proc.ExitCode))." 
             Add-Activity "Disk Cleaning" "Component Store ResetBase completed" "Success"
-        }.Invoke($proc.ExitCode)
+        })
     }
 })
 
@@ -1779,7 +1841,8 @@ $btn_rep_clean_resetbase.Add_Click({
 $btn_rep_clean_temp.Add_Click({
     Log-Message "Purging all files in User and System Temp directory paths..."
     Add-Activity "Disk Cleaning" "Delete TEMP Files" "Running"
-    Start-ThreadJob {
+    Run-Async {
+        param($win)
         $paths = @(
             "$env:temp\*"
             "C:\Windows\Temp\*"
@@ -1787,10 +1850,10 @@ $btn_rep_clean_temp.Add_Click({
         foreach ($p in $paths) {
             Remove-Item -Path $p -Force -Recurse -ErrorAction SilentlyContinue
         }
-        [Action]{ 
+        $win.Dispatcher.Invoke([Action]{ 
             Log-Message "[✓] Completed cleaning temporary directories." 
             Add-Activity "Disk Cleaning" "TEMP Files cleaned" "Success"
-        }.Invoke()
+        })
     }
 })
 
@@ -1798,12 +1861,13 @@ $btn_rep_clean_temp.Add_Click({
 $btn_rep_recycle.Add_Click({
     Log-Message "Emptying Windows Recycle Bin database on all drives silently..."
     Add-Activity "Disk Cleaning" "Empty Recycle Bin" "Running"
-    Start-ThreadJob {
+    Run-Async {
+        param($win)
         Clear-RecycleBin -Force -ErrorAction SilentlyContinue
-        [Action]{ 
+        $win.Dispatcher.Invoke([Action]{ 
             Log-Message "[✓] Recycle Bin emptied successfully." 
             Add-Activity "Disk Cleaning" "Recycle Bin Emptied" "Success"
-        }.Invoke()
+        })
     }
 })
 
@@ -1811,30 +1875,32 @@ $btn_rep_recycle.Add_Click({
 $btn_rep_defrag.Add_Click({
     Log-Message "Optimizing and Defragmenting all connected system drives..."
     Add-Activity "Disk Cleaning" "Optimize/Defrag Volumes" "Running"
-    Start-ThreadJob {
+    Run-Async {
+        param($win)
         # Optimize C:
         Optimize-Volume -DriveLetter C -Defrag -Verbose | Out-Null
-        [Action]{ 
+        $win.Dispatcher.Invoke([Action]{ 
             Log-Message "[✓] Completed volume defragmentation and trimming optimization passes."
             Add-Activity "Disk Cleaning" "Optimize/Defrag Completed" "Success"
-        }.Invoke()
+        })
     }
 })
 
 $btn_rep_shield_wu.Add_Click({
     Log-Message "Running comprehensive Windows Update Service repair engine..."
     Add-Activity "System Repair" "Windows Update Service Repair" "Running"
-    Start-ThreadJob {
+    Run-Async {
+        param($win)
         Stop-Service wuauserv -Force -ErrorAction SilentlyContinue
         Stop-Service bits -Force -ErrorAction SilentlyContinue
         $dlls = @("wups.dll", "wups2.dll", "wuaueng.dll", "wuapi.dll", "wucltux.dll", "wuwebv.dll")
         foreach ($d in $dlls) { Start-Process regsvr32.exe -ArgumentList "/s $d" -Wait }
         Start-Service wuauserv -ErrorAction SilentlyContinue
         Start-Service bits -ErrorAction SilentlyContinue
-        [Action]{ 
+        $win.Dispatcher.Invoke([Action]{ 
             Log-Message "[✓] Windows Update components registered and services restarted." 
             Add-Activity "System Repair" "Windows Update Service Repair completed" "Success"
-        }.Invoke()
+        })
     }
 })
 
@@ -1884,12 +1950,13 @@ $btn_rep_shield_firewall.Add_Click({ Run-RepairCommand @("netsh", "advfirewall",
 
 $btn_rep_shield_audio.Add_Click({
     Log-Message "Resetting and restarting Windows Audio Playback services..."
-    Start-ThreadJob {
+    Run-Async {
+        param($win)
         Stop-Service AudioSrv -Force -ErrorAction SilentlyContinue
         Stop-Service AudioEndpointBuilder -Force -ErrorAction SilentlyContinue
         Start-Service AudioEndpointBuilder -ErrorAction SilentlyContinue
         Start-Service AudioSrv -ErrorAction SilentlyContinue
-        [Action]{ Log-Message "[✓] AudioSrv and AudioEndpointBuilder restarted successfully." }.Invoke()
+        $win.Dispatcher.Invoke([Action]{ Log-Message "[✓] AudioSrv and AudioEndpointBuilder restarted successfully." })
     }
 })
 
@@ -1903,33 +1970,36 @@ $btn_rep_shell_explorer.Add_Click({
 $btn_rep_shell_events.Add_Click({
     Log-Message "Clearing all Application, System, and Security event logs..."
     Add-Activity "System Repair" "Clear Event Logs" "Running"
-    Start-ThreadJob {
+    Run-Async {
+        param($win)
         wevtutil el | Foreach-Object { wevtutil cl $_ }
-        [Action]{ 
+        $win.Dispatcher.Invoke([Action]{ 
             Log-Message "[✓] Windows Event Logs cleared successfully." 
             Add-Activity "System Repair" "Clear Event Logs completed" "Success"
-        }.Invoke()
+        })
     }
 })
 
 $btn_rep_shell_icon.Add_Click({
     Log-Message "Rebuilding icon and thumbnail cache databases..."
-    Start-ThreadJob {
+    Run-Async {
+        param($win)
         Stop-Process -Name explorer -Force -ErrorAction SilentlyContinue
         Remove-Item "$env:localappdata\IconCache.db" -Force -ErrorAction SilentlyContinue
         Remove-Item "$env:localappdata\Microsoft\Windows\Explorer\thumbcache_*.db" -Force -ErrorAction SilentlyContinue
         Start-Process explorer
-        [Action]{ Log-Message "[✓] Icon and thumbnail cache rebuilt successfully." }.Invoke()
+        $win.Dispatcher.Invoke([Action]{ Log-Message "[✓] Icon and thumbnail cache rebuilt successfully." })
     }
 })
 
 $btn_rep_shell_font.Add_Click({
     Log-Message "Rebuilding Windows System Font Cache..."
-    Start-ThreadJob {
+    Run-Async {
+        param($win)
         Stop-Service -Name "FontCache" -Force -ErrorAction SilentlyContinue
         Remove-Item "$env:SystemRoot\ServiceProfiles\LocalService\AppData\Local\FontCache\*" -Force -Recurse -ErrorAction SilentlyContinue
         Start-Service -Name "FontCache" -ErrorAction SilentlyContinue
-        [Action]{ Log-Message "[✓] Font Cache rebuilt and service restarted." }.Invoke()
+        $win.Dispatcher.Invoke([Action]{ Log-Message "[✓] Font Cache rebuilt and service restarted." })
     }
 })
 
@@ -1937,15 +2007,16 @@ $btn_rep_shell_font.Add_Click({
 $btn_remove_bloat.Add_Click({
     Log-Message "Starting UWP bloatware package removal..."
     Add-Activity "System Repair" "Remove Bloatware UWP Apps" "Running"
-    Start-ThreadJob {
+    Run-Async {
+        param($win)
         $bloat = @("*xbox*", "*skype*", "*solitaire*", "*bingweather*", "*maps*", "*getstarted*", "*officehub*", "*onenote*")
         foreach ($b in $bloat) {
             Get-AppxPackage -AllUsers $b | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue
         }
-        [Action]{ 
+        $win.Dispatcher.Invoke([Action]{ 
             Log-Message "[✓] Windows bloatware packages removed." 
             Add-Activity "System Repair" "Remove Bloatware UWP Apps completed" "Success"
-        }.Invoke()
+        })
     }
 })
 
@@ -1953,17 +2024,18 @@ $btn_remove_bloat.Add_Click({
 $btn_bloat_onedrive.Add_Click({
     Log-Message "Completely purging Microsoft OneDrive Client from the system..."
     Add-Activity "Bloatware Purge" "Purge OneDrive Client" "Running"
-    Start-ThreadJob {
+    Run-Async {
+        param($win)
         taskkill /f /im OneDrive.exe | Out-Null
         if (Test-Path "$env:SystemRoot\System32\OneDriveSetup.exe") {
             $proc = Start-Process "$env:SystemRoot\System32\OneDriveSetup.exe" -ArgumentList "/uninstall" -Wait -PassThru
         } elseif (Test-Path "$env:SystemRoot\SysWOW64\OneDriveSetup.exe") {
             $proc = Start-Process "$env:SystemRoot\SysWOW64\OneDriveSetup.exe" -ArgumentList "/uninstall" -Wait -PassThru
         }
-        [Action]{ 
+        $win.Dispatcher.Invoke([Action]{ 
             Log-Message "[✓] OneDrive Client uninstall command triggered." 
             Add-Activity "Bloatware Purge" "Purged OneDrive Client" "Success"
-        }.Invoke()
+        })
     }
 })
 
@@ -1992,33 +2064,33 @@ $btn_apply_features.Add_Click({
     $snd = $cb_feat_sandbox.IsChecked
     $wsl = $cb_feat_wsl.IsChecked
     
-    Start-ThreadJob {
-        param($eLpd, $eLpr, $eSmb, $eHyp, $eSnd, $eWsl)
+    Run-Async {
+        param($win, $eLpd, $eLpr, $eSmb, $eHyp, $eSnd, $eWsl)
         if ($eLpd) {
-            [Action]{ Log-Message "Enabling LPD Print Service..." }.Invoke()
+            $win.Dispatcher.Invoke([Action]{ Log-Message "Enabling LPD Print Service..." })
             Enable-WindowsOptionalFeature -Online -FeatureName "LPDPrintService" -NoRestart | Out-Null
         }
         if ($eLpr) {
-            [Action]{ Log-Message "Enabling LPR Port Monitor..." }.Invoke()
+            $win.Dispatcher.Invoke([Action]{ Log-Message "Enabling LPR Port Monitor..." })
             Enable-WindowsOptionalFeature -Online -FeatureName "LPRPortMonitor" -NoRestart | Out-Null
         }
         if ($eSmb) {
-            [Action]{ Log-Message "Enabling SMB1 Protocol Service..." }.Invoke()
+            $win.Dispatcher.Invoke([Action]{ Log-Message "Enabling SMB1 Protocol Service..." })
             Enable-WindowsOptionalFeature -Online -FeatureName "SMB1Protocol" -NoRestart | Out-Null
         }
         if ($eHyp) {
-            [Action]{ Log-Message "Enabling Hyper-V Platform..." }.Invoke()
+            $win.Dispatcher.Invoke([Action]{ Log-Message "Enabling Hyper-V Platform..." })
             Enable-WindowsOptionalFeature -Online -FeatureName "Microsoft-Hyper-V-All" -NoRestart | Out-Null
         }
         if ($eSnd) {
-            [Action]{ Log-Message "Enabling Windows Sandbox..." }.Invoke()
+            $win.Dispatcher.Invoke([Action]{ Log-Message "Enabling Windows Sandbox..." })
             Enable-WindowsOptionalFeature -Online -FeatureName "Containers-DisposableKit" -NoRestart | Out-Null
         }
         if ($eWsl) {
-            [Action]{ Log-Message "Enabling WSL Platform..." }.Invoke()
+            $win.Dispatcher.Invoke([Action]{ Log-Message "Enabling WSL Platform..." })
             Enable-WindowsOptionalFeature -Online -FeatureName "Microsoft-Windows-Subsystem-Linux" -NoRestart | Out-Null
         }
-        [Action]{ Log-Message "[✓] Optional features configuration completed." }.Invoke()
+        $win.Dispatcher.Invoke([Action]{ Log-Message "[✓] Optional features configuration completed." })
     } -ArgumentList $lpd, $lpr, $smb, $hyp, $snd, $wsl
 })
 
@@ -2194,23 +2266,25 @@ $btn_diag_ping_start.Add_Click({
     Log-Message "Starting active ping diagnostic on '$hostTarget'..."
     Add-Activity "Diagnostics" "Running Ping Test on $hostTarget" "Running"
     
-    Start-ThreadJob {
-        param($t)
+    Run-Async {
+        param($win, $t)
         while ($true) {
-            $btnText = $window.Dispatcher.Invoke([Func[string]]{ $btn_diag_ping_start.Content })
+            $btnText = $win.Dispatcher.Invoke([Func[string]]{ $btn_diag_ping_start.Content })
             if ($btnText -eq "Ping Test") { break }
             
             try {
                 $ping = Test-Connection -ComputerName $t -Count 1 -ErrorAction Stop
                 $time = $ping.ResponseTime
                 if ($time -eq $null) { $time = 0 }
-                [Action[string, string]]{ param($h, $r) Log-Message "Ping response from ${h}: Reply latency = ${r} ms." }.Invoke($t, $time)
+                $win.Dispatcher.Invoke([Action]{ 
+                    Log-Message "Ping response from ${t}: Reply latency = ${time} ms." 
+                })
             } catch {
-                [Action[string]]{ param($h) Log-Message "[X] Ping timed out or failed to reach host: $h" }.Invoke($t)
+                $win.Dispatcher.Invoke([Action]{ Log-Message "[X] Ping timed out or failed to reach host: $t" })
             }
             Start-Sleep -Seconds 1
         }
-        [Action]{ Add-Activity "Diagnostics" "Ping Test Completed" "Success" }.Invoke()
+        $win.Dispatcher.Invoke([Action]{ Add-Activity "Diagnostics" "Ping Test Completed" "Success" })
     } -ArgumentList $hostTarget
 })
 
@@ -2218,20 +2292,21 @@ $btn_diag_ping_start.Add_Click({
 $btn_rep_wifi_pass.Add_Click({
     Log-Message "Decrypting all saved Wi-Fi security keys from netsh profiles..."
     Add-Activity "Diagnostics" "Decrypting Wi-Fi Passwords" "Running"
-    Start-ThreadJob {
+    Run-Async {
+        param($win)
         $profiles = netsh wlan show profiles | Select-String "All User Profile" | ForEach-Object { $_.ToString().Split(":")[1].Trim() }
-        [Action]{ Log-Message "--- DECRYPTED WI-FI SECURITY PROFILES ---" }.Invoke()
+        $win.Dispatcher.Invoke([Action]{ Log-Message "--- DECRYPTED WI-FI SECURITY PROFILES ---" })
         foreach ($p in $profiles) {
             $res = netsh wlan show profile name="$p" key=clear
             $passLine = $res | Select-String "Key Content"
             if ($passLine) {
                 $pwd = $passLine.ToString().Split(":")[1].Trim()
-                [Action[string, string]]{ param($s, $k) Log-Message " ➜ Wireless SSID: $s | Security Key: $k" }.Invoke($p, $pwd)
+                $win.Dispatcher.Invoke([Action]{ Log-Message " ➜ Wireless SSID: $p | Security Key: $pwd" })
             } else {
-                [Action[string]]{ param($s) Log-Message " ➜ Wireless SSID: $s | Security Key: [Open / No Password]" }.Invoke($p)
+                $win.Dispatcher.Invoke([Action]{ Log-Message " ➜ Wireless SSID: $p | Security Key: [Open / No Password]" })
             }
         }
-        [Action]{ Add-Activity "Diagnostics" "Wi-Fi Passwords Decrypted" "Success" }.Invoke()
+        $win.Dispatcher.Invoke([Action]{ Add-Activity "Diagnostics" "Wi-Fi Passwords Decrypted" "Success" })
     }
 })
 
@@ -2239,11 +2314,14 @@ $btn_rep_wifi_pass.Add_Click({
 $btn_rep_wifi_export.Add_Click({
     Log-Message "Exporting Wi-Fi connection profile XML keys to desktop..."
     Add-Activity "Diagnostics" "Exporting Wi-Fi XML profiles" "Running"
-    Start-ThreadJob {
+    Run-Async {
+        param($win)
         $desktop = [Environment]::GetFolderPath("Desktop")
         netsh wlan export profile folder="$desktop" key=clear | Out-Null
-        [Action[string]]{ param($d) Log-Message "[✓] All decrypted Wi-Fi XML profiles exported to directory: $d" }.Invoke($desktop)
-        [Action]{ Add-Activity "Diagnostics" "Wi-Fi XML Profiles Exported" "Success" }.Invoke()
+        $win.Dispatcher.Invoke([Action]{ 
+            Log-Message "[✓] All decrypted Wi-Fi XML profiles exported to directory: $desktop" 
+            Add-Activity "Diagnostics" "Wi-Fi XML Profiles Exported" "Success"
+        })
     }
 })
 
@@ -2251,13 +2329,14 @@ $btn_rep_wifi_export.Add_Click({
 $btn_rep_dhcp.Add_Click({
     Log-Message "Releasing and renewing network adapter IP configurations (DHCP lease refresh)..."
     Add-Activity "Diagnostics" "Renew DHCP IP Address" "Running"
-    Start-ThreadJob {
+    Run-Async {
+        param($win)
         ipconfig /release | Out-Null
         ipconfig /renew | Out-Null
-        [Action]{ 
+        $win.Dispatcher.Invoke([Action]{ 
             Log-Message "[✓] Completed adapter IP refresh and renewed DHCP connection."
             Add-Activity "Diagnostics" "DHCP IP Address Renewed" "Success"
-        }.Invoke()
+        })
     }
 })
 
@@ -2288,26 +2367,25 @@ $btn_rep_ipv6_en.Add_Click({
 $btn_diag_top_proc.Add_Click({
     Log-Message "Scanning active process allocations..."
     Add-Activity "Diagnostics" "Scanning processes CPU/RAM allocation" "Running"
-    Start-ThreadJob {
+    Run-Async {
+        param($win)
         $cpuProc = Get-Process | Sort-Object CPU -Descending | Select-Object -First 5
         $ramProc = Get-Process | Sort-Object WorkingSet -Descending | Select-Object -First 5
         
-        [Action]{
-            Log-Message "--- TOP PROCESSES BY CPU TIME ---"
-        }.Invoke()
+        $win.Dispatcher.Invoke([Action]{ Log-Message "--- TOP PROCESSES BY CPU TIME ---" })
         foreach ($p in $cpuProc) {
             $cpuSecs = [Math]::Round($p.CPU)
-            [Action[string, string]]{ param($n, $c) Log-Message "  ➜ Process Name: $n ($c CPU CPU-seconds)" }.Invoke($p.ProcessName, $cpuSecs)
+            $name = $p.ProcessName
+            $win.Dispatcher.Invoke([Action]{ Log-Message "  ➜ Process Name: $name ($cpuSecs CPU-seconds)" })
         }
         
-        [Action]{
-            Log-Message "--- TOP PROCESSES BY MEMORY WORKING SET ---"
-        }.Invoke()
+        $win.Dispatcher.Invoke([Action]{ Log-Message "--- TOP PROCESSES BY MEMORY WORKING SET ---" })
         foreach ($p in $ramProc) {
             $wsMB = [Math]::Round($p.WorkingSet / 1MB)
-            [Action[string, string]]{ param($n, $m) Log-Message "  ➜ Process Name: $n ($m MB RAM alloc)" }.Invoke($p.ProcessName, $wsMB)
+            $name = $p.ProcessName
+            $win.Dispatcher.Invoke([Action]{ Log-Message "  ➜ Process Name: $name ($wsMB MB RAM alloc)" })
         }
-        [Action]{ Add-Activity "Diagnostics" "Processes Scanned" "Success" }.Invoke()
+        $win.Dispatcher.Invoke([Action]{ Add-Activity "Diagnostics" "Processes Scanned" "Success" })
     }
 })
 
@@ -2315,69 +2393,72 @@ $btn_diag_top_proc.Add_Click({
 $btn_diag_export_drivers.Add_Click({
     Log-Message "Exporting active system drivers details registry list..."
     Add-Activity "Diagnostics" "Exporting drivers list" "Running"
-    Start-ThreadJob {
+    Run-Async {
+        param($win)
         $outFile = "$env:USERPROFILE\Desktop\SystemDriversList.txt"
         Get-CimInstance Win32_SystemDriver | Select-Object Name, DisplayName, State, StartMode | Out-File -FilePath $outFile -Encoding utf8
-        [Action[string]]{
-            param($path)
-            Log-Message "[✓] Completed driver manifest export. Document saved: $path"
+        $win.Dispatcher.Invoke([Action]{
+            Log-Message "[✓] Completed driver manifest export. Document saved: $outFile"
             Add-Activity "Diagnostics" "Driver List Exported" "Success"
-        }.Invoke($outFile)
+        })
     }
 })
 
 $btn_diag_specs.Add_Click({
     Log-Message "Generating hardware specifications summary..."
     Add-Activity "Diagnostics" "Generating hardware specifications" "Running"
-    Start-ThreadJob {
+    Run-Async {
+        param($win)
         $cpu = (Get-CimInstance Win32_Processor).Name
         $gpu = (Get-CimInstance Win32_VideoController).Name
         $mobo = (Get-CimInstance Win32_BaseBoard).Product
         $bios = (Get-CimInstance Win32_Bios).SMBIOSBIOSVersion
         
-        [Action[string, string, string, string]]{
-            param($c, $g, $m, $b)
+        $win.Dispatcher.Invoke([Action]{
             Log-Message "--- HARDWARE SUMMARY ---"
-            Log-Message "Processor: $c"
-            Log-Message "Graphics: $g"
-            Log-Message "Motherboard: $m"
-            Log-Message "BIOS Version: $b"
+            Log-Message "Processor: $cpu"
+            Log-Message "Graphics: $gpu"
+            Log-Message "Motherboard: $mobo"
+            Log-Message "BIOS Version: $bios"
             Add-Activity "Diagnostics" "Hardware specifications generated" "Success"
-        }.Invoke($cpu, $gpu, $mobo, $bios)
+        })
     }
 })
 
 $btn_diag_battery.Add_Click({
     Log-Message "Generating Windows Battery Lifecycle HTML Report..."
     Add-Activity "Diagnostics" "Generating Battery Report" "Running"
-    Start-ThreadJob {
+    Run-Async {
+        param($win)
         powercfg /batteryreport /output "$env:USERPROFILE\Desktop\BatteryReport.html" | Out-Null
-        [Action]{ 
+        $win.Dispatcher.Invoke([Action]{ 
             Log-Message "[✓] HTML Battery Report generated on your Desktop (BatteryReport.html)."
             Add-Activity "Diagnostics" "Battery Report generated" "Success"
-        }.Invoke()
+        })
     }
 })
 
 $btn_diag_disk.Add_Click({
     Log-Message "Scanning connected physical drives status (SMART Check)..."
     Add-Activity "Diagnostics" "Scanning SMART Disk Status" "Running"
-    Start-ThreadJob {
+    Run-Async {
+        param($win)
         $status = Get-CimInstance -Namespace root\wmi -ClassName MSStorageDriver_FailurePredictStatus -ErrorAction SilentlyContinue
         if ($status -eq $null) {
-            [Action]{ 
+            $win.Dispatcher.Invoke([Action]{ 
                 Log-Message "[✓] SMART reports all connected drives are healthy."
                 Add-Activity "Diagnostics" "SMART Disk Scan completed" "Success"
-            }.Invoke()
+            })
         } else {
             foreach ($drive in $status) {
+                $inst = $drive.InstanceName
                 if ($drive.PredictFailure) {
-                    [Action[string]]{ param($inst) Log-Message "[!] WARNING: Failure predicted on drive: $inst" }.Invoke($drive.InstanceName)
+                    $win.Dispatcher.Invoke([Action]{ Log-Message "[!] WARNING: Failure predicted on drive: $inst" })
                 } else {
-                    [Action[string]]{ param($inst) Log-Message "[✓] Drive healthy: $inst" }.Invoke($drive.InstanceName)
+                    $win.Dispatcher.Invoke([Action]{ Log-Message "[✓] Drive healthy: $inst" })
                 }
             }
-            [Action]{ Add-Activity "Diagnostics" "SMART Disk Scan completed" "Success" }.Invoke()
+            $win.Dispatcher.Invoke([Action]{ Add-Activity "Diagnostics" "SMART Disk Scan completed" "Success" })
         }
     }
 })
@@ -2385,17 +2466,18 @@ $btn_diag_disk.Add_Click({
 $btn_diag_ram.Add_Click({
     Log-Message "Identifying installed memory modules properties..."
     Add-Activity "Diagnostics" "Identifying Memory Modules" "Running"
-    Start-ThreadJob {
+    Run-Async {
+        param($win)
         $modules = Get-CimInstance Win32_PhysicalMemory
         foreach ($mod in $modules) {
             $cap = [Math]::Round($mod.Capacity / 1GB)
             $speed = $mod.Speed
-            [Action[string, string, string]]{
-                param($c, $s, $d)
-                Log-Message "Slot ${d}: ${c} GB RAM module running at ${s} MHz."
-            }.Invoke($cap, $speed, $mod.DeviceLocator)
+            $loc = $mod.DeviceLocator
+            $win.Dispatcher.Invoke([Action]{ 
+                Log-Message "Slot ${loc}: ${cap} GB RAM module running at ${speed} MHz."
+            })
         }
-        [Action]{ Add-Activity "Diagnostics" "Memory Modules identified" "Success" }.Invoke()
+        $win.Dispatcher.Invoke([Action]{ Add-Activity "Diagnostics" "Memory Modules identified" "Success" })
     }
 })
 
@@ -2412,33 +2494,33 @@ $btn_diag_dns.Add_Click({
         foreach ($a in $adapters) {
             Set-DnsClientServerAddress -InterfaceAlias $a.Name -ServerAddresses ("1.1.1.1", "1.0.0.1") -ErrorAction SilentlyContinue
         }
-        [Action]{ Log-Message "[✓] Cloudflare DNS configuration completed." }.Invoke()
+        Log-Message "[✓] Cloudflare DNS configuration completed."
     }
 })
 
 $btn_diag_speed.Add_Click({
     Log-Message "Running real-time download bandwidth speed test..."
     Add-Activity "Diagnostics" "Running download Speed Test" "Running"
-    Start-ThreadJob {
+    Run-Async {
+        param($win)
         $url = "https://speed.cloudflare.com/__down?bytes=10000000" # 10MB test file
         $start = Get-Date
         $tempFile = "$env:temp\speedtest.bin"
-        [Action]{ Log-Message "Downloading 10MB test payload from Cloudflare CDN..." }.Invoke()
+        $win.Dispatcher.Invoke([Action]{ Log-Message "Downloading 10MB test payload from Cloudflare CDN..." })
         try {
             Invoke-WebRequest -Uri $url -OutFile $tempFile -ErrorAction Stop
             $elapsed = (Get-Date) - $start
             $speedMbps = [Math]::Round((10 * 8) / $elapsed.TotalSeconds, 2)
             Remove-Item $tempFile -Force
-            [Action[string]]{ 
-                param($sp) 
-                Log-Message "[✓] Speed test finished. Current Bandwidth: $sp Mbps." 
-                Add-Activity "Diagnostics" "Speed Test Completed: $sp Mbps" "Success"
-            }.Invoke($speedMbps)
+            $win.Dispatcher.Invoke([Action]{ 
+                Log-Message "[✓] Speed test finished. Current Bandwidth: $speedMbps Mbps." 
+                Add-Activity "Diagnostics" "Speed Test Completed: $speedMbps Mbps" "Success"
+            })
         } catch {
-            [Action]{ 
+            $win.Dispatcher.Invoke([Action]{ 
                 Log-Message "[X] Speed test failed. Please check internet connection." 
                 Add-Activity "Diagnostics" "Speed Test Failed" "Failed"
-            }.Invoke()
+            })
         }
     }
 })
@@ -2446,15 +2528,15 @@ $btn_diag_speed.Add_Click({
 $btn_diag_act.Add_Click({
     Log-Message "Checking Windows activation status details..."
     Add-Activity "Diagnostics" "Checking activation status..." "Running"
-    Start-ThreadJob {
+    Run-Async {
+        param($win)
         $res = cscript //nologo $env:SystemRoot\system32\slmgr.vbs /dli
         $joined = $res -join "`r`n"
-        [Action[string]]{ 
-            param($txt)
+        $win.Dispatcher.Invoke([Action]{ 
             Log-Message "License details returned:" 
-            Log-Message $txt
+            Log-Message $joined
             Add-Activity "Diagnostics" "Activation Checked" "Success"
-        }.Invoke($joined)
+        })
     }
 })
 
@@ -2485,14 +2567,13 @@ $btn_start_backup.Add_Click({
     
     Log-Message "Initializing Robocopy migration command from '$src' to '$dst'..."
     Add-Activity "Backups" "Starting Robocopy backup" "Running"
-    Start-ThreadJob {
-        param($s, $d)
+    Run-Async {
+        param($win, $s, $d)
         $proc = Start-Process robocopy -ArgumentList "`"$s`" `"$d`" /E /Z /ZB /R:5 /W:5 /TBD /NP /V" -NoNewWindow -PassThru -Wait
-        [Action[string]]{ 
-            param($code) 
-            Log-Message "Robocopy process completed (Exit code: $code)." 
-            Add-Activity "Backups" "Robocopy completed (Code $code)" "Success"
-        }.Invoke($proc.ExitCode)
+        $win.Dispatcher.Invoke([Action]{ 
+            Log-Message "Robocopy process completed (Exit code: $($proc.ExitCode))." 
+            Add-Activity "Backups" "Robocopy completed (Code $($proc.ExitCode))" "Success"
+        })
     } -ArgumentList $src, $dst
 })
 
@@ -2512,20 +2593,21 @@ $btn_backup_enable_restore.Add_Click({
 $btn_backup_create_restore.Add_Click({
     Log-Message "Creating instant checkpoint System Restore point..."
     Add-Activity "Restore Point" "Creating System Restore Point" "Running"
-    Start-ThreadJob {
+    Run-Async {
+        param($win)
         try {
             Checkpoint-Computer -Description "VenkatPulse_AI_RestorePoint" -RestorePointType "MODIFY_SETTINGS" -ErrorAction Stop
-            [Action]{ 
+            $win.Dispatcher.Invoke([Action]{ 
                 Log-Message "[✓] Immediate System Restore Point created successfully!"
                 Add-Activity "Restore Point" "System Restore Point Created" "Success"
-            }.Invoke()
+            })
         } catch {
-            [Action[string]]{ 
-                param($err) 
+            $err = $_.ToString()
+            $win.Dispatcher.Invoke([Action]{ 
                 Log-Message "[X] Failed to create restore point: $err" 
                 Log-Message "[!] Make sure System Protection is Enabled on C: Drive and you haven't created another restore point in the last 24 hours (Windows limit)."
                 Add-Activity "Restore Point" "Restore Point Creation Failed" "Failed"
-            }.Invoke($_)
+            })
         }
     }
 })
@@ -2620,19 +2702,23 @@ $btn_cfg_autologin.Add_Click({
 # System Serial info check
 $btn_cfg_serial.Add_Click({
     Log-Message "Retrieving system BIOS and motherboard physical serial credentials..."
-    Start-ThreadJob {
+    Run-Async {
+        param($win)
         $bios = Get-CimInstance Win32_Bios
         $board = Get-CimInstance Win32_BaseBoard
+        $ser = $bios.SerialNumber
+        $moth = $board.SerialNumber
+        $manuf = $board.Manufacturer
+        $prod = $board.Product
         
-        [Action[string, string, string, string]]{
-            param($s, $m, $b, $v)
+        $win.Dispatcher.Invoke([Action]{
             Log-Message "--- BIOS & TELEMETRY MANIFEST ---"
-            Log-Message "BIOS Serial Number: $s"
-            Log-Message "Motherboard Serial: $m"
-            Log-Message "System Manufacturer: $b"
-            Log-Message "Motherboard SKU: $v"
+            Log-Message "BIOS Serial Number: $ser"
+            Log-Message "Motherboard Serial: $moth"
+            Log-Message "System Manufacturer: $manuf"
+            Log-Message "Motherboard SKU: $prod"
             Add-Activity "Diagnostics" "System Serial Checked" "Success"
-        }.Invoke($bios.SerialNumber, $board.SerialNumber, $board.Manufacturer, $board.Product)
+        })
     }
 })
 
