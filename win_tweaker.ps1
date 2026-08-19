@@ -1519,9 +1519,17 @@ $btn_rep_dll.Add_Click({
 
 $btn_rep_dns.Add_Click({
     Log-Message "Flushing DNS resolver cache..."
-    ipconfig /flushdns | Out-Null
-    Log-Message "[OK] DNS cache flushed."
-    Add-Activity "System Repair" "Flush DNS Cache" "Success"
+    Add-Activity "System Repair" "Flush DNS Cache" "Running"
+    Run-Async {
+        try {
+            ipconfig /flushdns | Out-Null
+            Log-Message "[OK] DNS cache flushed."
+            Add-Activity "System Repair" "Flush DNS Cache" "Success"
+        } catch {
+            Log-Message "[FAIL] Failed to flush DNS: $_"
+            Add-Activity "System Repair" "Flush DNS Failed" "Failed"
+        }
+    }
 })
 
 $btn_rep_winsock.Add_Click({ Run-RepairCommand @("netsh", "winsock", "reset") "Winsock Reset" })
@@ -1667,29 +1675,36 @@ $btn_rep_chkdsk.Add_Click({
 
 $btn_rep_printer_11b.Add_Click({
     Log-Message "Fixing Printer Sharing Error 0x0000011b..."
-    try {
-        Set-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Print" -Name "RpcAuthnLevelPrivacyEnabled" -Value 0 -Force
-        Log-Message "[OK] Applied RPC privacy key registry bypass."
-        Add-Activity "Printer Repair" "Error 0x0000011b Fixed" "Success"
-    } catch {
-        Log-Message "[FAIL] Failed to modify print registry keys: $_"
-        Add-Activity "Printer Repair" "Error 0x0000011b Fix Failed" "Failed"
+    Add-Activity "Printer Repair" "Fix Error 0x0000011b" "Running"
+    Run-Async {
+        try {
+            Set-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Print" -Name "RpcAuthnLevelPrivacyEnabled" -Value 0 -Force
+            Log-Message "[OK] Applied RPC privacy key registry bypass."
+            Add-Activity "Printer Repair" "Error 0x0000011b Fixed" "Success"
+        } catch {
+            Log-Message "[FAIL] Failed to modify print registry keys: $_"
+            Add-Activity "Printer Repair" "Error 0x0000011b Fix Failed" "Failed"
+        }
     }
 })
 
 $btn_rep_printer_policy.Add_Click({
     Log-Message "Configuring GPO Point and Print / RPC driver install policy..."
-    try {
-        New-Item -Path "HKLM:\Software\Policies\Microsoft\Windows NT\Printers\PointAndPrint" -Force -ErrorAction SilentlyContinue | Out-Null
-        Set-ItemProperty -Path "HKLM:\Software\Policies\Microsoft\Windows NT\Printers\PointAndPrint" -Name "RestrictDriverInstallationToAdministrators" -Value 0 -Force
-        
-        New-Item -Path "HKLM:\Software\Policies\Microsoft\Windows NT\Printers" -Force -ErrorAction SilentlyContinue | Out-Null
-        Set-ItemProperty -Path "HKLM:\Software\Policies\Microsoft\Windows NT\Printers" -Name "RpcOverTcp" -Value 1 -Force
-        
-        Log-Message "[OK] Printer GPO Point and Print / RPC rules applied."
-        Add-Activity "Printer Repair" "GPO Printer Policies Applied" "Success"
-    } catch {
-        Log-Message "[FAIL] Failed to write print GPO keys: $_"
+    Add-Activity "Printer Repair" "Apply GPO Printer Rules" "Running"
+    Run-Async {
+        try {
+            New-Item -Path "HKLM:\Software\Policies\Microsoft\Windows NT\Printers\PointAndPrint" -Force -ErrorAction SilentlyContinue | Out-Null
+            Set-ItemProperty -Path "HKLM:\Software\Policies\Microsoft\Windows NT\Printers\PointAndPrint" -Name "RestrictDriverInstallationToAdministrators" -Value 0 -Force
+            
+            New-Item -Path "HKLM:\Software\Policies\Microsoft\Windows NT\Printers" -Force -ErrorAction SilentlyContinue | Out-Null
+            Set-ItemProperty -Path "HKLM:\Software\Policies\Microsoft\Windows NT\Printers" -Name "RpcOverTcp" -Value 1 -Force
+            
+            Log-Message "[OK] Printer GPO Point and Print / RPC rules applied."
+            Add-Activity "Printer Repair" "GPO Printer Policies Applied" "Success"
+        } catch {
+            Log-Message "[FAIL] Failed to write print GPO keys: $_"
+            Add-Activity "Printer Repair" "GPO Printer Policies Failed" "Failed"
+        }
     }
 })
 
@@ -1709,26 +1724,35 @@ $btn_rep_printer_lpd.Add_Click({
 
 $btn_rep_printer_disc.Add_Click({
     Log-Message "Restarting Network Discovery and Printer sharing dependency services..."
+    Add-Activity "Printer Repair" "Restart Discovery Services" "Running"
     Run-Async {
-        param($win)
         $services = @("FDResPub", "SSDPSrv", "UPnPHost", "Dnscache")
         foreach ($s in $services) {
             Set-Service -Name $s -StartupType Automatic -ErrorAction SilentlyContinue
             Restart-Service -Name $s -Force -ErrorAction SilentlyContinue
         }
-        $win.Dispatcher.Invoke([Action]{ Log-Message "[OK] Network discovery dependency services restarted." })
+        Log-Message "[OK] Network discovery dependency services restarted."
+        Add-Activity "Printer Repair" "Discovery Services Restarted" "Success"
     }
 })
 
 $btn_rep_printer_spool.Add_Click({
     Log-Message "Stopping Print Spooler..."
-    Stop-Service spooler -Force
-    Log-Message "Clearing print queue directory..."
-    Remove-Item "$env:SystemRoot\system32\spool\PRINTERS\*" -Force -Recurse -ErrorAction SilentlyContinue
-    Log-Message "Starting Print Spooler..."
-    Start-Service spooler
-    Log-Message "[OK] Print Spooler restarted and queue cleared successfully."
-    Add-Activity "Printer Repair" "Spooler Cleaned" "Success"
+    Add-Activity "Printer Repair" "Clean Print Spooler" "Running"
+    Run-Async {
+        try {
+            Stop-Service spooler -Force -ErrorAction SilentlyContinue
+            Log-Message "Clearing print queue directory..."
+            Remove-Item "$env:SystemRoot\system32\spool\PRINTERS\*" -Force -Recurse -ErrorAction SilentlyContinue
+            Log-Message "Starting Print Spooler..."
+            Start-Service spooler -ErrorAction SilentlyContinue
+            Log-Message "[OK] Print Spooler restarted and queue cleared successfully."
+            Add-Activity "Printer Repair" "Spooler Cleaned" "Success"
+        } catch {
+            Log-Message "[FAIL] Error cleaning print spooler: $_"
+            Add-Activity "Printer Repair" "Spooler Cleanup Failed" "Failed"
+        }
+    }
 })
 
 $btn_rep_printer_diag.Add_Click({ Run-RepairCommand @("msdt.exe", "/id", "PrinterDiagnostic") "Printer Troubleshooter Wizard" })
@@ -1736,42 +1760,54 @@ $btn_rep_printer_diag.Add_Click({ Run-RepairCommand @("msdt.exe", "/id", "Printe
 # New Printer offline fix
 $btn_rep_printer_offline.Add_Click({
     Log-Message "Fixing Printer Offline status status bug (Disable SNMP Status registry check)..."
-    try {
-        Get-ChildItem -Path "HKLM:\System\CurrentControlSet\Control\Print\Monitors\Standard TCP/IP Port\Ports" | ForEach-Object {
-            Set-ItemProperty -Path $_.PSPath -Name "SNMP Enabled" -Value 0 -Force
+    Add-Activity "Printer Repair" "Fix Printer Offline Bug" "Running"
+    Run-Async {
+        try {
+            Get-ChildItem -Path "HKLM:\System\CurrentControlSet\Control\Print\Monitors\Standard TCP/IP Port\Ports" -ErrorAction SilentlyContinue | ForEach-Object {
+                Set-ItemProperty -Path $_.PSPath -Name "SNMP Enabled" -Value 0 -Force
+            }
+            Log-Message "[OK] Disabled SNMP Enabled flags for all TCP/IP printer ports."
+            Add-Activity "Printer Repair" "SNMP Offline Status Fixed" "Success"
+        } catch {
+            Log-Message "[FAIL] Error disabling SNMP status: $_"
+            Add-Activity "Printer Repair" "Fix Printer Offline Failed" "Failed"
         }
-        Log-Message "[OK] Disabled SNMP Enabled flags for all TCP/IP printer ports."
-        Add-Activity "Printer Repair" "SNMP Offline Status Fix" "Success"
-    } catch {
-        Log-Message "[FAIL] Error disabling SNMP status: $_"
     }
 })
 
 # Wipe Printer Drivers
 $btn_rep_printer_drivers.Add_Click({
     Log-Message "Wiping corrupted printer drivers registry configuration keys..."
-    try {
-        Stop-Service spooler -Force
-        Remove-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Print\Environments\Windows x64\Drivers\Version-3\*" -Force -Recurse -ErrorAction SilentlyContinue
-        Remove-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Print\Environments\Windows x64\Drivers\Version-4\*" -Force -Recurse -ErrorAction SilentlyContinue
-        Start-Service spooler
-        Log-Message "[OK] Corrupted printer driver configuration keys cleaned."
-        Add-Activity "Printer Repair" "Wiped Corrupted Drivers" "Success"
-    } catch {
-        Log-Message "[FAIL] Failed to wipe printer driver keys: $_"
+    Add-Activity "Printer Repair" "Wipe Print Drivers" "Running"
+    Run-Async {
+        try {
+            Stop-Service spooler -Force -ErrorAction SilentlyContinue
+            Remove-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Print\Environments\Windows x64\Drivers\Version-3\*" -Force -Recurse -ErrorAction SilentlyContinue
+            Remove-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Print\Environments\Windows x64\Drivers\Version-4\*" -Force -Recurse -ErrorAction SilentlyContinue
+            Start-Service spooler -ErrorAction SilentlyContinue
+            Log-Message "[OK] Corrupted printer driver configuration keys cleaned."
+            Add-Activity "Printer Repair" "Wiped Corrupted Drivers" "Success"
+        } catch {
+            Log-Message "[FAIL] Failed to wipe printer driver keys: $_"
+            Add-Activity "Printer Repair" "Wipe Print Drivers Failed" "Failed"
+        }
     }
 })
 
 # Disable Print Spooler
 $btn_rep_printer_dis_spooler.Add_Click({
     Log-Message "Stopping and disabling Print Spooler service for security..."
-    try {
-        Stop-Service spooler -Force
-        Set-Service -Name spooler -StartupType Disabled
-        Log-Message "[OK] Print Spooler stopped and disabled successfully."
-        Add-Activity "Printer Repair" "Print Spooler Disabled" "Success"
-    } catch {
-        Log-Message "[FAIL] Failed to disable Spooler: $_"
+    Add-Activity "Printer Repair" "Disable Print Spooler" "Running"
+    Run-Async {
+        try {
+            Stop-Service spooler -Force -ErrorAction SilentlyContinue
+            Set-Service -Name spooler -StartupType Disabled -ErrorAction SilentlyContinue
+            Log-Message "[OK] Print Spooler stopped and disabled successfully."
+            Add-Activity "Printer Repair" "Print Spooler Disabled" "Success"
+        } catch {
+            Log-Message "[FAIL] Failed to disable Spooler: $_"
+            Add-Activity "Printer Repair" "Disable Spooler Failed" "Failed"
+        }
     }
 })
 
@@ -1946,42 +1982,53 @@ $btn_rep_shield_wu.Add_Click({
 # Windows Update Blocker
 $btn_rep_shield_block_wu.Add_Click({
     Log-Message "Blocking automatic Windows Updates..."
-    try {
-        Stop-Service wuauserv -Force -ErrorAction SilentlyContinue
-        Set-Service -Name wuauserv -StartupType Disabled -ErrorAction SilentlyContinue
-        
-        New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" -Force -ErrorAction SilentlyContinue | Out-Null
-        Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" -Name "NoAutoUpdate" -Value 1 -Force
-        Log-Message "[OK] Windows Update service disabled and GPO block applied."
-        Add-Activity "Shield Tweak" "Windows Updates Blocked" "Success"
-    } catch {
-        Log-Message "[FAIL] Failed to block Windows Updates: $_"
+    Add-Activity "Shield Tweak" "Block Windows Updates" "Running"
+    Run-Async {
+        try {
+            Stop-Service wuauserv -Force -ErrorAction SilentlyContinue
+            Set-Service -Name wuauserv -StartupType Disabled -ErrorAction SilentlyContinue
+            
+            New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" -Force -ErrorAction SilentlyContinue | Out-Null
+            Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" -Name "NoAutoUpdate" -Value 1 -Force
+            Log-Message "[OK] Windows Update service disabled and GPO block applied."
+            Add-Activity "Shield Tweak" "Windows Updates Blocked" "Success"
+        } catch {
+            Log-Message "[FAIL] Failed to block Windows Updates: $_"
+            Add-Activity "Shield Tweak" "Block Updates Failed" "Failed"
+        }
     }
 })
 
 $btn_rep_shield_enable_wu.Add_Click({
     Log-Message "Enabling automatic Windows Updates..."
-    try {
-        Remove-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" -Name "NoAutoUpdate" -Force -ErrorAction SilentlyContinue
-        Set-Service -Name wuauserv -StartupType Automatic -ErrorAction SilentlyContinue
-        Start-Service wuauserv -ErrorAction SilentlyContinue
-        Log-Message "[OK] Windows Update service enabled and GPO block removed."
-        Add-Activity "Shield Tweak" "Windows Updates Enabled" "Success"
-    } catch {
-        Log-Message "[FAIL] Failed to enable Windows Updates: $_"
+    Add-Activity "Shield Tweak" "Enable Windows Updates" "Running"
+    Run-Async {
+        try {
+            Remove-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" -Name "NoAutoUpdate" -Force -ErrorAction SilentlyContinue
+            Set-Service -Name wuauserv -StartupType Automatic -ErrorAction SilentlyContinue
+            Start-Service wuauserv -ErrorAction SilentlyContinue
+            Log-Message "[OK] Windows Update service enabled and GPO block removed."
+            Add-Activity "Shield Tweak" "Windows Updates Enabled" "Success"
+        } catch {
+            Log-Message "[FAIL] Failed to enable Windows Updates: $_"
+            Add-Activity "Shield Tweak" "Enable Updates Failed" "Failed"
+        }
     }
 })
 
 $btn_rep_shield_defender.Add_Click({
     Log-Message "Resetting Windows Defender policies..."
     Add-Activity "System Repair" "Reset Windows Defender Policies" "Running"
-    try {
-        Remove-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender" -Recurse -Force -ErrorAction SilentlyContinue
-        Start-Service WinDefend -ErrorAction SilentlyContinue
-        Log-Message "[OK] Windows Defender policies reset successfully."
-        Add-Activity "System Repair" "Reset Windows Defender Policies completed" "Success"
-    } catch {
-        Log-Message "[FAIL] Failed to reset Defender: $_"
+    Run-Async {
+        try {
+            Remove-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender" -Recurse -Force -ErrorAction SilentlyContinue
+            Start-Service WinDefend -ErrorAction SilentlyContinue
+            Log-Message "[OK] Windows Defender policies reset successfully."
+            Add-Activity "System Repair" "Reset Windows Defender Policies completed" "Success"
+        } catch {
+            Log-Message "[FAIL] Failed to reset Defender: $_"
+            Add-Activity "System Repair" "Reset Defender Failed" "Failed"
+        }
     }
 })
 
@@ -2001,9 +2048,18 @@ $btn_rep_shield_audio.Add_Click({
 
 $btn_rep_shell_explorer.Add_Click({
     Log-Message "Restarting Windows Explorer shell..."
-    Stop-Process -Name explorer -Force -ErrorAction SilentlyContinue
-    Start-Process explorer
-    Log-Message "[OK] Explorer restarted."
+    Add-Activity "Shell Action" "Restart Explorer Shell" "Running"
+    Run-Async {
+        try {
+            Stop-Process -Name explorer -Force -ErrorAction SilentlyContinue
+            Start-Process explorer
+            Log-Message "[OK] Explorer restarted."
+            Add-Activity "Shell Action" "Explorer Shell Restarted" "Success"
+        } catch {
+            Log-Message "[FAIL] Failed to restart explorer: $_"
+            Add-Activity "Shell Action" "Explorer Restart Failed" "Failed"
+        }
+    }
 })
 
 $btn_rep_shell_events.Add_Click({
@@ -2080,17 +2136,21 @@ $btn_bloat_onedrive.Add_Click({
 
 $btn_bloat_edge.Add_Click({
     Log-Message "Blocking Edge browser background telemetry & updates..."
-    try {
-        New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Edge" -Force -ErrorAction SilentlyContinue | Out-Null
-        Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Edge" -Name "MetricsReportingEnabled" -Value 0 -Force
-        
-        New-Item -Path "HKLM:\SOFTWARE\Microsoft\EdgeUpdate" -Force -ErrorAction SilentlyContinue | Out-Null
-        Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\EdgeUpdate" -Name "AutoUpdateDisableUntilTime" -Value 1 -Force
-        
-        Log-Message "[OK] Edge browser telemetry disabled."
-        Add-Activity "Telemetry Tweak" "Edge Telemetry Blocked" "Success"
-    } catch {
-        Log-Message "[FAIL] Error blocking Edge telemetry: $_"
+    Add-Activity "Telemetry Tweak" "Block Edge Telemetry" "Running"
+    Run-Async {
+        try {
+            New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Edge" -Force -ErrorAction SilentlyContinue | Out-Null
+            Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Edge" -Name "MetricsReportingEnabled" -Value 0 -Force
+            
+            New-Item -Path "HKLM:\SOFTWARE\Microsoft\EdgeUpdate" -Force -ErrorAction SilentlyContinue | Out-Null
+            Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\EdgeUpdate" -Name "AutoUpdateDisableUntilTime" -Value 1 -Force
+            
+            Log-Message "[OK] Edge browser telemetry disabled."
+            Add-Activity "Telemetry Tweak" "Edge Telemetry Blocked" "Success"
+        } catch {
+            Log-Message "[FAIL] Error blocking Edge telemetry: $_"
+            Add-Activity "Telemetry Tweak" "Block Edge Telemetry Failed" "Failed"
+        }
     }
 })
 
@@ -2136,155 +2196,214 @@ $btn_apply_features.Add_Click({
 # --- SYSTEM TWEAKS IMPLEMENTATION ---
 $btn_tweak_classic.Add_Click({
     Log-Message "Restoring Win11 Classic Context Menu..."
-    try {
-        New-Item -Path "HKCU:\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}" -Force | Out-Null
-        New-Item -Path "HKCU:\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" -Force | Out-Null
-        Set-ItemProperty -Path "HKCU:\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" -Name "(Default)" -Value "" -Force
-        Log-Message "[OK] Classic Right-click context menu enabled. Restart Explorer to apply."
-    } catch {
-        Log-Message "[FAIL] Error applying context menu tweak: $_"
+    Add-Activity "System Tweak" "Classic Context Menu Restore" "Running"
+    Run-Async {
+        try {
+            New-Item -Path "HKCU:\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}" -Force | Out-Null
+            New-Item -Path "HKCU:\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" -Force | Out-Null
+            Set-ItemProperty -Path "HKCU:\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" -Name "(Default)" -Value "" -Force
+            Log-Message "[OK] Classic Right-click context menu enabled. Restart Explorer to apply."
+            Add-Activity "System Tweak" "Classic Context Menu Restored" "Success"
+        } catch {
+            Log-Message "[FAIL] Error applying context menu tweak: $_"
+            Add-Activity "System Tweak" "Classic Context Menu Failed" "Failed"
+        }
     }
 })
 
 $btn_tweak_default_ctx.Add_Click({
     Log-Message "Reverting to Win11 Default Context Menu..."
-    try {
-        Remove-Item -Path "HKCU:\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}" -Recurse -Force -ErrorAction SilentlyContinue
-        Log-Message "[OK] Default modern menu layout restored. Restart Explorer to apply."
-    } catch {
-        Log-Message "[FAIL] Error removing context menu tweak: $_"
+    Add-Activity "System Tweak" "Default Context Menu Revert" "Running"
+    Run-Async {
+        try {
+            Remove-Item -Path "HKCU:\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}" -Recurse -Force -ErrorAction SilentlyContinue
+            Log-Message "[OK] Default modern menu layout restored. Restart Explorer to apply."
+            Add-Activity "System Tweak" "Default Context Menu Restored" "Success"
+        } catch {
+            Log-Message "[FAIL] Error removing context menu tweak: $_"
+            Add-Activity "System Tweak" "Default Context Menu Failed" "Failed"
+        }
     }
 })
 
 $btn_tweak_ultimate.Add_Click({
     Log-Message "Unlocking Ultimate Performance Power Scheme..."
-    $res = powercfg -duplicatescheme e9a22db2-565e-4b6e-82f0-8022c5e3430b
-    Log-Message $res
-    Log-Message "[OK] Power plan scheme unlocked."
+    Add-Activity "Power Tweak" "Unlock Ultimate Scheme" "Running"
+    Run-Async {
+        try {
+            $res = powercfg -duplicatescheme e9a22db2-565e-4b6e-82f0-8022c5e3430b
+            Log-Message $res
+            Log-Message "[OK] Power plan scheme unlocked."
+            Add-Activity "Power Tweak" "Ultimate Power Plan Unlocked" "Success"
+        } catch {
+            Log-Message "[FAIL] Failed to unlock scheme: $_"
+            Add-Activity "Power Tweak" "Unlock Ultimate Scheme Failed" "Failed"
+        }
+    }
 })
 
 $btn_tweak_gaming.Add_Click({
     Log-Message "Applying Low-Latency Gaming Registry tweaks..."
-    try {
-        New-Item -Path "HKCU:\System\GameConfigStore" -Force -ErrorAction SilentlyContinue | Out-Null
-        Set-ItemProperty -Path "HKCU:\System\GameConfigStore" -Name "GameDVR_Enabled" -Value 0 -Force
-        
-        New-Item -Path "HKLM:\SOFTWARE\Microsoft\PolicyManager\default\ApplicationManagement\AllowGameDVR" -Force -ErrorAction SilentlyContinue | Out-Null
-        Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\PolicyManager\default\ApplicationManagement\AllowGameDVR" -Name "value" -Value 0 -Force
-        
-        Log-Message "[OK] Disallowed GameDVR overlays."
-        
-        New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" -Force -ErrorAction SilentlyContinue | Out-Null
-        Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" -Name "SystemResponsiveness" -Value 0 -Force
-        
-        Log-Message "[OK] Optimized game process latency bindings."
-    } catch {
-        Log-Message "[FAIL] Failed to apply some gaming tweaks: $_"
+    Add-Activity "System Tweak" "Apply Gaming Tweaks" "Running"
+    Run-Async {
+        try {
+            New-Item -Path "HKCU:\System\GameConfigStore" -Force -ErrorAction SilentlyContinue | Out-Null
+            Set-ItemProperty -Path "HKCU:\System\GameConfigStore" -Name "GameDVR_Enabled" -Value 0 -Force
+            
+            New-Item -Path "HKLM:\SOFTWARE\Microsoft\PolicyManager\default\ApplicationManagement\AllowGameDVR" -Force -ErrorAction SilentlyContinue | Out-Null
+            Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\PolicyManager\default\ApplicationManagement\AllowGameDVR" -Name "value" -Value 0 -Force
+            
+            Log-Message "[OK] Disallowed GameDVR overlays."
+            
+            New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" -Force -ErrorAction SilentlyContinue | Out-Null
+            Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" -Name "SystemResponsiveness" -Value 0 -Force
+            
+            Log-Message "[OK] Optimized game process latency bindings."
+            Add-Activity "System Tweak" "Gaming Tweaks Applied" "Success"
+        } catch {
+            Log-Message "[FAIL] Failed to apply some gaming tweaks: $_"
+            Add-Activity "System Tweak" "Gaming Tweaks Failed" "Failed"
+        }
     }
 })
 
 $btn_tweak_bing.Add_Click({
     Log-Message "Disabling online Bing Search in Start Menu..."
-    try {
-        New-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Search" -Force -ErrorAction SilentlyContinue | Out-Null
-        Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Search" -Name "BingSearchEnabled" -Value 0 -Force
-        Log-Message "[OK] Online Bing Start Menu results disabled."
-    } catch {
-        Log-Message "[FAIL] Failed to apply Bing Search GPO registry key: $_"
+    Add-Activity "System Tweak" "Disable Start Bing" "Running"
+    Run-Async {
+        try {
+            New-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Search" -Force -ErrorAction SilentlyContinue | Out-Null
+            Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Search" -Name "BingSearchEnabled" -Value 0 -Force
+            Log-Message "[OK] Online Bing Start Menu results disabled."
+            Add-Activity "System Tweak" "Start Bing Disabled" "Success"
+        } catch {
+            Log-Message "[FAIL] Failed to apply Bing Search GPO registry key: $_"
+            Add-Activity "System Tweak" "Disable Start Bing Failed" "Failed"
+        }
     }
 })
 
 $btn_tweak_fast_on.Add_Click({
     Log-Message "Enabling Windows Fast Startup..."
-    try {
-        Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power" -Name "HiberbootEnabled" -Value 1 -Force
-        Log-Message "[OK] Hiberboot Enabled successfully."
-    } catch {
-        Log-Message "[FAIL] Failed to enable Fast Startup: $_"
+    Add-Activity "System Tweak" "Enable Fast Startup" "Running"
+    Run-Async {
+        try {
+            Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power" -Name "HiberbootEnabled" -Value 1 -Force
+            Log-Message "[OK] Hiberboot Enabled successfully."
+            Add-Activity "System Tweak" "Fast Startup Enabled" "Success"
+        } catch {
+            Log-Message "[FAIL] Failed to enable Fast Startup: $_"
+            Add-Activity "System Tweak" "Enable Fast Startup Failed" "Failed"
+        }
     }
 })
 
 $btn_tweak_fast_off.Add_Click({
     Log-Message "Disabling Windows Fast Startup..."
-    try {
-        Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power" -Name "HiberbootEnabled" -Value 0 -Force
-        Log-Message "[OK] Hiberboot Disabled successfully."
-    } catch {
-        Log-Message "[FAIL] Failed to disable Fast Startup: $_"
+    Add-Activity "System Tweak" "Disable Fast Startup" "Running"
+    Run-Async {
+        try {
+            Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power" -Name "HiberbootEnabled" -Value 0 -Force
+            Log-Message "[OK] Hiberboot Disabled successfully."
+            Add-Activity "System Tweak" "Fast Startup Disabled" "Success"
+        } catch {
+            Log-Message "[FAIL] Failed to disable Fast Startup: $_"
+            Add-Activity "System Tweak" "Disable Fast Startup Failed" "Failed"
+        }
     }
 })
 
 # Visual Performance Mode
 $btn_tweak_visuals.Add_Click({
     Log-Message "Configuring visual effects settings for high performance..."
-    try {
-        Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "VisualFXSetting" -Value 2 -Force
-        Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "UserPreferencesMask" -Value ([byte[]](0x90,0x12,0x01,0x80,0x10,0x00,0x00,0x00)) -Force
-        Log-Message "[OK] Visual options configured for Maximum Performance. Restart Explorer to see differences."
-        Add-Activity "Visual Tweak" "Set Performance Visuals" "Success"
-    } catch {
-        Log-Message "[FAIL] Error modifying visual properties: $_"
+    Add-Activity "Visual Tweak" "Set Performance Visuals" "Running"
+    Run-Async {
+        try {
+            Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "VisualFXSetting" -Value 2 -Force
+            Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "UserPreferencesMask" -Value ([byte[]](0x90,0x12,0x01,0x80,0x10,0x00,0x00,0x00)) -Force
+            Log-Message "[OK] Visual options configured for Maximum Performance. Restart Explorer to see differences."
+            Add-Activity "Visual Tweak" "Performance Visuals Applied" "Success"
+        } catch {
+            Log-Message "[FAIL] Error modifying visual properties: $_"
+            Add-Activity "Visual Tweak" "Performance Visuals Failed" "Failed"
+        }
     }
 })
 
 # Pagefile Optimizer
 $btn_tweak_pagefile.Add_Click({
     Log-Message "Optimizing Virtual Memory allocation (Pagefile sizing)..."
-    try {
-        $wmi = Get-CimInstance Win32_ComputerSystem
-        $wmi.AutomaticManagedPagefile = $true
-        Set-CimInstance -InputObject $wmi
-        Log-Message "[OK] Enabled Windows Automatic Managed Pagefile configuration."
-        Add-Activity "Memory Tweak" "Pagefile Auto-managed" "Success"
-    } catch {
-        Log-Message "[FAIL] Error writing virtual memory flags: $_"
+    Add-Activity "Memory Tweak" "Pagefile Optimization" "Running"
+    Run-Async {
+        try {
+            $wmi = Get-CimInstance Win32_ComputerSystem
+            $wmi.AutomaticManagedPagefile = $true
+            Set-CimInstance -InputObject $wmi
+            Log-Message "[OK] Enabled Windows Automatic Managed Pagefile configuration."
+            Add-Activity "Memory Tweak" "Pagefile Optimized" "Success"
+        } catch {
+            Log-Message "[FAIL] Error writing virtual memory flags: $_"
+            Add-Activity "Memory Tweak" "Pagefile Optimization Failed" "Failed"
+        }
     }
 })
 
 # Telemetry Tweaks
 $btn_tweak_cortana.Add_Click({
     Log-Message "Disabling Cortana and Windows Copilot assistant modules..."
-    try {
-        New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot" -Force -ErrorAction SilentlyContinue | Out-Null
-        Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot" -Name "TurnOffWindowsCopilot" -Value 1 -Force
-        
-        New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search" -Force -ErrorAction SilentlyContinue | Out-Null
-        Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search" -Name "AllowCortana" -Value 0 -Force
-        
-        Log-Message "[OK] Disallowed Cortana Search and Copilot taskbar interfaces."
-        Add-Activity "Privacy Tweak" "Disabled Assistants" "Success"
-    } catch {
-        Log-Message "[FAIL] Error writing registry key properties: $_"
+    Add-Activity "Privacy Tweak" "Disable Assistants" "Running"
+    Run-Async {
+        try {
+            New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot" -Force -ErrorAction SilentlyContinue | Out-Null
+            Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot" -Name "TurnOffWindowsCopilot" -Value 1 -Force
+            
+            New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search" -Force -ErrorAction SilentlyContinue | Out-Null
+            Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search" -Name "AllowCortana" -Value 0 -Force
+            
+            Log-Message "[OK] Disallowed Cortana Search and Copilot taskbar interfaces."
+            Add-Activity "Privacy Tweak" "Assistants Disabled" "Success"
+        } catch {
+            Log-Message "[FAIL] Error writing registry key properties: $_"
+            Add-Activity "Privacy Tweak" "Disable Assistants Failed" "Failed"
+        }
     }
 })
 
 $btn_tweak_telemetry.Add_Click({
     Log-Message "Blocking diagnostic telemetry and feedback policies..."
-    try {
-        Stop-Service DiagTrack -Force -ErrorAction SilentlyContinue
-        Set-Service -Name DiagTrack -StartupType Disabled
-        
-        New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Force -ErrorAction SilentlyContinue | Out-Null
-        Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "AllowTelemetry" -Value 0 -Force
-        
-        Log-Message "[OK] Telmetry services blocked and registry GPO applied."
-        Add-Activity "Privacy Tweak" "Blocked Diagnostic Telemetry" "Success"
-    } catch {
-        Log-Message "[FAIL] Error stopping telemetry bindings: $_"
+    Add-Activity "Privacy Tweak" "Block Telemetry" "Running"
+    Run-Async {
+        try {
+            Stop-Service DiagTrack -Force -ErrorAction SilentlyContinue
+            Set-Service -Name DiagTrack -StartupType Disabled -ErrorAction SilentlyContinue
+            
+            New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Force -ErrorAction SilentlyContinue | Out-Null
+            Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "AllowTelemetry" -Value 0 -Force
+            
+            Log-Message "[OK] Telemetry services blocked and registry GPO applied."
+            Add-Activity "Privacy Tweak" "Telemetry Blocked" "Success"
+        } catch {
+            Log-Message "[FAIL] Error stopping telemetry bindings: $_"
+            Add-Activity "Privacy Tweak" "Block Telemetry Failed" "Failed"
+        }
     }
 })
 
 $btn_tweak_ads.Add_Click({
     Log-Message "Disabling Microsoft lockscreen spotlight tips & ads..."
-    try {
-        New-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" -Force -ErrorAction SilentlyContinue | Out-Null
-        Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" -Name "SubscribedContent-338387Enabled" -Value 0 -Force
-        Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" -Name "SubscribedContent-338389Enabled" -Value 0 -Force
-        
-        Log-Message "[OK] Turned off lockscreen Spotlight promotional tips."
-        Add-Activity "Privacy Tweak" "Disabled Lockscreen Ads" "Success"
-    } catch {
-        Log-Message "[FAIL] Error disabling Spotlight properties: $_"
+    Add-Activity "Privacy Tweak" "Disable Lockscreen Ads" "Running"
+    Run-Async {
+        try {
+            New-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" -Force -ErrorAction SilentlyContinue | Out-Null
+            Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" -Name "SubscribedContent-338387Enabled" -Value 0 -Force
+            Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" -Name "SubscribedContent-338389Enabled" -Value 0 -Force
+            
+            Log-Message "[OK] Turned off lockscreen Spotlight promotional tips."
+            Add-Activity "Privacy Tweak" "Lockscreen Ads Disabled" "Success"
+        } catch {
+            Log-Message "[FAIL] Error disabling Spotlight properties: $_"
+            Add-Activity "Privacy Tweak" "Disable Lockscreen Ads Failed" "Failed"
+        }
     }
 })
 
@@ -2382,23 +2501,31 @@ $btn_rep_dhcp.Add_Click({
 # IPv6 Toggle Disable
 $btn_rep_ipv6_dis.Add_Click({
     Log-Message "Disabling IPv6 bindings on all active network adapters..."
-    try {
-        Disable-NetAdapterBinding -Name "*" -ComponentID "ms_tcpip6" -ErrorAction Stop
-        Log-Message "[OK] IPv6 protocol disabled on all adapters."
-        Add-Activity "Network Tweak" "IPv6 Disabled" "Success"
-    } catch {
-        Log-Message "[FAIL] Failed to disable IPv6 binding: $_"
+    Add-Activity "Network Tweak" "Disable IPv6" "Running"
+    Run-Async {
+        try {
+            Disable-NetAdapterBinding -Name "*" -ComponentID "ms_tcpip6" -ErrorAction Stop
+            Log-Message "[OK] IPv6 protocol disabled on all adapters."
+            Add-Activity "Network Tweak" "IPv6 Disabled" "Success"
+        } catch {
+            Log-Message "[FAIL] Failed to disable IPv6 binding: $_"
+            Add-Activity "Network Tweak" "Disable IPv6 Failed" "Failed"
+        }
     }
 })
 
 $btn_rep_ipv6_en.Add_Click({
     Log-Message "Enabling IPv6 bindings on all active network adapters..."
-    try {
-        Enable-NetAdapterBinding -Name "*" -ComponentID "ms_tcpip6" -ErrorAction Stop
-        Log-Message "[OK] IPv6 protocol enabled on all adapters."
-        Add-Activity "Network Tweak" "IPv6 Enabled" "Success"
-    } catch {
-        Log-Message "[FAIL] Failed to enable IPv6 binding: $_"
+    Add-Activity "Network Tweak" "Enable IPv6" "Running"
+    Run-Async {
+        try {
+            Enable-NetAdapterBinding -Name "*" -ComponentID "ms_tcpip6" -ErrorAction Stop
+            Log-Message "[OK] IPv6 protocol enabled on all adapters."
+            Add-Activity "Network Tweak" "IPv6 Enabled" "Success"
+        } catch {
+            Log-Message "[FAIL] Failed to enable IPv6 binding: $_"
+            Add-Activity "Network Tweak" "Enable IPv6 Failed" "Failed"
+        }
     }
 })
 
@@ -2528,12 +2655,19 @@ $btn_diag_mdsched.Add_Click({
 
 $btn_diag_dns.Add_Click({
     Log-Message "Configuring adapter DNS settings to Cloudflare Secure DNS (1.1.1.1)..."
-    Start-ThreadJob {
-        $adapters = Get-NetAdapter | Where-Object { $_.Status -eq "Up" }
-        foreach ($a in $adapters) {
-            Set-DnsClientServerAddress -InterfaceAlias $a.Name -ServerAddresses ("1.1.1.1", "1.0.0.1") -ErrorAction SilentlyContinue
+    Add-Activity "Diagnostics" "Apply Secure DNS" "Running"
+    Run-Async {
+        try {
+            $adapters = Get-NetAdapter -ErrorAction SilentlyContinue | Where-Object { $_.Status -eq "Up" }
+            foreach ($a in $adapters) {
+                Set-DnsClientServerAddress -InterfaceAlias $a.Name -ServerAddresses ("1.1.1.1", "1.0.0.1") -ErrorAction SilentlyContinue
+            }
+            Log-Message "[OK] Cloudflare DNS configuration completed."
+            Add-Activity "Diagnostics" "Secure DNS Configured" "Success"
+        } catch {
+            Log-Message "[FAIL] Failed to configure DNS: $_"
+            Add-Activity "Diagnostics" "Secure DNS Failed" "Failed"
         }
-        Log-Message "[OK] Cloudflare DNS configuration completed."
     }
 })
 
@@ -2619,13 +2753,17 @@ $btn_start_backup.Add_Click({
 # System Restore protection & point creation
 $btn_backup_enable_restore.Add_Click({
     Log-Message "Enabling System Restore point protection on C: Drive..."
-    try {
-        Enable-ComputerRestore -Drive "C:\" -ErrorAction Stop
-        vssadmin resize shadowstorage /on=C: /for=C: /maxsize=10% | Out-Null
-        Log-Message "[OK] Computer System Protection enabled for Drive C: with 10% max allocation limit."
-        Add-Activity "Restore Point" "Enabled System Protection" "Success"
-    } catch {
-        Log-Message "[FAIL] Error enabling System Restore protection: $_"
+    Add-Activity "Restore Point" "Enable System Protection" "Running"
+    Run-Async {
+        try {
+            Enable-ComputerRestore -Drive "C:\" -ErrorAction Stop
+            vssadmin resize shadowstorage /on=C: /for=C: /maxsize=10% | Out-Null
+            Log-Message "[OK] Computer System Protection enabled for Drive C: with 10% max allocation limit."
+            Add-Activity "Restore Point" "Enabled System Protection" "Success"
+        } catch {
+            Log-Message "[FAIL] Error enabling System Restore protection: $_"
+            Add-Activity "Restore Point" "Enable System Protection Failed" "Failed"
+        }
     }
 })
 
@@ -2683,23 +2821,31 @@ $btn_cfg_sys.Add_Click({ Start-ConfigShortcut "control.exe" "sysdm.cpl" })
 # Local accounts options
 $btn_cfg_admin_en.Add_Click({
     Log-Message "Enabling the built-in Windows Administrator account..."
-    try {
-        net user administrator /active:yes | Out-Null
-        Log-Message "[OK] Default Administrator account activated."
-        Add-Activity "User Accounts" "Enabled Built-in Admin" "Success"
-    } catch {
-        Log-Message "[FAIL] Failed to enable Administrator account: $_"
+    Add-Activity "User Accounts" "Enable Built-in Admin" "Running"
+    Run-Async {
+        try {
+            net user administrator /active:yes | Out-Null
+            Log-Message "[OK] Default Administrator account activated."
+            Add-Activity "User Accounts" "Enabled Built-in Admin" "Success"
+        } catch {
+            Log-Message "[FAIL] Failed to enable Administrator account: $_"
+            Add-Activity "User Accounts" "Enable Built-in Admin Failed" "Failed"
+        }
     }
 })
 
 $btn_cfg_admin_dis.Add_Click({
     Log-Message "Disabling the built-in Windows Administrator account..."
-    try {
-        net user administrator /active:no | Out-Null
-        Log-Message "[OK] Default Administrator account deactivated."
-        Add-Activity "User Accounts" "Disabled Built-in Admin" "Success"
-    } catch {
-        Log-Message "[FAIL] Failed to disable Administrator account: $_"
+    Add-Activity "User Accounts" "Disable Built-in Admin" "Running"
+    Run-Async {
+        try {
+            net user administrator /active:no | Out-Null
+            Log-Message "[OK] Default Administrator account deactivated."
+            Add-Activity "User Accounts" "Disabled Built-in Admin" "Success"
+        } catch {
+            Log-Message "[FAIL] Failed to disable Administrator account: $_"
+            Add-Activity "User Accounts" "Disable Built-in Admin Failed" "Failed"
+        }
     }
 })
 
@@ -2710,9 +2856,19 @@ $btn_cfg_reset_pass.Add_Click({
         $password = [Microsoft.VisualBasic.Interaction]::InputBox("Enter the new Password for user '$username':", "Reset Password Manager", "")
         
         Log-Message "Resetting password for local user '$username'..."
-        net user $username $password | Out-Null
-        Log-Message "[OK] Password for user '$username' has been reset successfully."
-        Add-Activity "User Accounts" "Reset Password for $username" "Success"
+        Add-Activity "User Accounts" "Resetting password for $username..." "Running"
+        
+        Run-Async {
+            param($win, $u, $p)
+            try {
+                net user $u $p | Out-Null
+                Log-Message "[OK] Password for user '$u' has been reset successfully."
+                Add-Activity "User Accounts" "Reset Password for $u" "Success"
+            } catch {
+                Log-Message "[FAIL] Failed to reset user password: $_"
+                Add-Activity "User Accounts" "Password Reset Failed" "Failed"
+            }
+        } -ArgumentList $username, $password
     } catch {
         Log-Message "[FAIL] Failed to reset user password: $_"
     }
@@ -2726,13 +2882,22 @@ $btn_cfg_autologin.Add_Click({
         $domain = $env:COMPUTERNAME
         
         Log-Message "Configuring Windows registry auto-login policies for '$username'..."
-        Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" -Name "AutoAdminLogon" -Value "1" -Force
-        Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" -Name "DefaultUserName" -Value $username -Force
-        Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" -Name "DefaultPassword" -Value $password -Force
-        Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" -Name "DefaultDomainName" -Value $domain -Force
+        Add-Activity "User Accounts" "Configuring Auto-Login..." "Running"
         
-        Log-Message "[OK] Windows auto-login configured successfully. System will automatically login on boot."
-        Add-Activity "User Accounts" "Auto-Login configured for $username" "Success"
+        Run-Async {
+            param($win, $u, $p, $d)
+            try {
+                Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" -Name "AutoAdminLogon" -Value "1" -Force
+                Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" -Name "DefaultUserName" -Value $u -Force
+                Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" -Name "DefaultPassword" -Value $p -Force
+                Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" -Name "DefaultDomainName" -Value $d -Force
+                Log-Message "[OK] Windows auto-login configured successfully. System will automatically login on boot."
+                Add-Activity "User Accounts" "Auto-Login configured for $u" "Success"
+            } catch {
+                Log-Message "[FAIL] Failed to configure auto-login: $_"
+                Add-Activity "User Accounts" "Auto-Login Configuration Failed" "Failed"
+            }
+        } -ArgumentList $username, $password, $domain
     } catch {
         Log-Message "[FAIL] Failed to configure auto-login: $_"
     }
