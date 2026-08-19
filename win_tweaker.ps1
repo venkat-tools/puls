@@ -1469,12 +1469,15 @@ function Run-RepairCommand ($argsList, $opName) {
     Log-Message "Initiating command: $($argsList -join ' ')..."
     Add-Activity "System Repair" "Running $opName" "Running"
     Run-Async {
-        param($win, $cmd, $args, $name)
-        $proc = Start-Process $cmd -ArgumentList $args -NoNewWindow -PassThru -Wait
-        $win.Dispatcher.Invoke([Action]{ 
-            Log-Message "$name finished with exit code: $($proc.ExitCode)" 
+        param($win, $cmd, $cmdArgs, $name)
+        try {
+            $proc = Start-Process $cmd -ArgumentList $cmdArgs -NoNewWindow -PassThru -Wait
+            Log-Message "$name finished with exit code: $($proc.ExitCode)"
             Add-Activity "System Repair" "$name completed" "Success"
-        })
+        } catch {
+            Log-Message "[FAIL] $name failed: $_"
+            Add-Activity "System Repair" "$name Failed" "Failed"
+        }
     } -ArgumentList $argsList[0], ($argsList[1..($argsList.Length-1)] -join ' '), $opName
 }
 
@@ -2247,10 +2250,21 @@ $btn_tweak_ultimate.Add_Click({
     Add-Activity "Power Tweak" "Unlock Ultimate Scheme" "Running"
     Run-Async {
         try {
-            $res = powercfg -duplicatescheme e9a22db2-565e-4b6e-82f0-8022c5e3430b
-            Log-Message $res
-            Log-Message "[OK] Power plan scheme unlocked."
-            Add-Activity "Power Tweak" "Ultimate Power Plan Unlocked" "Success"
+            # Try to duplicate Ultimate Performance scheme
+            $res = powercfg -duplicatescheme e9a22db2-565e-4b6e-82f0-8022c5e3430b 2>$null
+            if (-not $res -or $res -match "does not exist") {
+                Log-Message "Ultimate Performance scheme not found. Falling back to High Performance plan..."
+                $res = powercfg -duplicatescheme 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c
+            }
+            if ($res -match "GUID: (\\S+)") {
+                $guid = $Matches[1]
+                powercfg -setactive $guid | Out-Null
+                Log-Message "[OK] Performance power scheme unlocked and set as active."
+                Add-Activity "Power Tweak" "Performance Power Plan Activated" "Success"
+            } else {
+                Log-Message "[FAIL] Could not create or activate power scheme: $res"
+                Add-Activity "Power Tweak" "Unlock Ultimate Scheme Failed" "Failed"
+            }
         } catch {
             Log-Message "[FAIL] Failed to unlock scheme: $_"
             Add-Activity "Power Tweak" "Unlock Ultimate Scheme Failed" "Failed"
