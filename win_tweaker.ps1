@@ -975,11 +975,47 @@ function Run-Async ($scriptBlock, $argsList=@()) {
     $rs.Open()
     $ps.Runspace = $rs
     
+    # Copy shared UI variables to background runspace context
+    $rs.SessionStateProxy.SetVariable("win", $window)
+    $rs.SessionStateProxy.SetVariable("txt_log_soft", $txt_log_soft)
+    $rs.SessionStateProxy.SetVariable("txt_log_rep", $txt_log_rep)
+    $rs.SessionStateProxy.SetVariable("activities", $activities)
+    
+    # Pre-define helper logging functions inside the background runspace before scriptblock invocation
+    $ps.AddScript({
+        function Log-Message ($msg) {
+            $timestamp = Get-Date -Format "HH:mm:ss"
+            $formatted = "[$timestamp] $msg`r`n"
+            $win.Dispatcher.Invoke([Action[string]]{
+                param($text)
+                $txt_log_soft.AppendText($text)
+                $txt_log_soft.ScrollToEnd()
+                $txt_log_rep.AppendText($text)
+                $txt_log_rep.ScrollToEnd()
+            }, $formatted)
+        }
+        function Add-Activity ($op, $desc, $status) {
+            $win.Dispatcher.Invoke([Action]{
+                $activities.Insert(0, [PSCustomObject]@{
+                    Operation = $op
+                    Description = $desc
+                    Status = $status
+                    Timestamp = (Get-Date -Format "HH:mm:ss")
+                })
+            })
+        }
+    }.ToString()) | Out-Null
+    
+    $ps.Invoke() | Out-Null # Define functions in runspace session state
+    $ps.Commands.Clear() # Clear helper code from pipeline
+    
+    # Add actual background script block to pipeline
     $ps.AddScript($scriptBlock) | Out-Null
     $ps.AddArgument($window) | Out-Null
     foreach ($arg in $argsList) {
         $ps.AddArgument($arg) | Out-Null
     }
+    
     $script:runspaces.Add(@{ PS = $ps; RS = $rs }) | Out-Null
     $ps.BeginInvoke() | Out-Null
 }
