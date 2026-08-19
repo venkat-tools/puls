@@ -949,11 +949,12 @@ $xaml = @"
 </Window>
 "@
 
-$reader = (New-Object System.Xml.XmlTextReader (New-Object System.IO.StringReader $xaml))
+$xamlString = $xaml.Trim().Trim([char]0xFEFF)
+$reader = (New-Object System.Xml.XmlTextReader (New-Object System.IO.StringReader $xamlString))
 $window = [Windows.Markup.XamlReader]::Load($reader)
 
 # Map all Named XAML elements to script variables
-[xml]$xmlDoc = $xaml
+[xml]$xmlDoc = $xamlString
 $xmlDoc.SelectNodes("//*[@Name]") | ForEach-Object {
     Set-Variable -Name $_.Name -Value $window.FindName($_.Name) -Scope Script
 }
