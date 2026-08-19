@@ -14,7 +14,7 @@ Add-Type -AssemblyName Microsoft.VisualBasic
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="VenkatPulse AI - Windows Utility Suite" Height="840" Width="1240"
-        Background="#0b0f19" Foreground="#ffffff" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize">
+        Background="#0b0f19" Foreground="#ffffff" WindowStartupLocation="CenterScreen" ResizeMode="CanResize">
     <Window.Resources>
         <Style TargetType="Button">
             <Setter Property="Background" Value="#1e293b"/>
@@ -1123,38 +1123,46 @@ $btn_soft_desel_all.Add_Click({
     $checkboxes | ForEach-Object { $_.IsChecked = $false }
 })
 
-# --- SYSTEM STATS DISPATCHER TIMER ---
+# --- SYSTEM STATS BACKGROUND MONITOR ---
 $osPlatform = (Get-CimInstance Win32_OperatingSystem).Caption
 $txt_os.Text = "Win 10/11"
 
-$timer = New-Object System.Windows.Threading.DispatcherTimer
-$timer.Interval = [TimeSpan]::FromSeconds(2.5)
-$timer.Add_Tick({
-    try {
-        # CPU
-        $cpu = Get-CimInstance -ClassName Win32_Processor | Measure-Object -Property LoadPercentage -Average | Select-Object -ExpandProperty Average
-        if ($cpu -eq $null) { $cpu = 0 }
-        $txt_cpu.Text = "$([Math]::Round($cpu))%"
+Start-ThreadJob {
+    while ($true) {
+        try {
+            # CPU
+            $cpu = Get-CimInstance -ClassName Win32_Processor | Measure-Object -Property LoadPercentage -Average | Select-Object -ExpandProperty Average
+            if ($cpu -eq $null) { $cpu = 0 }
+            $cpuStr = "$([Math]::Round($cpu))%"
 
-        # RAM
-        $os = Get-CimInstance Win32_OperatingSystem
-        $freeRam = $os.FreePhysicalMemory
-        $totalRam = $os.TotalVisibleMemorySize
-        $usedRam = $totalRam - $freeRam
-        $ramPct = ($usedRam / $totalRam) * 100
-        $txt_ram.Text = "$([Math]::Round($ramPct))%"
+            # RAM
+            $os = Get-CimInstance Win32_OperatingSystem
+            $freeRam = $os.FreePhysicalMemory
+            $totalRam = $os.TotalVisibleMemorySize
+            $usedRam = $totalRam - $freeRam
+            $ramPct = ($usedRam / $totalRam) * 100
+            $ramStr = "$([Math]::Round($ramPct))%"
 
-        # Disk
-        $disk = Get-PSDrive C
-        $freeGB = [Math]::Round($disk.Free / 1GB)
-        $txt_disk.Text = "$freeGB GB Free"
+            # Disk
+            $disk = Get-PSDrive C
+            $freeGB = [Math]::Round($disk.Free / 1GB)
+            $diskStr = "$freeGB GB Free"
 
-        # Uptime
-        $uptime = (Get-Date) - $os.LastBootUpTime
-        $txt_uptime.Text = "Uptime: $($uptime.Days)d $($uptime.Hours)h $($uptime.Minutes)m"
-    } catch {}
-})
-$timer.Start()
+            # Uptime
+            $uptime = (Get-Date) - $os.LastBootUpTime
+            $uptimeStr = "Uptime: $($uptime.Days)d $($uptime.Hours)h $($uptime.Minutes)m"
+
+            # Update UI controls safely on the UI thread
+            $window.Dispatcher.Invoke([Action]{
+                $txt_cpu.Text = $cpuStr
+                $txt_ram.Text = $ramStr
+                $txt_disk.Text = $diskStr
+                $txt_uptime.Text = $uptimeStr
+            })
+        } catch {}
+        Start-Sleep -Seconds 3
+    }
+}
 
 Add-Activity "Launch Utility" "Ready" "Success"
 Log-Message "System Utility Toolkit initialized."
