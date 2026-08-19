@@ -10,7 +10,7 @@ Add-Type -AssemblyName WindowsBase
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName Microsoft.VisualBasic
 
-[xml]$xaml = @"
+$xaml = @"
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="VenkatPulse AI - Windows Utility Suite" Height="840" Width="1240"
@@ -954,7 +954,8 @@ $reader = (New-Object System.Xml.XmlTextReader (New-Object System.IO.StringReade
 $window = [Windows.Markup.XamlReader]::Load($reader)
 
 # Map all Named XAML elements to script variables
-$xaml.SelectNodes("//*[@Name]") | ForEach-Object {
+[xml]$xmlDoc = $xaml
+$xmlDoc.SelectNodes("//*[@Name]") | ForEach-Object {
     Set-Variable -Name $_.Name -Value $window.FindName($_.Name) -Scope Script
 }
 
