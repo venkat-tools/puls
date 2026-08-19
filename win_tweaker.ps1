@@ -2196,7 +2196,7 @@ $btn_diag_ping_start.Add_Click({
                 $ping = Test-Connection -ComputerName $t -Count 1 -ErrorAction Stop
                 $time = $ping.ResponseTime
                 if ($time -eq $null) { $time = 0 }
-                [Action[string, string]]{ param($h, $r) Log-Message "Ping response from $h: Reply latency = $r ms." }.Invoke($t, $time)
+                [Action[string, string]]{ param($h, $r) Log-Message "Ping response from ${h}: Reply latency = ${r} ms." }.Invoke($t, $time)
             } catch {
                 [Action[string]]{ param($h) Log-Message "[X] Ping timed out or failed to reach host: $h" }.Invoke($t)
             }
