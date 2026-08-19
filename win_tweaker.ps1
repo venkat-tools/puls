@@ -1016,6 +1016,22 @@ function Run-Async ($scriptBlock, $argsList=@()) {
         $ps.AddArgument($arg) | Out-Null
     }
     
+    # Register error stream callback to log background errors to the UI
+    $ps.Streams.Error.add_DataAdded({
+        param($sender, $e)
+        try {
+            $err = $sender[$e.Index].ToString()
+            $window.Dispatcher.Invoke([Action]{
+                $timestamp = Get-Date -Format "HH:mm:ss"
+                $formatted = "[$timestamp] BACKGROUND ERROR: $err`r`n"
+                $txt_log_soft.AppendText($formatted)
+                $txt_log_soft.ScrollToEnd()
+                $txt_log_rep.AppendText($formatted)
+                $txt_log_rep.ScrollToEnd()
+            })
+        } catch {}
+    })
+    
     $script:runspaces.Add(@{ PS = $ps; RS = $rs }) | Out-Null
     $ps.BeginInvoke() | Out-Null
 }
