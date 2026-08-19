@@ -511,13 +511,13 @@ $btn_install_soft.Add_Click({
         foreach ($item in $items) {
             $name = $item.Content
             $id = $item.Tag
-            [Action[string]]{ Log-Message "Installing $using:name..." }.Invoke()
+            [Action[string]]{ param($n) Log-Message "Installing $n..." }.Invoke($name)
             
             $proc = Start-Process winget -ArgumentList "install --id $id --silent --accept-source-agreements --accept-package-agreements" -NoNewWindow -PassThru -Wait
             if ($proc.ExitCode -eq 0) {
-                [Action[string]]{ Log-Message "[✓] $using:name installed successfully." }.Invoke()
+                [Action[string]]{ param($n) Log-Message "[✓] $n installed successfully." }.Invoke($name)
             } else {
-                [Action[string]]{ Log-Message "[X] $using:name failed or was already installed." }.Invoke()
+                [Action[string]]{ param($n) Log-Message "[X] $n failed or was already installed." }.Invoke($name)
             }
         }
         [Action[string]]{ Log-Message "Installation batch completed." }.Invoke()
@@ -538,9 +538,10 @@ $btn_check_license.Add_Click({
         $res = cscript //nologo $env:SystemRoot\system32\slmgr.vbs /dli
         $joined = $res -join "`r`n"
         [Action[string]]{ 
+            param($txt)
             Log-Message "License details returned:" 
-            Log-Message $using:joined
-        }.Invoke()
+            Log-Message $txt
+        }.Invoke($joined)
     }
 })
 
