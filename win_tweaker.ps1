@@ -283,7 +283,7 @@ $xaml = @"
                         </Grid>
                     </Border>
 
-                    <!-- Bottom Row: Activation & Edition Changer -->
+                    <!-- Bottom Row: Activation and Edition Changer -->
                     <Grid Grid.Row="1" Margin="0,10,0,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -450,7 +450,7 @@ $xaml = @"
                     </Border>
                 </Grid>
 
-                <!-- 5. Bloatware & Features View -->
+                <!-- 5. Bloatware and Features View -->
                 <Grid Name="grid_bloat" Visibility="Collapsed">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -467,7 +467,7 @@ $xaml = @"
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <!-- Left Column: Bloatware Remover & System Purger -->
+                        <!-- Left Column: Bloatware Remover and System Purger -->
                         <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto" Margin="0,0,10,0">
                             <StackPanel>
                                 <Border Background="#1f2937" BorderBrush="#374151" BorderThickness="1" CornerRadius="8" Padding="15" Margin="0,0,0,10">
@@ -644,13 +644,13 @@ $xaml = @"
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
-                            <TextBlock Grid.Row="0" Text="📋 Operation Output Console" FontSize="11" FontWeight="Bold" Foreground="#ffffff" Margin="0,0,0,10"/>
+                            <TextBlock Grid.Row="0" Text="&#x1F4CB; Operation Output Console" FontSize="11" FontWeight="Bold" Foreground="#ffffff" Margin="0,0,0,10"/>
                             <TextBox Grid.Row="1" Name="txt_log_rep" Background="#0b0f19" Foreground="#10b981" BorderBrush="#374151" FontFamily="Consolas" FontSize="10" IsReadOnly="True" VerticalScrollBarVisibility="Auto" AcceptsReturn="True" TextWrapping="Wrap"/>
                         </Grid>
                     </Border>
                 </Grid>
 
-                <!-- 7. Diagnostics & Specs View -->
+                <!-- 7. Diagnostics and Specs View -->
                 <Grid Name="grid_diag" Visibility="Collapsed">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -830,7 +830,7 @@ $xaml = @"
                     </Border>
                 </Grid>
 
-                <!-- 8. Backups & Migration View -->
+                <!-- 8. Backups and Migration View -->
                 <Grid Name="grid_backups" Visibility="Collapsed">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
