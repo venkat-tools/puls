@@ -550,7 +550,8 @@ $btn_rep_sfc.Add_Click({
     Start-ThreadJob {
         [Action[string]]{ Log-Message "[*] Running: sfc /scannow (This takes a few minutes)..." }.Invoke()
         $proc = Start-Process sfc -ArgumentList "/scannow" -NoNewWindow -PassThru -Wait
-        [Action[string]]{ Log-Message "SFC Scan finished with exit code: $using:($proc.ExitCode)" }.Invoke()
+        $exitCode = $proc.ExitCode
+        [Action[string]]{ param($code) Log-Message "SFC Scan finished with exit code: $code" }.Invoke($exitCode)
     }
 })
 
@@ -559,7 +560,8 @@ $btn_rep_dism.Add_Click({
     Start-ThreadJob {
         [Action[string]]{ Log-Message "[*] Running: dism /online /cleanup-image /restorehealth..." }.Invoke()
         $proc = Start-Process dism -ArgumentList "/online /cleanup-image /restorehealth" -NoNewWindow -PassThru -Wait
-        [Action[string]]{ Log-Message "DISM finished with exit code: $using:($proc.ExitCode)" }.Invoke()
+        $exitCode = $proc.ExitCode
+        [Action[string]]{ param($code) Log-Message "DISM finished with exit code: $code" }.Invoke($exitCode)
     }
 })
 
@@ -740,7 +742,7 @@ $btn_diag_ram.Add_Click({
             $speed = $mod.Speed
             [Action[string, string, string]]{
                 param($c, $s, $d)
-                Log-Message "Slot $d: $c GB RAM module running at $s MHz."
+                Log-Message "Slot ${d}: ${c} GB RAM module running at ${s} MHz."
             }.Invoke($cap, $speed, $mod.DeviceLocator)
         }
     }
