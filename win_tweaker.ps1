@@ -41,9 +41,9 @@ Add-Type -AssemblyName Microsoft.VisualBasic
         <Border Grid.Column="0" Background="#111827" BorderBrush="#1f2937" BorderThickness="0,0,1,0">
             <Grid>
                 <Grid.RowDefinitions>
-                    <Grid.RowDefinition Height="90"/>
-                    <Grid.RowDefinition Height="*"/>
-                    <Grid.RowDefinition Height="45"/>
+                    <RowDefinition Height="90"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="45"/>
                 </Grid.RowDefinitions>
 
                 <!-- Brand logo/text -->
@@ -2196,7 +2196,7 @@ $btn_diag_ping_start.Add_Click({
                 $ping = Test-Connection -ComputerName $t -Count 1 -ErrorAction Stop
                 $time = $ping.ResponseTime
                 if ($time -eq $null) { $time = 0 }
-                [Action[string, string]]{ param($h, $r) Log-Message "Ping response from ${h}: Reply latency = ${r} ms." }.Invoke($t, $time)
+                [Action[string, string]]{ param($h, $r) Log-Message "Ping response from $h: Reply latency = $r ms." }.Invoke($t, $time)
             } catch {
                 [Action[string]]{ param($h) Log-Message "[X] Ping timed out or failed to reach host: $h" }.Invoke($t)
             }
