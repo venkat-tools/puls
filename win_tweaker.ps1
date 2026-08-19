@@ -10,7 +10,7 @@ Add-Type -AssemblyName WindowsBase
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName Microsoft.VisualBasic
 
-$xaml = @"
+$xamlRaw = @"
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="VenkatPulse AI - Windows Utility Suite" Height="840" Width="1240"
@@ -949,7 +949,7 @@ $xaml = @"
 </Window>
 "@
 
-$xamlString = $xaml.Trim().Trim([char]0xFEFF)
+$xamlString = $xamlRaw.Trim().Trim([char]0xFEFF)
 $reader = (New-Object System.Xml.XmlTextReader (New-Object System.IO.StringReader $xamlString))
 $window = [Windows.Markup.XamlReader]::Load($reader)
 
