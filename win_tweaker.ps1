@@ -964,8 +964,18 @@ $activities = New-Object System.Collections.ObjectModel.ObservableCollection[PSO
 $activity_tree.ItemsSource = $activities
 
 $script:runspaces = [System.Collections.ArrayList]::new()
+$script:isTaskRunning = $false
 
-function Run-Async ($scriptBlock, $ArgumentList=@()) {
+function Run-Async ($scriptBlock, $ArgumentList=@(), $isLockingTask=$true) {
+    if ($isLockingTask -and $script:isTaskRunning) {
+        Log-Message "[WARN] A system repair, scan or service configuration task is already running in the background. Please wait for it to finish before starting a new task."
+        return
+    }
+    
+    if ($isLockingTask) {
+        $script:isTaskRunning = $true
+    }
+
     $ps = [PowerShell]::Create()
     
     # Create and configure a separate dedicated runspace with UseNewThread option to run fully asynchronously
@@ -1035,8 +1045,22 @@ function Run-Async ($scriptBlock, $ArgumentList=@()) {
         }
     }.ToString()) | Out-Null
     
-    # 2. Add actual background script block to pipeline (chained)
-    $ps.AddScript($scriptBlock) | Out-Null
+    # 2. Add actual background script block to pipeline (chained, wrapped with finally block if it is a locking task)
+    if ($isLockingTask) {
+        $wrappedScript = @"
+            param(`$win, `$arg1, `$arg2, `$arg3, `$arg4, `$arg5)
+            try {
+                & { $scriptBlock } `$win `$arg1 `$arg2 `$arg3 `$arg4 `$arg5
+            } finally {
+                `$win.Dispatcher.Invoke([Action]{
+                    `$script:isTaskRunning = `$false
+                })
+            }
+"@
+        $ps.AddScript($wrappedScript) | Out-Null
+    } else {
+        $ps.AddScript($scriptBlock) | Out-Null
+    }
     
     # 3. Add arguments to pipeline (bound to actual background script block parameter list)
     $ps.AddArgument($window) | Out-Null
@@ -1269,7 +1293,7 @@ Run-Async {
         } catch {}
         Start-Sleep -Seconds 4
     }
-} @($txt_cpu, $txt_ram, $txt_disk, $txt_uptime)
+} @($txt_cpu, $txt_ram, $txt_disk, $txt_uptime) $false
 
 Add-Activity "Launch Utility" "Ready" "Success"
 Log-Message "System Utility Toolkit initialized."
