@@ -965,7 +965,7 @@ $activity_tree.ItemsSource = $activities
 
 $script:runspaces = [System.Collections.ArrayList]::new()
 
-function Run-Async ($scriptBlock, $argsList=@()) {
+function Run-Async ($scriptBlock, $ArgumentList=@()) {
     $ps = [PowerShell]::Create()
     
     # Create and configure a separate dedicated runspace with UseNewThread option to run fully asynchronously
@@ -1012,7 +1012,7 @@ function Run-Async ($scriptBlock, $argsList=@()) {
     # Add actual background script block to pipeline
     $ps.AddScript($scriptBlock) | Out-Null
     $ps.AddArgument($window) | Out-Null
-    foreach ($arg in $argsList) {
+    foreach ($arg in $ArgumentList) {
         $ps.AddArgument($arg) | Out-Null
     }
     
