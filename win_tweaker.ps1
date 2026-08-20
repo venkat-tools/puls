@@ -981,7 +981,7 @@ function Run-Async ($scriptBlock, $ArgumentList=@()) {
     $rs.SessionStateProxy.SetVariable("txt_log_rep", $txt_log_rep)
     $rs.SessionStateProxy.SetVariable("activities", $activities)
     
-    # Pre-define helper logging functions inside the background runspace before scriptblock invocation
+    # 1. Add helper logging functions to the pipeline
     $ps.AddScript({
         function Log-Message ($msg) {
             $timestamp = Get-Date -Format "HH:mm:ss"
@@ -1006,11 +1006,10 @@ function Run-Async ($scriptBlock, $ArgumentList=@()) {
         }
     }.ToString()) | Out-Null
     
-    $ps.Invoke() | Out-Null # Define functions in runspace session state
-    $ps.Commands.Clear() # Clear helper code from pipeline
-    
-    # Add actual background script block to pipeline
+    # 2. Add actual background script block to pipeline (chained)
     $ps.AddScript($scriptBlock) | Out-Null
+    
+    # 3. Add arguments to pipeline (bound to actual background script block parameter list)
     $ps.AddArgument($window) | Out-Null
     foreach ($arg in $ArgumentList) {
         $ps.AddArgument($arg) | Out-Null
