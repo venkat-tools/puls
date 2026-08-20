@@ -1018,9 +1018,24 @@ function Run-Async ($scriptBlock, $ArgumentList=@(), $isLockingTask=$true) {
                 })
             })
         }
+        function Run-Command-With-Timeout ($cmd, $args, $timeoutSeconds=3) {
+            try {
+                $proc = Start-Process $cmd -ArgumentList $args -NoNewWindow -PassThru -ErrorAction SilentlyContinue
+                if ($proc) {
+                    $timeout = 0
+                    while ($timeout -lt ($timeoutSeconds * 2) -and -not $proc.HasExited) {
+                        Start-Sleep -Milliseconds 500
+                        $timeout++
+                    }
+                    if (-not $proc.HasExited) {
+                        Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
+                    }
+                }
+            } catch {}
+        }
         function Stop-Service-Force ($serviceName) {
-            # Send stop command via sc.exe (never blocks)
-            sc.exe stop $serviceName | Out-Null
+            # Send stop command via sc.exe using non-blocking timeout process wrapper
+            Run-Command-With-Timeout "sc.exe" "stop $serviceName" 3
             
             # Check if service is still running using SCM-free tasklist.exe
             $timeout = 0
@@ -1050,8 +1065,8 @@ function Run-Async ($scriptBlock, $ArgumentList=@(), $isLockingTask=$true) {
             }
         }
         function Start-Service-Safe ($serviceName) {
-            # Send start command via sc.exe (never blocks, returns 1056 if already running without error)
-            sc.exe start $serviceName | Out-Null
+            # Send start command via sc.exe using non-blocking timeout process wrapper
+            Run-Command-With-Timeout "sc.exe" "start $serviceName" 3
         }
     }.ToString()) | Out-Null
     
