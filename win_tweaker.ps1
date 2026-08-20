@@ -1014,9 +1014,12 @@ function Run-Async ($scriptBlock, $ArgumentList=@()) {
                     $timeout++
                 }
                 if ((Get-Service -Name $serviceName).Status -ne "Stopped") {
-                    $pid = (Get-CimInstance -ClassName Win32_Service -Filter "Name='$serviceName'").ProcessId
-                    if ($pid -and $pid -gt 0) {
-                        Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue
+                    $sc = sc.exe queryex $serviceName | Out-String
+                    if ($sc -match "PID\s*:\s*(\d+)") {
+                        $pid = [int]$Matches[1]
+                        if ($pid -gt 0) {
+                            Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue
+                        }
                     }
                     Start-Sleep -Seconds 1
                 }
@@ -1215,18 +1218,21 @@ $btn_soft_desel_all.Add_Click({
 })
 
 # --- SYSTEM STATS BACKGROUND MONITOR ---
-$osPlatform = (Get-CimInstance -Query "SELECT Caption FROM Win32_OperatingSystem").Caption
+$osPlatform = (Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion" -ErrorAction SilentlyContinue).ProductName
+if (-not $osPlatform) { $osPlatform = "Windows 10/11" }
 $txt_os.Text = "Win 10/11"
 
 Run-Async {
     param($win, $c, $r, $d, $u)
     # Instantiate .NET ComputerInfo for instant memory calculations
     $computerInfo = New-Object Microsoft.VisualBasic.Devices.ComputerInfo
-    $bootTime = (Get-CimInstance -Query "SELECT LastBootUpTime FROM Win32_OperatingSystem").LastBootUpTime
+    $cpuCounter = New-Object System.Diagnostics.PerformanceCounter("Processor", "% Processor Time", "_Total")
+    $cpuCounter.NextValue() | Out-Null
+    
     while ($true) {
         try {
-            # CPU query via selective property Select to run WMI extremely fast
-            $cpu = (Get-CimInstance -Query "SELECT LoadPercentage FROM Win32_Processor" -ErrorAction SilentlyContinue | Measure-Object -Property LoadPercentage -Average).Average
+            # CPU query via .NET PerformanceCounter (Instant: 0ms execution, WMI-free)
+            $cpu = $cpuCounter.NextValue()
             if ($cpu -eq $null) { $cpu = 0 }
             $cpuStr = "$([Math]::Round($cpu))%"
 
@@ -1241,9 +1247,10 @@ Run-Async {
             $freeGB = [Math]::Round($disk.Free / 1GB)
             $diskStr = "$freeGB GB Free"
 
-            # Uptime calculation via static BootTime reference
-            $uptime = (Get-Date) - $bootTime
-            $uptimeStr = "Uptime: $($uptime.Days)d $($uptime.Hours)h $($uptime.Minutes)m"
+            # Uptime calculation via static System.Environment.TickCount64 reference (Instant: 0ms execution, WMI-free)
+            $uptimeMs = [System.Environment]::TickCount64
+            $uptimeSpan = [TimeSpan]::FromMilliseconds($uptimeMs)
+            $uptimeStr = "Uptime: $($uptimeSpan.Days)d $($uptimeSpan.Hours)h $($uptimeSpan.Minutes)m"
 
             $win.Dispatcher.Invoke([Action]{
                 $c.Text = $cpuStr
