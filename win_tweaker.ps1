@@ -970,6 +970,10 @@ $script:isTaskRunning = $false
 sc.exe config wuauserv type= own | Out-Null
 sc.exe config bits type= own | Out-Null
 
+# Initialize global RunspacePool at startup (SCM-clean phase)
+$script:rsp = [runspacefactory]::CreateRunspacePool(1, 10)
+$script:rsp.Open()
+
 function Run-Async ($scriptBlock, $ArgumentList=@(), $isLockingTask=$true) {
     if ($isLockingTask -and $script:isTaskRunning) {
         Log-Message "[WARN] A system repair, scan or service configuration task is already running in the background. Please wait for it to finish before starting a new task."
@@ -981,22 +985,9 @@ function Run-Async ($scriptBlock, $ArgumentList=@(), $isLockingTask=$true) {
     }
 
     $ps = [PowerShell]::Create()
+    $ps.RunspacePool = $script:rsp
     
-    # Create and configure a separate dedicated runspace with UseNewThread option to run fully asynchronously
-    $rs = [System.Management.Automation.Runspaces.RunspaceFactory]::CreateRunspace()
-    $rs.ApartmentState = "STA"
-    $rs.ThreadOptions = "UseNewThread"
-    $rs.Open()
-    $ps.Runspace = $rs
-    
-    # Copy shared UI variables to background runspace context
-    $rs.SessionStateProxy.SetVariable("win", $window)
-    $rs.SessionStateProxy.SetVariable("txt_log_soft", $txt_log_soft)
-    $rs.SessionStateProxy.SetVariable("txt_log_rep", $txt_log_rep)
-    $rs.SessionStateProxy.SetVariable("activities", $activities)
-    
-    # 1. Add helper logging functions to the pipeline
-    $ps.AddScript({
+    $helpersDef = @'
         function Log-Message ($msg) {
             $timestamp = Get-Date -Format "HH:mm:ss"
             $formatted = "[$timestamp] $msg`r`n"
@@ -1054,10 +1045,7 @@ function Run-Async ($scriptBlock, $ArgumentList=@(), $isLockingTask=$true) {
             return ""
         }
         function Stop-Service-Force ($serviceName) {
-            # Send stop command via sc.exe using non-blocking timeout process wrapper
             Run-Command-With-Timeout "sc.exe" "stop $serviceName" 3
-            
-            # Check if service is still running using SCM-free tasklist.exe wrapped in timeout
             $timeout = 0
             $isRunning = $true
             while ($timeout -lt 6 -and $isRunning) {
@@ -1070,8 +1058,6 @@ function Run-Async ($scriptBlock, $ArgumentList=@(), $isLockingTask=$true) {
                 }
                 $timeout++
             }
-            
-            # If still running, find the PID from tasklist.exe and kill it if isolated or known dedicated service
             if ($isRunning) {
                 $tasklist = Get-Command-Output-With-Timeout "tasklist.exe" "/svc" 3
                 if ($tasklist -match "svchost\.exe\s+(\d+)\s+([^\r\n]*\b$serviceName\b[^\r\n]*)") {
@@ -1085,35 +1071,38 @@ function Run-Async ($scriptBlock, $ArgumentList=@(), $isLockingTask=$true) {
             }
         }
         function Start-Service-Safe ($serviceName) {
-            # Send start command via sc.exe using non-blocking timeout process wrapper
             Run-Command-With-Timeout "sc.exe" "start $serviceName" 3
         }
-    }.ToString()) | Out-Null
-    
-    # 2. Add actual background script block to pipeline (chained, wrapped with finally block if it is a locking task)
-    if ($isLockingTask) {
-        $wrappedScript = @"
-            param(`$win, `$arg1, `$arg2, `$arg3, `$arg4, `$arg5)
-            try {
-                & { $scriptBlock } `$win `$arg1 `$arg2 `$arg3 `$arg4 `$arg5
-            } finally {
+'@
+
+    $combinedScript = @"
+        param(`$win, `$txt_log_soft, `$txt_log_rep, `$activities, `$arg1, `$arg2, `$arg3, `$arg4, `$arg5)
+        
+        # Define helper functions in local scope
+        $helpersDef
+        
+        try {
+            & { $scriptBlock } `$win `$arg1 `$arg2 `$arg3 `$arg4 `$arg5
+        } finally {
+            if ($isLockingTask) {
                 `$win.Dispatcher.Invoke([Action]{
                     `$script:isTaskRunning = `$false
                 })
             }
+        }
 "@
-        $ps.AddScript($wrappedScript) | Out-Null
-    } else {
-        $ps.AddScript($scriptBlock) | Out-Null
-    }
+
+    $ps.AddScript($combinedScript) | Out-Null
     
-    # 3. Add arguments to pipeline (bound to actual background script block parameter list)
     $ps.AddArgument($window) | Out-Null
+    $ps.AddArgument($txt_log_soft) | Out-Null
+    $ps.AddArgument($txt_log_rep) | Out-Null
+    $ps.AddArgument($activities) | Out-Null
     foreach ($arg in $ArgumentList) {
         $ps.AddArgument($arg) | Out-Null
     }
     
-    # Register error stream callback to log background errors to the UI
+    # Register error stream callback
     $ps.Streams.Error.add_DataAdded({
         param($sender, $e)
         try {
@@ -1129,7 +1118,7 @@ function Run-Async ($scriptBlock, $ArgumentList=@(), $isLockingTask=$true) {
         } catch {}
     })
     
-    $script:runspaces.Add(@{ PS = $ps; RS = $rs }) | Out-Null
+    $script:runspaces.Add(@{ PS = $ps }) | Out-Null
     $ps.BeginInvoke() | Out-Null
 }
 
