@@ -1055,11 +1055,11 @@ function Run-Async ($scriptBlock, $ArgumentList=@(), $isLockingTask=$true) {
             if ($isRunning) {
                 $tasklist = tasklist.exe /svc | Out-String
                 if ($tasklist -match "svchost\.exe\s+(\d+)\s+([^\r\n]*\b$serviceName\b[^\r\n]*)") {
-                    $pid = [int]$Matches[1]
+                    $servicePid = [int]$Matches[1]
                     $servicesInProcess = $Matches[2]
                     $servicesCount = ($servicesInProcess -split ',\s*').Length
                     if ($servicesCount -eq 1 -or $serviceName -eq "spooler" -or $serviceName -eq "wsearch" -or $serviceName -eq "DiagTrack") {
-                        Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue
+                        Stop-Process -Id $servicePid -Force -ErrorAction SilentlyContinue
                     }
                 }
             }
