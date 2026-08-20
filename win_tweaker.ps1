@@ -1007,7 +1007,8 @@ function Run-Async ($scriptBlock, $ArgumentList=@()) {
         function Stop-Service-Force ($serviceName) {
             $service = Get-Service -Name $serviceName -ErrorAction SilentlyContinue
             if ($service -and $service.Status -ne "Stopped") {
-                Stop-Service -Name $serviceName -Force -ErrorAction SilentlyContinue
+                # Use sc.exe stop to send the stop signal instantly and never block
+                sc.exe stop $serviceName | Out-Null
                 $timeout = 0
                 while ($timeout -lt 6 -and (Get-Service -Name $serviceName).Status -ne "Stopped") {
                     Start-Sleep -Milliseconds 500
@@ -1023,6 +1024,13 @@ function Run-Async ($scriptBlock, $ArgumentList=@()) {
                     }
                     Start-Sleep -Seconds 1
                 }
+            }
+        }
+        function Start-Service-Safe ($serviceName) {
+            $service = Get-Service -Name $serviceName -ErrorAction SilentlyContinue
+            if ($service -and $service.Status -ne "Running") {
+                # Use sc.exe start to send the start signal instantly and never block
+                sc.exe start $serviceName | Out-Null
             }
         }
     }.ToString()) | Out-Null
@@ -1519,8 +1527,8 @@ $btn_rep_wu.Add_Click({
         $win.Dispatcher.Invoke([Action]{ Log-Message "Deleting SoftwareDistribution download cache..." })
         Remove-Item "$env:SystemRoot\SoftwareDistribution\Download\*" -Recurse -Force -ErrorAction SilentlyContinue
         
-        Start-Service wuauserv -ErrorAction SilentlyContinue
-        Start-Service bits -ErrorAction SilentlyContinue
+        Start-Service-Safe wuauserv
+        Start-Service-Safe bits
         $win.Dispatcher.Invoke([Action]{ 
             Log-Message "[OK] Windows Update services cache reset completed." 
             Add-Activity "System Repair" "Reset Update Cache completed" "Success"
@@ -1627,7 +1635,7 @@ $btn_rep_search.Add_Click({
     try {
         Stop-Service-Force wsearch
         Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows Search" -Name "SetupCompletedSuccessfully" -Value 0 -Force
-        Start-Service wsearch -ErrorAction SilentlyContinue
+        Start-Service-Safe wsearch
         Log-Message "[OK] Search indexer database reset. Windows is now rebuilding the index in the background."
         Add-Activity "System Tweak" "Rebuilt Search Index" "Success"
     } catch {
@@ -1788,7 +1796,7 @@ $btn_rep_printer_spool.Add_Click({
             Log-Message "Clearing print queue directory..."
             Remove-Item "$env:SystemRoot\system32\spool\PRINTERS\*" -Force -Recurse -ErrorAction SilentlyContinue
             Log-Message "Starting Print Spooler..."
-            Start-Service spooler -ErrorAction SilentlyContinue
+            Start-Service-Safe spooler
             Log-Message "[OK] Print Spooler restarted and queue cleared successfully."
             Add-Activity "Printer Repair" "Spooler Cleaned" "Success"
         } catch {
@@ -1827,7 +1835,7 @@ $btn_rep_printer_drivers.Add_Click({
             Stop-Service-Force spooler
             Remove-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Print\Environments\Windows x64\Drivers\Version-3\*" -Force -Recurse -ErrorAction SilentlyContinue
             Remove-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Print\Environments\Windows x64\Drivers\Version-4\*" -Force -Recurse -ErrorAction SilentlyContinue
-            Start-Service spooler -ErrorAction SilentlyContinue
+            Start-Service-Safe spooler
             Log-Message "[OK] Corrupted printer driver configuration keys cleaned."
             Add-Activity "Printer Repair" "Wiped Corrupted Drivers" "Success"
         } catch {
@@ -2013,8 +2021,8 @@ $btn_rep_shield_wu.Add_Click({
         Stop-Service-Force bits
         $dlls = @("wups.dll", "wups2.dll", "wuaueng.dll", "wuapi.dll", "wucltux.dll", "wuwebv.dll")
         foreach ($d in $dlls) { Start-Process regsvr32.exe -ArgumentList "/s $d" -Wait }
-        Start-Service wuauserv -ErrorAction SilentlyContinue
-        Start-Service bits -ErrorAction SilentlyContinue
+        Start-Service-Safe wuauserv
+        Start-Service-Safe bits
         $win.Dispatcher.Invoke([Action]{ 
             Log-Message "[OK] Windows Update components registered and services restarted." 
             Add-Activity "System Repair" "Windows Update Service Repair completed" "Success"
@@ -2049,7 +2057,7 @@ $btn_rep_shield_enable_wu.Add_Click({
         try {
             Remove-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" -Name "NoAutoUpdate" -Force -ErrorAction SilentlyContinue
             Set-Service -Name wuauserv -StartupType Automatic -ErrorAction SilentlyContinue
-            Start-Service wuauserv -ErrorAction SilentlyContinue
+            Start-Service-Safe wuauserv
             Log-Message "[OK] Windows Update service enabled and GPO block removed."
             Add-Activity "Shield Tweak" "Windows Updates Enabled" "Success"
         } catch {
@@ -2065,7 +2073,7 @@ $btn_rep_shield_defender.Add_Click({
     Run-Async {
         try {
             Remove-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender" -Recurse -Force -ErrorAction SilentlyContinue
-            Start-Service WinDefend -ErrorAction SilentlyContinue
+            Start-Service-Safe WinDefend
             Log-Message "[OK] Windows Defender policies reset successfully."
             Add-Activity "System Repair" "Reset Windows Defender Policies completed" "Success"
         } catch {
@@ -2083,8 +2091,8 @@ $btn_rep_shield_audio.Add_Click({
         param($win)
         Stop-Service-Force AudioSrv
         Stop-Service-Force AudioEndpointBuilder
-        Start-Service AudioEndpointBuilder -ErrorAction SilentlyContinue
-        Start-Service AudioSrv -ErrorAction SilentlyContinue
+        Start-Service-Safe AudioEndpointBuilder
+        Start-Service-Safe AudioSrv
         $win.Dispatcher.Invoke([Action]{ Log-Message "[OK] AudioSrv and AudioEndpointBuilder restarted successfully." })
     }
 })
@@ -2136,7 +2144,7 @@ $btn_rep_shell_font.Add_Click({
         param($win)
         Stop-Service-Force FontCache
         Remove-Item "$env:SystemRoot\ServiceProfiles\LocalService\AppData\Local\FontCache\*" -Force -Recurse -ErrorAction SilentlyContinue
-        Start-Service -Name "FontCache" -ErrorAction SilentlyContinue
+        Start-Service-Safe FontCache
         $win.Dispatcher.Invoke([Action]{ Log-Message "[OK] Font Cache rebuilt and service restarted." })
     }
 })
