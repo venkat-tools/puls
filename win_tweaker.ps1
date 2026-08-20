@@ -966,6 +966,10 @@ $activity_tree.ItemsSource = $activities
 $script:runspaces = [System.Collections.ArrayList]::new()
 $script:isTaskRunning = $false
 
+# Isolate wuauserv and bits services to dedicated processes at startup to allow safe process termination
+sc.exe config wuauserv type= own | Out-Null
+sc.exe config bits type= own | Out-Null
+
 function Run-Async ($scriptBlock, $ArgumentList=@(), $isLockingTask=$true) {
     if ($isLockingTask -and $script:isTaskRunning) {
         Log-Message "[WARN] A system repair, scan or service configuration task is already running in the background. Please wait for it to finish before starting a new task."
@@ -1015,33 +1019,39 @@ function Run-Async ($scriptBlock, $ArgumentList=@(), $isLockingTask=$true) {
             })
         }
         function Stop-Service-Force ($serviceName) {
-            $service = Get-Service -Name $serviceName -ErrorAction SilentlyContinue
-            if ($service -and $service.Status -ne "Stopped") {
-                # Use sc.exe stop to send the stop signal instantly and never block
-                sc.exe stop $serviceName | Out-Null
-                $timeout = 0
-                while ($timeout -lt 6 -and (Get-Service -Name $serviceName).Status -ne "Stopped") {
-                    Start-Sleep -Milliseconds 500
-                    $timeout++
+            # Send stop command via sc.exe (never blocks)
+            sc.exe stop $serviceName | Out-Null
+            
+            # Check if service is still running using SCM-free tasklist.exe
+            $timeout = 0
+            $isRunning = $true
+            while ($timeout -lt 6 -and $isRunning) {
+                Start-Sleep -Milliseconds 500
+                $tasklist = tasklist.exe /svc | Out-String
+                if ($tasklist -match "\b$serviceName\b") {
+                    $isRunning = $true
+                } else {
+                    $isRunning = $false
                 }
-                if ((Get-Service -Name $serviceName).Status -ne "Stopped") {
-                    $sc = sc.exe queryex $serviceName | Out-String
-                    if ($sc -match "PID\s*:\s*(\d+)") {
-                        $pid = [int]$Matches[1]
-                        if ($pid -gt 0) {
-                            Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue
-                        }
+                $timeout++
+            }
+            
+            # If still running, find the PID from tasklist.exe and kill it if isolated or known dedicated service
+            if ($isRunning) {
+                $tasklist = tasklist.exe /svc | Out-String
+                if ($tasklist -match "svchost\.exe\s+(\d+)\s+([^\r\n]*\b$serviceName\b[^\r\n]*)") {
+                    $pid = [int]$Matches[1]
+                    $servicesInProcess = $Matches[2]
+                    $servicesCount = ($servicesInProcess -split ',\s*').Length
+                    if ($servicesCount -eq 1 -or $serviceName -eq "spooler" -or $serviceName -eq "wsearch" -or $serviceName -eq "DiagTrack") {
+                        Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue
                     }
-                    Start-Sleep -Seconds 1
                 }
             }
         }
         function Start-Service-Safe ($serviceName) {
-            $service = Get-Service -Name $serviceName -ErrorAction SilentlyContinue
-            if ($service -and $service.Status -ne "Running") {
-                # Use sc.exe start to send the start signal instantly and never block
-                sc.exe start $serviceName | Out-Null
-            }
+            # Send start command via sc.exe (never blocks, returns 1056 if already running without error)
+            sc.exe start $serviceName | Out-Null
         }
     }.ToString()) | Out-Null
     
