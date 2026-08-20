@@ -1033,16 +1033,36 @@ function Run-Async ($scriptBlock, $ArgumentList=@(), $isLockingTask=$true) {
                 }
             } catch {}
         }
+        function Get-Command-Output-With-Timeout ($cmd, $args, $timeoutSeconds=3) {
+            try {
+                $tempFile = [System.IO.Path]::GetTempFileName()
+                $proc = Start-Process $cmd -ArgumentList $args -NoNewWindow -PassThru -RedirectStandardOutput $tempFile -ErrorAction SilentlyContinue
+                if ($proc) {
+                    $timeout = 0
+                    while ($timeout -lt ($timeoutSeconds * 2) -and -not $proc.HasExited) {
+                        Start-Sleep -Milliseconds 500
+                        $timeout++
+                    }
+                    if (-not $proc.HasExited) {
+                        Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
+                    }
+                    $output = Get-Content $tempFile -Raw -ErrorAction SilentlyContinue
+                    Remove-Item $tempFile -Force -ErrorAction SilentlyContinue
+                    return $output
+                }
+            } catch {}
+            return ""
+        }
         function Stop-Service-Force ($serviceName) {
             # Send stop command via sc.exe using non-blocking timeout process wrapper
             Run-Command-With-Timeout "sc.exe" "stop $serviceName" 3
             
-            # Check if service is still running using SCM-free tasklist.exe
+            # Check if service is still running using SCM-free tasklist.exe wrapped in timeout
             $timeout = 0
             $isRunning = $true
             while ($timeout -lt 6 -and $isRunning) {
                 Start-Sleep -Milliseconds 500
-                $tasklist = tasklist.exe /svc | Out-String
+                $tasklist = Get-Command-Output-With-Timeout "tasklist.exe" "/svc" 3
                 if ($tasklist -match "\b$serviceName\b") {
                     $isRunning = $true
                 } else {
@@ -1053,7 +1073,7 @@ function Run-Async ($scriptBlock, $ArgumentList=@(), $isLockingTask=$true) {
             
             # If still running, find the PID from tasklist.exe and kill it if isolated or known dedicated service
             if ($isRunning) {
-                $tasklist = tasklist.exe /svc | Out-String
+                $tasklist = Get-Command-Output-With-Timeout "tasklist.exe" "/svc" 3
                 if ($tasklist -match "svchost\.exe\s+(\d+)\s+([^\r\n]*\b$serviceName\b[^\r\n]*)") {
                     $servicePid = [int]$Matches[1]
                     $servicesInProcess = $Matches[2]
@@ -1574,7 +1594,8 @@ $btn_rep_wu.Add_Click({
         Stop-Service-Force bits
         
         $win.Dispatcher.Invoke([Action]{ Log-Message "Deleting SoftwareDistribution download cache..." })
-        Remove-Item "$env:SystemRoot\SoftwareDistribution\Download\*" -Recurse -Force -ErrorAction SilentlyContinue
+        cmd.exe /c "rd /s /q %SystemRoot%\SoftwareDistribution\Download" 2>$null
+        cmd.exe /c "mkdir %SystemRoot%\SoftwareDistribution\Download" 2>$null
         
         Start-Service-Safe wuauserv
         Start-Service-Safe bits
