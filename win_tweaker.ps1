@@ -2612,26 +2612,32 @@ $btn_rep_wifi_pass.Add_Click({
     Run-Async {
         param($win)
         try {
-            $profilesOutput = Get-Command-Output-With-Timeout "netsh.exe" "wlan show profiles" 5
-            $profiles = $profilesOutput | Select-String "All User Profile" | ForEach-Object { 
-                $parts = $_.ToString().Split(":")
-                if ($parts.Length -gt 1) { $parts[1].Trim() }
-            }
+            $tempDir = [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), [System.Guid]::NewGuid().ToString())
+            New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
+            
+            Run-Command-With-Timeout "netsh.exe" "wlan export profile folder=\\"$tempDir\\" key=clear" 5
+            
             $win.Dispatcher.Invoke([Action]{ Log-Message "--- DECRYPTED WI-FI SECURITY PROFILES ---" })
-            foreach ($p in $profiles) {
-                if (-not $p) { continue }
-                $res = Get-Command-Output-With-Timeout "netsh.exe" "wlan show profile name=\"$p\" key=clear" 5
-                $passLine = $res | Select-String "Key Content"
-                if ($passLine) {
-                    $parts = $passLine.ToString().Split(":")
-                    if ($parts.Length -gt 1) {
-                        $pwd = $parts[1].Trim()
-                        $win.Dispatcher.Invoke([Action]{ Log-Message " -> Wireless SSID: $p | Security Key: $pwd" })
+            
+            $files = Get-ChildItem $tempDir -Filter "*.xml" -ErrorAction SilentlyContinue
+            foreach ($f in $files) {
+                try {
+                    [xml]$xml = Get-Content $f.FullName -Raw -ErrorAction SilentlyContinue
+                    $name = $xml.WLANProfile.name
+                    $key = $xml.WLANProfile.MSM.security.sharedKey.keyMaterial
+                    if ($key) {
+                        if ($key -match '^[0-9A-Fa-f]{32,}$') {
+                            $win.Dispatcher.Invoke([Action]{ Log-Message " -> Wireless SSID: $name | Security Key: [Enterprise WPA / Protected]" })
+                        } else {
+                            $win.Dispatcher.Invoke([Action]{ Log-Message " -> Wireless SSID: $name | Security Key: $key" })
+                        }
+                    } else {
+                        $win.Dispatcher.Invoke([Action]{ Log-Message " -> Wireless SSID: $name | Security Key: [Open / No Password]" })
                     }
-                } else {
-                    $win.Dispatcher.Invoke([Action]{ Log-Message " -> Wireless SSID: $p | Security Key: [Open / No Password]" })
-                }
+                } catch {}
             }
+            
+            Remove-Item $tempDir -Recurse -Force -ErrorAction SilentlyContinue
             $win.Dispatcher.Invoke([Action]{ Add-Activity "Diagnostics" "Wi-Fi Passwords Decrypted" "Success" })
         } catch {
             $win.Dispatcher.Invoke([Action]{ 
