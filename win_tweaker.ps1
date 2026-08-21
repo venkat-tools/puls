@@ -1140,27 +1140,36 @@ function Run-Async ($scriptBlock, $ArgumentList=@(), $isLockingTask=$true) {
 }
 
 function Add-Activity ($op, $desc, $status) {
-    $window.Dispatcher.Invoke([Action]{
+    $action = [Action]{
         $script:activities.Insert(0, [PSCustomObject]@{
             Operation = $op
             Description = $desc
             Status = $status
             Timestamp = (Get-Date -Format "HH:mm:ss")
         })
-    })
+    }
+    if ($window.Dispatcher.CheckAccess()) {
+        & $action
+    } else {
+        $window.Dispatcher.Invoke($action)
+    }
 }
 
 function Log-Message ($msg) {
     $timestamp = Get-Date -Format "HH:mm:ss"
     $formatted = "[$timestamp] $msg`r`n"
-    $window.Dispatcher.Invoke([Action[string]]{
+    $action = [Action[string]]{
         param($text)
         $txt_log_soft.AppendText($text)
         $txt_log_soft.ScrollToEnd()
-        
         $txt_log_rep.AppendText($text)
         $txt_log_rep.ScrollToEnd()
-    }, $formatted)
+    }
+    if ($window.Dispatcher.CheckAccess()) {
+        & $action $formatted
+    } else {
+        $window.Dispatcher.Invoke($action, $formatted)
+    }
 }
 
 function Switch-View ($viewName) {
