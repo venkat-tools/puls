@@ -962,9 +962,12 @@ $xmlDoc.SelectNodes("//*[@Name]") | ForEach-Object {
 # --- GLOBAL UTILITY FUNCTIONS ---
 $activities = New-Object System.Collections.ObjectModel.ObservableCollection[PSObject]
 $activity_tree.ItemsSource = $activities
+[System.Windows.Data.BindingOperations]::EnableCollectionSynchronization($activities, (New-Object System.Object))
 
 $script:runspaces = [System.Collections.ArrayList]::new()
-$script:isTaskRunning = $false
+$script:sharedData = [hashtable]::Synchronized(@{
+    isTaskRunning = $false
+})
 
 # Isolate wuauserv and bits services to dedicated processes at startup to allow safe process termination
 sc.exe config wuauserv type= own | Out-Null
@@ -975,13 +978,13 @@ $script:rsp = [runspacefactory]::CreateRunspacePool(1, 10)
 $script:rsp.Open()
 
 function Run-Async ($scriptBlock, $ArgumentList=@(), $isLockingTask=$true) {
-    if ($isLockingTask -and $script:isTaskRunning) {
+    if ($isLockingTask -and $script:sharedData.isTaskRunning) {
         Log-Message "[WARN] A system repair, scan or service configuration task is already running in the background. Please wait for it to finish before starting a new task."
         return
     }
     
     if ($isLockingTask) {
-        $script:isTaskRunning = $true
+        $script:sharedData.isTaskRunning = $true
     }
 
     $ps = [PowerShell]::Create()
@@ -1087,7 +1090,7 @@ function Run-Async ($scriptBlock, $ArgumentList=@(), $isLockingTask=$true) {
 
     $lockVal = if ($isLockingTask) { '$true' } else { '$false' }
     $combinedScript = @"
-        param(`$win, `$txt_log_soft, `$txt_log_rep, `$activities, `$arg1, `$arg2, `$arg3, `$arg4, `$arg5)
+        param(`$win, `$txt_log_soft, `$txt_log_rep, `$activities, `$sharedData, `$arg1, `$arg2, `$arg3, `$arg4, `$arg5)
         
         # Assign global scope variables for scope-independent helper access
         `$global:win = `$win
@@ -1102,9 +1105,7 @@ function Run-Async ($scriptBlock, $ArgumentList=@(), $isLockingTask=$true) {
             & { $scriptBlock } `$win `$arg1 `$arg2 `$arg3 `$arg4 `$arg5
         } finally {
             if ($lockVal) {
-                `$global:win.Dispatcher.Invoke([Action]{
-                    `$script:isTaskRunning = `$false
-                })
+                `$sharedData.isTaskRunning = `$false
             }
         }
 "@
@@ -1115,6 +1116,7 @@ function Run-Async ($scriptBlock, $ArgumentList=@(), $isLockingTask=$true) {
     $ps.AddArgument($txt_log_soft) | Out-Null
     $ps.AddArgument($txt_log_rep) | Out-Null
     $ps.AddArgument($activities) | Out-Null
+    $ps.AddArgument($script:sharedData) | Out-Null
     foreach ($arg in $ArgumentList) {
         $ps.AddArgument($arg) | Out-Null
     }
