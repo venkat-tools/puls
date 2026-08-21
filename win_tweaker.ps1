@@ -991,17 +991,17 @@ function Run-Async ($scriptBlock, $ArgumentList=@(), $isLockingTask=$true) {
         function Log-Message ($msg) {
             $timestamp = Get-Date -Format "HH:mm:ss"
             $formatted = "[$timestamp] $msg`r`n"
-            $win.Dispatcher.Invoke([Action[string]]{
+            $global:win.Dispatcher.Invoke([Action[string]]{
                 param($text)
-                $txt_log_soft.AppendText($text)
-                $txt_log_soft.ScrollToEnd()
-                $txt_log_rep.AppendText($text)
-                $txt_log_rep.ScrollToEnd()
+                $global:txt_log_soft.AppendText($text)
+                $global:txt_log_soft.ScrollToEnd()
+                $global:txt_log_rep.AppendText($text)
+                $global:txt_log_rep.ScrollToEnd()
             }, $formatted)
         }
         function Add-Activity ($op, $desc, $status) {
-            $win.Dispatcher.Invoke([Action]{
-                $activities.Insert(0, [PSCustomObject]@{
+            $global:win.Dispatcher.Invoke([Action]{
+                $global:activities.Insert(0, [PSCustomObject]@{
                     Operation = $op
                     Description = $desc
                     Status = $status
@@ -1084,6 +1084,12 @@ function Run-Async ($scriptBlock, $ArgumentList=@(), $isLockingTask=$true) {
     $combinedScript = @"
         param(`$win, `$txt_log_soft, `$txt_log_rep, `$activities, `$arg1, `$arg2, `$arg3, `$arg4, `$arg5)
         
+        # Assign global scope variables for scope-independent helper access
+        `$global:win = `$win
+        `$global:txt_log_soft = `$txt_log_soft
+        `$global:txt_log_rep = `$txt_log_rep
+        `$global:activities = `$activities
+
         # Define helper functions in local scope
         $helpersDef
         
@@ -1091,7 +1097,7 @@ function Run-Async ($scriptBlock, $ArgumentList=@(), $isLockingTask=$true) {
             & { $scriptBlock } `$win `$arg1 `$arg2 `$arg3 `$arg4 `$arg5
         } finally {
             if ($lockVal) {
-                `$win.Dispatcher.Invoke([Action]{
+                `$global:win.Dispatcher.Invoke([Action]{
                     `$script:isTaskRunning = `$false
                 })
             }
@@ -2580,14 +2586,15 @@ $btn_rep_wifi_pass.Add_Click({
     Run-Async {
         param($win)
         try {
-            $profiles = netsh wlan show profiles | Select-String "All User Profile" | ForEach-Object { 
+            $profilesOutput = Get-Command-Output-With-Timeout "netsh.exe" "wlan show profiles" 5
+            $profiles = $profilesOutput | Select-String "All User Profile" | ForEach-Object { 
                 $parts = $_.ToString().Split(":")
                 if ($parts.Length -gt 1) { $parts[1].Trim() }
             }
             $win.Dispatcher.Invoke([Action]{ Log-Message "--- DECRYPTED WI-FI SECURITY PROFILES ---" })
             foreach ($p in $profiles) {
                 if (-not $p) { continue }
-                $res = netsh wlan show profile name="$p" key=clear
+                $res = Get-Command-Output-With-Timeout "netsh.exe" "wlan show profile name=\"$p\" key=clear" 5
                 $passLine = $res | Select-String "Key Content"
                 if ($passLine) {
                     $parts = $passLine.ToString().Split(":")
@@ -2615,12 +2622,19 @@ $btn_rep_wifi_export.Add_Click({
     Add-Activity "Diagnostics" "Exporting Wi-Fi XML profiles" "Running"
     Run-Async {
         param($win)
-        $desktop = [Environment]::GetFolderPath("Desktop")
-        netsh wlan export profile folder="$desktop" key=clear | Out-Null
-        $win.Dispatcher.Invoke([Action]{ 
-            Log-Message "[OK] All decrypted Wi-Fi XML profiles exported to directory: $desktop" 
-            Add-Activity "Diagnostics" "Wi-Fi XML Profiles Exported" "Success"
-        })
+        try {
+            $desktop = [Environment]::GetFolderPath("Desktop")
+            Run-Command-With-Timeout "netsh.exe" "wlan export profile folder=\"$desktop\" key=clear" 5
+            $win.Dispatcher.Invoke([Action]{ 
+                Log-Message "[OK] All decrypted Wi-Fi XML profiles exported to directory: $desktop" 
+                Add-Activity "Diagnostics" "Wi-Fi XML Profiles Exported" "Success"
+            })
+        } catch {
+            $win.Dispatcher.Invoke([Action]{
+                Log-Message "[FAIL] Exporting Wi-Fi XML profiles failed: $_"
+                Add-Activity "Diagnostics" "Exporting Wi-Fi XML profiles" "Failed"
+            })
+        }
     }
 })
 
@@ -2630,12 +2644,19 @@ $btn_rep_dhcp.Add_Click({
     Add-Activity "Diagnostics" "Renew DHCP IP Address" "Running"
     Run-Async {
         param($win)
-        ipconfig /release | Out-Null
-        ipconfig /renew | Out-Null
-        $win.Dispatcher.Invoke([Action]{ 
-            Log-Message "[OK] Completed adapter IP refresh and renewed DHCP connection."
-            Add-Activity "Diagnostics" "DHCP IP Address Renewed" "Success"
-        })
+        try {
+            Run-Command-With-Timeout "ipconfig.exe" "/release" 5
+            Run-Command-With-Timeout "ipconfig.exe" "/renew" 10
+            $win.Dispatcher.Invoke([Action]{ 
+                Log-Message "[OK] Completed adapter IP refresh and renewed DHCP connection."
+                Add-Activity "Diagnostics" "DHCP IP Address Renewed" "Success"
+            })
+        } catch {
+            $win.Dispatcher.Invoke([Action]{
+                Log-Message "[FAIL] DHCP IP Address Renew failed: $_"
+                Add-Activity "Diagnostics" "Renew DHCP IP Address" "Failed"
+            })
+        }
     }
 })
 
