@@ -1011,35 +1011,36 @@ function Run-Async ($scriptBlock, $ArgumentList=@(), $isLockingTask=$true) {
         }
         function Run-Command-With-Timeout ($cmd, $args, $timeoutSeconds=3) {
             try {
-                $proc = Start-Process $cmd -ArgumentList $args -NoNewWindow -PassThru -ErrorAction SilentlyContinue
+                $psi = New-Object System.Diagnostics.ProcessStartInfo
+                $psi.FileName = $cmd
+                $psi.Arguments = $args
+                $psi.UseShellExecute = $false
+                $psi.CreateNoWindow = $true
+                
+                $proc = [System.Diagnostics.Process]::Start($psi)
                 if ($proc) {
-                    $timeout = 0
-                    while ($timeout -lt ($timeoutSeconds * 2) -and -not $proc.HasExited) {
-                        Start-Sleep -Milliseconds 500
-                        $timeout++
-                    }
-                    if (-not $proc.HasExited) {
-                        Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
+                    if (-not $proc.WaitForExit($timeoutSeconds * 1000)) {
+                        $proc.Kill()
                     }
                 }
             } catch {}
         }
         function Get-Command-Output-With-Timeout ($cmd, $args, $timeoutSeconds=3) {
             try {
-                $tempFile = [System.IO.Path]::GetTempFileName()
-                $proc = Start-Process $cmd -ArgumentList $args -NoNewWindow -PassThru -RedirectStandardOutput $tempFile -ErrorAction SilentlyContinue
+                $psi = New-Object System.Diagnostics.ProcessStartInfo
+                $psi.FileName = $cmd
+                $psi.Arguments = $args
+                $psi.UseShellExecute = $false
+                $psi.RedirectStandardOutput = $true
+                $psi.CreateNoWindow = $true
+                
+                $proc = [System.Diagnostics.Process]::Start($psi)
                 if ($proc) {
-                    $timeout = 0
-                    while ($timeout -lt ($timeoutSeconds * 2) -and -not $proc.HasExited) {
-                        Start-Sleep -Milliseconds 500
-                        $timeout++
+                    if ($proc.WaitForExit($timeoutSeconds * 1000)) {
+                        return $proc.StandardOutput.ReadToEnd()
+                    } else {
+                        $proc.Kill()
                     }
-                    if (-not $proc.HasExited) {
-                        Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
-                    }
-                    $output = Get-Content $tempFile -Raw -ErrorAction SilentlyContinue
-                    Remove-Item $tempFile -Force -ErrorAction SilentlyContinue
-                    return $output
                 }
             } catch {}
             return ""
@@ -1337,13 +1338,6 @@ Run-Async {
 Add-Activity "Launch Utility" "Ready" "Success"
 Log-Message "System Utility Toolkit initialized."
 Log-Message "Operating System: $osPlatform"
-
-# Asynchronously stop services once at startup to enforce dedicated type=own process mapping
-Run-Async {
-    param($win)
-    Run-Command-With-Timeout "sc.exe" "stop wuauserv" 3
-    Run-Command-With-Timeout "sc.exe" "stop bits" 3
-} @() $false
 
 # --- CORE ACTIONS IMPLEMENTATION ---
 
