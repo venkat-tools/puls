@@ -1027,21 +1027,26 @@ function Run-Async ($scriptBlock, $ArgumentList=@(), $isLockingTask=$true) {
         }
         function Get-Command-Output-With-Timeout ($cmd, $args, $timeoutSeconds=3) {
             try {
+                $tempFile = [System.IO.Path]::GetTempFileName()
+                $cmdLine = "/c $cmd $args > `"$tempFile`""
+                
                 $psi = New-Object System.Diagnostics.ProcessStartInfo
-                $psi.FileName = $cmd
-                $psi.Arguments = $args
+                $psi.FileName = "cmd.exe"
+                $psi.Arguments = $cmdLine
                 $psi.UseShellExecute = $false
-                $psi.RedirectStandardOutput = $true
                 $psi.CreateNoWindow = $true
                 
                 $proc = [System.Diagnostics.Process]::Start($psi)
                 if ($proc) {
                     if ($proc.WaitForExit($timeoutSeconds * 1000)) {
-                        return $proc.StandardOutput.ReadToEnd()
+                        $output = Get-Content $tempFile -Raw -ErrorAction SilentlyContinue
+                        Remove-Item $tempFile -Force -ErrorAction SilentlyContinue
+                        return $output
                     } else {
                         $proc.Kill()
                     }
                 }
+                Remove-Item $tempFile -Force -ErrorAction SilentlyContinue
             } catch {}
             return ""
         }
