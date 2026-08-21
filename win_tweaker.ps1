@@ -1079,6 +1079,7 @@ function Run-Async ($scriptBlock, $ArgumentList=@(), $isLockingTask=$true) {
         }
 '@
 
+    $lockVal = if ($isLockingTask) { '$true' } else { '$false' }
     $combinedScript = @"
         param(`$win, `$txt_log_soft, `$txt_log_rep, `$activities, `$arg1, `$arg2, `$arg3, `$arg4, `$arg5)
         
@@ -1088,7 +1089,7 @@ function Run-Async ($scriptBlock, $ArgumentList=@(), $isLockingTask=$true) {
         try {
             & { $scriptBlock } `$win `$arg1 `$arg2 `$arg3 `$arg4 `$arg5
         } finally {
-            if ($isLockingTask) {
+            if ($lockVal) {
                 `$win.Dispatcher.Invoke([Action]{
                     `$script:isTaskRunning = `$false
                 })
