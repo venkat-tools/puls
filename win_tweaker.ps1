@@ -1140,7 +1140,7 @@ function Run-Async ($scriptBlock, $ArgumentList=@(), $isLockingTask=$true) {
 }
 
 function Add-Activity ($op, $desc, $status) {
-    $action = [Action]{
+    $action = {
         $script:activities.Insert(0, [PSCustomObject]@{
             Operation = $op
             Description = $desc
@@ -1151,14 +1151,14 @@ function Add-Activity ($op, $desc, $status) {
     if ($window.Dispatcher.CheckAccess()) {
         & $action
     } else {
-        $window.Dispatcher.Invoke($action)
+        $window.Dispatcher.Invoke([Action]$action)
     }
 }
 
 function Log-Message ($msg) {
     $timestamp = Get-Date -Format "HH:mm:ss"
     $formatted = "[$timestamp] $msg`r`n"
-    $action = [Action[string]]{
+    $action = {
         param($text)
         $txt_log_soft.AppendText($text)
         $txt_log_soft.ScrollToEnd()
@@ -1168,7 +1168,7 @@ function Log-Message ($msg) {
     if ($window.Dispatcher.CheckAccess()) {
         & $action $formatted
     } else {
-        $window.Dispatcher.Invoke($action, $formatted)
+        $window.Dispatcher.Invoke([Action[string]]$action, $formatted)
     }
 }
 
