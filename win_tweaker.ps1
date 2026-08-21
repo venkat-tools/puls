@@ -994,23 +994,33 @@ function Run-Async ($scriptBlock, $ArgumentList=@(), $isLockingTask=$true) {
         function Log-Message ($msg) {
             $timestamp = Get-Date -Format "HH:mm:ss"
             $formatted = "[$timestamp] $msg`r`n"
-            $global:win.Dispatcher.Invoke([Action[string]]{
+            $action = {
                 param($text)
                 $global:txt_log_soft.AppendText($text)
                 $global:txt_log_soft.ScrollToEnd()
                 $global:txt_log_rep.AppendText($text)
                 $global:txt_log_rep.ScrollToEnd()
-            }, $formatted)
+            }
+            if ($global:win.Dispatcher.CheckAccess()) {
+                & $action $formatted
+            } else {
+                $global:win.Dispatcher.Invoke([Action[string]]$action, $formatted)
+            }
         }
         function Add-Activity ($op, $desc, $status) {
-            $global:win.Dispatcher.Invoke([Action]{
+            $action = {
                 $global:activities.Insert(0, [PSCustomObject]@{
                     Operation = $op
                     Description = $desc
                     Status = $status
                     Timestamp = (Get-Date -Format "HH:mm:ss")
                 })
-            })
+            }
+            if ($global:win.Dispatcher.CheckAccess()) {
+                & $action
+            } else {
+                $global:win.Dispatcher.Invoke([Action]$action)
+            }
         }
         function Run-Command-With-Timeout ($cmd, $cmdArgs, $timeoutSeconds=3) {
             try {
