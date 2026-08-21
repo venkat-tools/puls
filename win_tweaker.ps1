@@ -2579,19 +2579,33 @@ $btn_rep_wifi_pass.Add_Click({
     Add-Activity "Diagnostics" "Decrypting Wi-Fi Passwords" "Running"
     Run-Async {
         param($win)
-        $profiles = netsh wlan show profiles | Select-String "All User Profile" | ForEach-Object { $_.ToString().Split(":")[1].Trim() }
-        $win.Dispatcher.Invoke([Action]{ Log-Message "--- DECRYPTED WI-FI SECURITY PROFILES ---" })
-        foreach ($p in $profiles) {
-            $res = netsh wlan show profile name="$p" key=clear
-            $passLine = $res | Select-String "Key Content"
-            if ($passLine) {
-                $pwd = $passLine.ToString().Split(":")[1].Trim()
-                $win.Dispatcher.Invoke([Action]{ Log-Message " -> Wireless SSID: $p | Security Key: $pwd" })
-            } else {
-                $win.Dispatcher.Invoke([Action]{ Log-Message " -> Wireless SSID: $p | Security Key: [Open / No Password]" })
+        try {
+            $profiles = netsh wlan show profiles | Select-String "All User Profile" | ForEach-Object { 
+                $parts = $_.ToString().Split(":")
+                if ($parts.Length -gt 1) { $parts[1].Trim() }
             }
+            $win.Dispatcher.Invoke([Action]{ Log-Message "--- DECRYPTED WI-FI SECURITY PROFILES ---" })
+            foreach ($p in $profiles) {
+                if (-not $p) { continue }
+                $res = netsh wlan show profile name="$p" key=clear
+                $passLine = $res | Select-String "Key Content"
+                if ($passLine) {
+                    $parts = $passLine.ToString().Split(":")
+                    if ($parts.Length -gt 1) {
+                        $pwd = $parts[1].Trim()
+                        $win.Dispatcher.Invoke([Action]{ Log-Message " -> Wireless SSID: $p | Security Key: $pwd" })
+                    }
+                } else {
+                    $win.Dispatcher.Invoke([Action]{ Log-Message " -> Wireless SSID: $p | Security Key: [Open / No Password]" })
+                }
+            }
+            $win.Dispatcher.Invoke([Action]{ Add-Activity "Diagnostics" "Wi-Fi Passwords Decrypted" "Success" })
+        } catch {
+            $win.Dispatcher.Invoke([Action]{ 
+                Log-Message "[FAIL] Decrypting Wi-Fi Passwords failed: $_" 
+                Add-Activity "Diagnostics" "Wi-Fi Passwords Decrypted" "Failed"
+            })
         }
-        $win.Dispatcher.Invoke([Action]{ Add-Activity "Diagnostics" "Wi-Fi Passwords Decrypted" "Success" })
     }
 })
 
@@ -2662,23 +2676,36 @@ $btn_diag_top_proc.Add_Click({
     Add-Activity "Diagnostics" "Scanning processes CPU/RAM allocation" "Running"
     Run-Async {
         param($win)
-        $cpuProc = Get-Process | Sort-Object CPU -Descending | Select-Object -First 5
-        $ramProc = Get-Process | Sort-Object WorkingSet -Descending | Select-Object -First 5
-        
-        $win.Dispatcher.Invoke([Action]{ Log-Message "--- TOP PROCESSES BY CPU TIME ---" })
-        foreach ($p in $cpuProc) {
-            $cpuSecs = [Math]::Round($p.CPU)
-            $name = $p.ProcessName
-            $win.Dispatcher.Invoke([Action]{ Log-Message "  -> Process Name: $name ($cpuSecs CPU-seconds)" })
+        try {
+            $cpuProc = Get-Process | Sort-Object CPU -Descending | Select-Object -First 5
+            $ramProc = Get-Process | Sort-Object WorkingSet -Descending | Select-Object -First 5
+            
+            $win.Dispatcher.Invoke([Action]{ Log-Message "--- TOP PROCESSES BY CPU TIME ---" })
+            foreach ($p in $cpuProc) {
+                $cpuSecs = 0
+                if ($p.CPU -ne $null) {
+                    $cpuSecs = [Math]::Round($p.CPU)
+                }
+                $name = $p.ProcessName
+                $win.Dispatcher.Invoke([Action]{ Log-Message "  -> Process Name: $name ($cpuSecs CPU-seconds)" })
+            }
+            
+            $win.Dispatcher.Invoke([Action]{ Log-Message "--- TOP PROCESSES BY MEMORY WORKING SET ---" })
+            foreach ($p in $ramProc) {
+                $wsMB = 0
+                if ($p.WorkingSet -ne $null) {
+                    $wsMB = [Math]::Round($p.WorkingSet / 1MB)
+                }
+                $name = $p.ProcessName
+                $win.Dispatcher.Invoke([Action]{ Log-Message "  -> Process Name: $name ($wsMB MB RAM alloc)" })
+            }
+            $win.Dispatcher.Invoke([Action]{ Add-Activity "Diagnostics" "Processes Scanned" "Success" })
+        } catch {
+            $win.Dispatcher.Invoke([Action]{ 
+                Log-Message "[FAIL] Process scan failed: $_" 
+                Add-Activity "Diagnostics" "Scanning processes CPU/RAM allocation" "Failed"
+            })
         }
-        
-        $win.Dispatcher.Invoke([Action]{ Log-Message "--- TOP PROCESSES BY MEMORY WORKING SET ---" })
-        foreach ($p in $ramProc) {
-            $wsMB = [Math]::Round($p.WorkingSet / 1MB)
-            $name = $p.ProcessName
-            $win.Dispatcher.Invoke([Action]{ Log-Message "  -> Process Name: $name ($wsMB MB RAM alloc)" })
-        }
-        $win.Dispatcher.Invoke([Action]{ Add-Activity "Diagnostics" "Processes Scanned" "Success" })
     }
 })
 
