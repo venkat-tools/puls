@@ -1009,12 +1009,31 @@ function Run-Async ($scriptBlock, $ArgumentList=@(), $isLockingTask=$true) {
         }
         function Add-Activity ($op, $desc, $status) {
             $action = {
-                $global:activities.Insert(0, [PSCustomObject]@{
-                    Operation = $op
-                    Description = $desc
-                    Status = $status
-                    Timestamp = (Get-Date -Format "HH:mm:ss")
-                })
+                $existing = $null
+                foreach ($act in $global:activities) {
+                    if ($act.Operation -eq $op -and $act.Status -eq "Running") {
+                        $existing = $act
+                        break
+                    }
+                }
+                if ($existing -ne $null) {
+                    $index = $global:activities.IndexOf($existing)
+                    if ($index -ge 0) {
+                        $global:activities[$index] = [PSCustomObject]@{
+                            Operation = $op
+                            Description = $desc
+                            Status = $status
+                            Timestamp = (Get-Date -Format "HH:mm:ss")
+                        }
+                    }
+                } else {
+                    $global:activities.Insert(0, [PSCustomObject]@{
+                        Operation = $op
+                        Description = $desc
+                        Status = $status
+                        Timestamp = (Get-Date -Format "HH:mm:ss")
+                    })
+                }
             }
             if ($global:win.Dispatcher.CheckAccess()) {
                 & $action
@@ -1153,12 +1172,31 @@ function Run-Async ($scriptBlock, $ArgumentList=@(), $isLockingTask=$true) {
 
 function Add-Activity ($op, $desc, $status) {
     $action = {
-        $script:activities.Insert(0, [PSCustomObject]@{
-            Operation = $op
-            Description = $desc
-            Status = $status
-            Timestamp = (Get-Date -Format "HH:mm:ss")
-        })
+        $existing = $null
+        foreach ($act in $script:activities) {
+            if ($act.Operation -eq $op -and $act.Status -eq "Running") {
+                $existing = $act
+                break
+            }
+        }
+        if ($existing -ne $null) {
+            $index = $script:activities.IndexOf($existing)
+            if ($index -ge 0) {
+                $script:activities[$index] = [PSCustomObject]@{
+                    Operation = $op
+                    Description = $desc
+                    Status = $status
+                    Timestamp = (Get-Date -Format "HH:mm:ss")
+                }
+            }
+        } else {
+            $script:activities.Insert(0, [PSCustomObject]@{
+                Operation = $op
+                Description = $desc
+                Status = $status
+                Timestamp = (Get-Date -Format "HH:mm:ss")
+            })
+        }
     }
     if ($window.Dispatcher.CheckAccess()) {
         & $action
