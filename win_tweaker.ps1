@@ -1051,6 +1051,10 @@ function Run-Async ($scriptBlock, $ArgumentList=@(), $isLockingTask=$true) {
             while ($timeout -lt 6 -and $isRunning) {
                 Start-Sleep -Milliseconds 500
                 $tasklist = Get-Command-Output-With-Timeout "tasklist.exe" "/svc" 3
+                if ($tasklist -eq "") {
+                    $isRunning = $false
+                    break
+                }
                 if ($tasklist -match "\b$serviceName\b") {
                     $isRunning = $true
                 } else {
@@ -1332,6 +1336,13 @@ Run-Async {
 Add-Activity "Launch Utility" "Ready" "Success"
 Log-Message "System Utility Toolkit initialized."
 Log-Message "Operating System: $osPlatform"
+
+# Asynchronously stop services once at startup to enforce dedicated type=own process mapping
+Run-Async {
+    param($win)
+    Run-Command-With-Timeout "sc.exe" "stop wuauserv" 3
+    Run-Command-With-Timeout "sc.exe" "stop bits" 3
+} @() $false
 
 # --- CORE ACTIONS IMPLEMENTATION ---
 
