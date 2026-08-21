@@ -1009,11 +1009,11 @@ function Run-Async ($scriptBlock, $ArgumentList=@(), $isLockingTask=$true) {
                 })
             })
         }
-        function Run-Command-With-Timeout ($cmd, $args, $timeoutSeconds=3) {
+        function Run-Command-With-Timeout ($cmd, $cmdArgs, $timeoutSeconds=3) {
             try {
                 $psi = New-Object System.Diagnostics.ProcessStartInfo
                 $psi.FileName = $cmd
-                $psi.Arguments = $args
+                $psi.Arguments = $cmdArgs
                 $psi.UseShellExecute = $false
                 $psi.CreateNoWindow = $true
                 
@@ -1025,10 +1025,10 @@ function Run-Async ($scriptBlock, $ArgumentList=@(), $isLockingTask=$true) {
                 }
             } catch {}
         }
-        function Get-Command-Output-With-Timeout ($cmd, $args, $timeoutSeconds=3) {
+        function Get-Command-Output-With-Timeout ($cmd, $cmdArgs, $timeoutSeconds=3) {
             try {
                 $tempFile = [System.IO.Path]::GetTempFileName()
-                $cmdLine = "/c $cmd $args > `"$tempFile`""
+                $cmdLine = "/c $cmd $cmdArgs > `"$tempFile`""
                 
                 $psi = New-Object System.Diagnostics.ProcessStartInfo
                 $psi.FileName = "cmd.exe"
@@ -2975,11 +2975,11 @@ $btn_backup_launch_restore.Add_Click({
 })
 
 # --- WINDOWS CONFIG SHORTCUTS ---
-function Start-ConfigShortcut ($bin, $args="") {
+function Start-ConfigShortcut ($bin, $cmdArgs="") {
     Log-Message "Launching console shortcut: $bin..."
     try {
-        if ($args -ne "") {
-            Start-Process $bin -ArgumentList $args
+        if ($cmdArgs -ne "") {
+            Start-Process $bin -ArgumentList $cmdArgs
         } else {
             Start-Process $bin
         }
