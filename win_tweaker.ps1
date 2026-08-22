@@ -300,10 +300,14 @@ function Run-Async ($scriptBlock, $ArgumentList=@(), $isLockingTask=$true) {
             $formatted = "[$timestamp] $msg`r`n"
             $action = {
                 param($text)
-                $global:txt_log_soft.AppendText($text)
-                $global:txt_log_soft.ScrollToEnd()
-                $global:txt_log_rep.AppendText($text)
-                $global:txt_log_rep.ScrollToEnd()
+                if ($global:txt_log_soft) {
+                    $global:txt_log_soft.AppendText($text)
+                    $global:txt_log_soft.ScrollToEnd()
+                }
+                if ($global:txt_log_rep) {
+                    $global:txt_log_rep.AppendText($text)
+                    $global:txt_log_rep.ScrollToEnd()
+                }
             }
             if ($global:win.Dispatcher.CheckAccess()) {
                 & $action $formatted
@@ -386,10 +390,14 @@ function Log-Message ($msg) {
     $formatted = "[$timestamp] $msg`r`n"
     $action = {
         param($text)
-        $txt_log_soft.AppendText($text)
-        $txt_log_soft.ScrollToEnd()
-        $txt_log_rep.AppendText($text)
-        $txt_log_rep.ScrollToEnd()
+        if ($txt_log_soft) {
+            $txt_log_soft.AppendText($text)
+            $txt_log_soft.ScrollToEnd()
+        }
+        if ($txt_log_rep) {
+            $txt_log_rep.AppendText($text)
+            $txt_log_rep.ScrollToEnd()
+        }
     }
     if ($window.Dispatcher.CheckAccess()) {
         & $action $formatted
