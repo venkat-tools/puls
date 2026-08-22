@@ -1,4 +1,4 @@
-# Requires -RunAsAdministrator
+﻿# Requires -RunAsAdministrator
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
     Exit
@@ -413,12 +413,13 @@ Add-Activity "Dashboard" "System Utility Toolkit initialized" "Success"
 Run-Async {
     param($win)
     
+    Add-Type -AssemblyName Microsoft.VisualBasic -ErrorAction SilentlyContinue
     $computerInfo = New-Object Microsoft.VisualBasic.Devices.ComputerInfo
-    $drive = [System.IO.DriveInfo]::GetDrives() | Where-Object { $_.Name -eq 'C:\' }
+    $drive = New-Object System.IO.DriveInfo("C")
     
     while ($true) {
         # CPU
-        $cpu = (Get-Counter '\Processor(_Total)\% Processor Time' -ErrorAction SilentlyContinue).CounterSamples.CookedValue
+        $cpu = (Get-CimInstance Win32_PerfFormattedData_PerfOS_Processor | Where-Object { $_.Name -eq '_Total' }).PercentProcessorTime
         if ($cpu -eq $null) { $cpu = 0 }
         $cpuStr = "{0:N0}%" -f $cpu
         
