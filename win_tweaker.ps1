@@ -1767,14 +1767,23 @@ $btn_rep_wmi.Add_Click({
 # Rebuild Search Index
 $btn_rep_search.Add_Click({
     Log-Message "Rebuilding Windows Search Indexer Database (Forces full catalog rebuild)..."
-    try {
-        Stop-Service-Force wsearch
-        Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows Search" -Name "SetupCompletedSuccessfully" -Value 0 -Force
-        Start-Service-Safe wsearch
-        Log-Message "[OK] Search indexer database reset. Windows is now rebuilding the index in the background."
-        Add-Activity "System Tweak" "Rebuilt Search Index" "Success"
-    } catch {
-        Log-Message "[FAIL] Error resetting Search Index: $_"
+    Add-Activity "System Tweak" "Rebuild Search Index" "Running"
+    Run-Async {
+        param($win)
+        try {
+            Stop-Service-Force wsearch
+            Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows Search" -Name "SetupCompletedSuccessfully" -Value 0 -Force
+            Start-Service-Safe wsearch
+            $win.Dispatcher.Invoke([Action]{ 
+                Log-Message "[OK] Search indexer database reset. Windows is now rebuilding the index in the background."
+                Add-Activity "System Tweak" "Rebuilt Search Index" "Success"
+            })
+        } catch {
+            $win.Dispatcher.Invoke([Action]{
+                Log-Message "[FAIL] Error resetting Search Index: $_"
+                Add-Activity "System Tweak" "Rebuild Search Index Failed" "Failed"
+            })
+        }
     }
 })
 
