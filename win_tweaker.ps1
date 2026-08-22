@@ -2653,7 +2653,7 @@ $btn_rep_wifi_pass.Add_Click({
             $tempDir = [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), [System.Guid]::NewGuid().ToString())
             New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
             
-            Run-Command-With-Timeout "netsh.exe" "wlan export profile folder=\\"$tempDir\\" key=clear" 5
+            Run-Command-With-Timeout "netsh.exe" "wlan export profile folder=`"$tempDir`" key=clear" 5
             
             $win.Dispatcher.Invoke([Action]{ Log-Message "--- DECRYPTED WI-FI SECURITY PROFILES ---" })
             
