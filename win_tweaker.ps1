@@ -440,10 +440,10 @@ Run-Async {
         $uptimeStr = "{0}d {1}h {2}m" -f $uptime.Days, $uptime.Hours, $uptime.Minutes
         
         $win.Dispatcher.Invoke([Action]{
-            $txt_cpu.Text = $cpuStr
-            $txt_ram.Text = $ramStr
-            $txt_disk.Text = $diskStr
-            $txt_uptime.Text = "Uptime: $uptimeStr"
+            ($win.FindName("txt_cpu")).Text = $cpuStr
+            ($win.FindName("txt_ram")).Text = $ramStr
+            ($win.FindName("txt_disk")).Text = $diskStr
+            ($win.FindName("txt_uptime")).Text = "Uptime: $uptimeStr"
         })
         
         Start-Sleep -Seconds 2
