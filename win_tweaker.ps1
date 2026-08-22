@@ -160,12 +160,64 @@ $xamlRaw = @"
                     </Border>
                 </Grid>
 
-                <!-- Other grids under construction -->
+                <!-- 2. Software Installer View -->
                 <Grid Name="grid_soft" Visibility="Collapsed">
-                    <Border Background="#1f2937" BorderBrush="#374151" BorderThickness="1" CornerRadius="8" Padding="30">
-                        <TextBlock Text="📥 Software Installer is under construction in Phase 2." FontSize="14" Foreground="#9ca3af" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1.3*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <!-- Left Column: Software Categories Scroll -->
+                    <Border Grid.Column="0" Background="#1f2937" BorderBrush="#374151" BorderThickness="1" CornerRadius="8" Padding="15" Margin="0,0,10,0">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+                                <Button Name="btn_soft_sel_all" Content="Select All" Width="95" Height="28" Margin="0,0,5,0" Background="#111827"/>
+                                <Button Name="btn_soft_desel_all" Content="Deselect All" Width="95" Height="28" Margin="5,0,0,0" Background="#111827"/>
+                            </StackPanel>
+                            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                                <StackPanel>
+                                    <TextBlock Text="🌐 Browsers" FontSize="11.5" FontWeight="Bold" Foreground="#38bdf8" Margin="5,5,5,5"/>
+                                    <WrapPanel Name="panel_soft_browsers" Orientation="Horizontal" Margin="0,0,0,15"/>
+                                    
+                                    <TextBlock Text="💻 Microsoft Tools &amp; Platforms" FontSize="11.5" FontWeight="Bold" Foreground="#38bdf8" Margin="5,5,5,5"/>
+                                    <WrapPanel Name="panel_soft_msoft" Orientation="Horizontal" Margin="0,0,0,15"/>
+                                    
+                                    <TextBlock Text="⚙️ Utilities &amp; Chat" FontSize="11.5" FontWeight="Bold" Foreground="#38bdf8" Margin="5,5,5,5"/>
+                                    <WrapPanel Name="panel_soft_utils" Orientation="Horizontal" Margin="0,0,0,15"/>
+                                    
+                                    <TextBlock Text="🔧 Development &amp; Networking" FontSize="11.5" FontWeight="Bold" Foreground="#38bdf8" Margin="5,5,5,5"/>
+                                    <WrapPanel Name="panel_soft_dev" Orientation="Horizontal" Margin="0,0,0,15"/>
+
+                                    <TextBlock Text="📄 Office, Design &amp; Media" FontSize="11.5" FontWeight="Bold" Foreground="#38bdf8" Margin="5,5,5,5"/>
+                                    <WrapPanel Name="panel_soft_media" Orientation="Horizontal" Margin="0,0,0,15"/>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </Grid>
+                    </Border>
+                    
+                    <!-- Right Column: Operations Terminal -->
+                    <Border Grid.Column="1" Background="#1f2937" BorderBrush="#374151" BorderThickness="1" CornerRadius="8" Padding="15" Margin="10,0,0,0">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Text="⚙️ Installation Terminal" FontSize="11" FontWeight="Bold" Foreground="#ffffff" Margin="0,0,0,10"/>
+                            <TextBox Grid.Row="1" Name="txt_log_soft" Background="#0b0f19" Foreground="#10b981" BorderBrush="#374151" FontFamily="Consolas" FontSize="10" IsReadOnly="True" VerticalScrollBarVisibility="Auto" AcceptsReturn="True" TextWrapping="Wrap" Margin="0,0,0,10"/>
+                            <StackPanel Grid.Row="2">
+                                <Button Name="btn_install_soft" Content="Install Selected" Height="36" Background="#059669" BorderThickness="0" FontWeight="Bold" Margin="0,0,0,5"/>
+                                <Button Name="btn_uninstall_soft" Content="Uninstall Selected" Height="36" Background="#b91c1c" BorderThickness="0" FontWeight="Bold" Margin="0,5,0,0"/>
+                            </StackPanel>
+                        </Grid>
                     </Border>
                 </Grid>
+
+                <!-- Other grids under construction -->
                 <Grid Name="grid_act" Visibility="Collapsed">
                     <Border Background="#1f2937" BorderBrush="#374151" BorderThickness="1" CornerRadius="8" Padding="30">
                         <TextBlock Text="🔑 Activation Suite is under construction in Phase 3." FontSize="14" Foreground="#9ca3af" HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -244,7 +296,20 @@ function Run-Async ($scriptBlock, $ArgumentList=@(), $isLockingTask=$true) {
     
     $helpersDef = @'
         function Log-Message ($msg) {
-            # Dummy helper for logging placeholder
+            $timestamp = Get-Date -Format "HH:mm:ss"
+            $formatted = "[$timestamp] $msg`r`n"
+            $action = {
+                param($text)
+                $global:txt_log_soft.AppendText($text)
+                $global:txt_log_soft.ScrollToEnd()
+                $global:txt_log_rep.AppendText($text)
+                $global:txt_log_rep.ScrollToEnd()
+            }
+            if ($global:win.Dispatcher.CheckAccess()) {
+                & $action $formatted
+            } else {
+                $global:win.Dispatcher.Invoke([Action[string]]$action, $formatted)
+            }
         }
         function Add-Activity ($op, $desc, $status) {
             $action = {
@@ -284,9 +349,11 @@ function Run-Async ($scriptBlock, $ArgumentList=@(), $isLockingTask=$true) {
 
     $lockVal = if ($isLockingTask) { '$true' } else { '$false' }
     $combinedScript = @"
-        param(`$win, `$activities, `$sharedData, `$arg1, `$arg2, `$arg3, `$arg4, `$arg5)
+        param(`$win, `$txt_log_soft, `$txt_log_rep, `$activities, `$sharedData, `$arg1, `$arg2, `$arg3, `$arg4, `$arg5)
         
         `$global:win = `$win
+        `$global:txt_log_soft = `$txt_log_soft
+        `$global:txt_log_rep = `$txt_log_rep
         `$global:activities = `$activities
 
         $helpersDef
@@ -302,6 +369,8 @@ function Run-Async ($scriptBlock, $ArgumentList=@(), $isLockingTask=$true) {
 
     $ps.AddScript($combinedScript) | Out-Null
     $ps.AddArgument($window) | Out-Null
+    $ps.AddArgument($txt_log_soft) | Out-Null
+    $ps.AddArgument($txt_log_rep) | Out-Null
     $ps.AddArgument($activities) | Out-Null
     $ps.AddArgument($script:sharedData) | Out-Null
     foreach ($arg in $ArgumentList) {
@@ -310,6 +379,23 @@ function Run-Async ($scriptBlock, $ArgumentList=@(), $isLockingTask=$true) {
     
     $script:runspaces.Add(@{ PS = $ps }) | Out-Null
     $ps.BeginInvoke() | Out-Null
+}
+
+function Log-Message ($msg) {
+    $timestamp = Get-Date -Format "HH:mm:ss"
+    $formatted = "[$timestamp] $msg`r`n"
+    $action = {
+        param($text)
+        $txt_log_soft.AppendText($text)
+        $txt_log_soft.ScrollToEnd()
+        $txt_log_rep.AppendText($text)
+        $txt_log_rep.ScrollToEnd()
+    }
+    if ($window.Dispatcher.CheckAccess()) {
+        & $action $formatted
+    } else {
+        $window.Dispatcher.Invoke([Action[string]]$action, $formatted)
+    }
 }
 
 function Add-Activity ($op, $desc, $status) {
@@ -449,6 +535,195 @@ Run-Async {
         Start-Sleep -Seconds 2
     }
 } -isLockingTask $false
+
+# --- Phase 2: SOFTWARE LISTS & INSTALLATION LOGIC ---
+
+$browsers = @(
+    @{ Name = "Google Chrome"; Id = "Google.Chrome" }
+    @{ Name = "Mozilla Firefox"; Id = "Mozilla.Firefox" }
+    @{ Name = "Brave Browser"; Id = "Brave.Brave" }
+    @{ Name = "Opera Browser"; Id = "Opera.Opera" }
+    @{ Name = "Vivaldi Browser"; Id = "VivaldiTechnologies.Vivaldi" }
+    @{ Name = "Arc Browser"; Id = "TheBrowserCompany.Arc" }
+    @{ Name = "Microsoft Edge"; Id = "Microsoft.Edge" }
+)
+
+$msoft = @(
+    @{ Name = "Microsoft Teams"; Id = "Microsoft.Teams" }
+    @{ Name = "Windows Terminal"; Id = "Microsoft.WindowsTerminal" }
+    @{ Name = "Sysinternals Suite"; Id = "Microsoft.SysinternalsSuite" }
+    @{ Name = "PowerShell 7 Core"; Id = "Microsoft.PowerShell" }
+    @{ Name = "VS 2022 Community"; Id = "Microsoft.VisualStudio.2022.Community" }
+    @{ Name = "Microsoft Office 365"; Id = "Microsoft.Office" }
+    @{ Name = "PowerBI Desktop"; Id = "Microsoft.PowerBIDesktop" }
+    @{ Name = "OneDrive Client"; Id = "Microsoft.OneDrive" }
+    @{ Name = "Remote Desktop"; Id = "Microsoft.RemoteDesktop" }
+    @{ Name = "SQL Studio (SSMS)"; Id = "Microsoft.SQLServerManagementStudio" }
+)
+
+$utils = @(
+    @{ Name = "7-Zip (Archiver)"; Id = "7zip.7zip" }
+    @{ Name = "Notepad++ (Editor)"; Id = "Notepad++.Notepad++" }
+    @{ Name = "VLC Media Player"; Id = "VideoLAN.VLC" }
+    @{ Name = "Discord Client"; Id = "Discord.Discord" }
+    @{ Name = "Telegram Desktop"; Id = "Telegram.TelegramDesktop" }
+    @{ Name = "WhatsApp Desktop"; Id = "WhatsApp.WhatsApp" }
+    @{ Name = "Steam Client"; Id = "Valve.Steam" }
+    @{ Name = "Microsoft PowerToys"; Id = "Microsoft.PowerToys" }
+    @{ Name = "Rufus USB Boot"; Id = "Akeo.Rufus" }
+    @{ Name = "WinRAR Archiver"; Id = "RARLab.WinRAR" }
+    @{ Name = "Everything Search"; Id = "Voidtools.Everything" }
+    @{ Name = "BleachBit Cleaner"; Id = "BleachBit.BleachBit" }
+    @{ Name = "AnyDesk Utility"; Id = "AnyDeskSoftwareGmbH.AnyDesk" }
+    @{ Name = "TeamViewer Client"; Id = "TeamViewer.TeamViewer" }
+    @{ Name = "LDPlayer 9 Android"; Id = "XuanZhi.LDPlayer9" }
+)
+
+$devs = @(
+    @{ Name = "VS Code Editor"; Id = "Microsoft.VisualStudioCode" }
+    @{ Name = "Git SCM Tool"; Id = "Git.Git" }
+    @{ Name = "Python 3.12"; Id = "Python.Python.3.12" }
+    @{ Name = "Node.js LTS Runtime"; Id = "OpenJS.NodeJS.LTS" }
+    @{ Name = "DBeaver Community"; Id = "dbeaver.dbeaver" }
+    @{ Name = "IntelliJ IDEA Comm"; Id = "JetBrains.IntelliJIDEA.Community" }
+    @{ Name = "Docker Desktop"; Id = "Docker.DockerDesktop" }
+    @{ Name = "WSL Ubuntu Distro"; Id = "Canonical.Ubuntu" }
+    @{ Name = "Cisco Packet Tracer"; Id = "Cisco.PacketTracer" }
+    @{ Name = "WinSCP SFTP client"; Id = "WinSCP.WinSCP" }
+    @{ Name = "FileZilla FTP client"; Id = "TimKosse.FileZilla.Client" }
+    @{ Name = "Oracle VirtualBox"; Id = "Oracle.VirtualBox" }
+    @{ Name = "Wireshark Analyzer"; Id = "Wireshark.Wireshark" }
+    @{ Name = "Nmap Port Scanner"; Id = "Insecure.Nmap" }
+    @{ Name = "PuTTY SSH Client"; Id = "SimonTatham.PuTTY" }
+)
+
+$media = @(
+    @{ Name = "LibreOffice Suite"; Id = "LibreOffice.LibreOffice" }
+    @{ Name = "GIMP Image Editor"; Id = "GIMP.GIMP" }
+    @{ Name = "Blender 3D Suite"; Id = "BlenderFoundation.Blender" }
+    @{ Name = "Adobe Reader DC"; Id = "Adobe.AdobeReaderext.Language.English" }
+    @{ Name = "Zoom Conferences"; Id = "Zoom.Zoom" }
+    @{ Name = "OBS Studio Recorder"; Id = "Obsproject.OBSStudio" }
+    @{ Name = "Spotify Music"; Id = "Spotify.Spotify" }
+)
+
+$checkboxes = @()
+
+function Add-Softwares($list, $panel) {
+    foreach ($app in $list) {
+        $cb = New-Object System.Windows.Controls.CheckBox
+        $cb.Content = $app.Name
+        $cb.Tag = $app.Id
+        $cb.Foreground = [System.Windows.Media.Brushes]::White
+        $cb.Margin = "8"
+        $cb.Width = 185
+        $cb.FontSize = 11
+        $cb.FontWeight = [System.Windows.FontWeights]::SemiBold
+        $panel.Children.Add($cb) | Out-Null
+        $script:checkboxes += $cb
+    }
+}
+
+# Dynamically populate software category WrapPanels
+Add-Softwares $browsers $panel_soft_browsers
+Add-Softwares $msoft $panel_soft_msoft
+Add-Softwares $utils $panel_soft_utils
+Add-Softwares $devs $panel_soft_dev
+Add-Softwares $media $panel_soft_media
+
+# Select / Deselect Callbacks
+$btn_soft_sel_all.Add_Click({
+    $script:checkboxes | ForEach-Object { $_.IsChecked = $true }
+})
+$btn_soft_desel_all.Add_Click({
+    $script:checkboxes | ForEach-Object { $_.IsChecked = $false }
+})
+
+# Install Selected
+$btn_install_soft.Add_Click({
+    $selected = $script:checkboxes | Where-Object { $_.IsChecked -eq $true }
+    if ($selected.Count -eq 0) {
+        [System.Windows.MessageBox]::Show("Please select at least one software package to install.", "Warning", "OK", "Warning")
+        return
+    }
+    
+    Log-Message "Starting installation batch..."
+    Add-Activity "Software Installer" "Starting installation batch" "Running"
+    
+    $itemsArray = @()
+    foreach ($item in $selected) {
+        $itemsArray += @{ Name = $item.Content; Id = $item.Tag }
+    }
+
+    Run-Async {
+        param($win, $items)
+        foreach ($item in $items) {
+            $name = $item.Name
+            $id = $item.Id
+            $win.Dispatcher.Invoke([Action]{ Log-Message "Installing $name..." })
+            
+            $proc = Start-Process winget -ArgumentList "install --id $id --silent --accept-source-agreements --accept-package-agreements" -NoNewWindow -PassThru -Wait
+            if ($proc.ExitCode -eq 0) {
+                $win.Dispatcher.Invoke([Action]{ 
+                    Log-Message "[OK] $name installed successfully."
+                    Add-Activity "WinGet Installer" "$name installed successfully" "Success"
+                })
+            } else {
+                $win.Dispatcher.Invoke([Action]{ 
+                    Log-Message "[FAIL] $name failed or was already installed."
+                    Add-Activity "WinGet Installer" "$name install failed" "Failed"
+                })
+            }
+        }
+        $win.Dispatcher.Invoke([Action]{ 
+            Log-Message "Installation batch completed." 
+            Add-Activity "Software Installer" "Installation batch completed" "Success"
+        })
+    } @(,$itemsArray)
+})
+
+# Uninstall Selected
+$btn_uninstall_soft.Add_Click({
+    $selected = $script:checkboxes | Where-Object { $_.IsChecked -eq $true }
+    if ($selected.Count -eq 0) {
+        [System.Windows.MessageBox]::Show("Please select at least one software package to uninstall.", "Warning", "OK", "Warning")
+        return
+    }
+    
+    Log-Message "Starting uninstallation batch..."
+    Add-Activity "Software Installer" "Starting uninstallation batch" "Running"
+    
+    $itemsArray = @()
+    foreach ($item in $selected) {
+        $itemsArray += @{ Name = $item.Content; Id = $item.Tag }
+    }
+
+    Run-Async {
+        param($win, $items)
+        foreach ($item in $items) {
+            $name = $item.Name
+            $id = $item.Id
+            $win.Dispatcher.Invoke([Action]{ Log-Message "Uninstalling $name..." })
+            
+            $proc = Start-Process winget -ArgumentList "uninstall --id $id --silent" -NoNewWindow -PassThru -Wait
+            if ($proc.ExitCode -eq 0) {
+                $win.Dispatcher.Invoke([Action]{ 
+                    Log-Message "[OK] $name uninstalled successfully."
+                    Add-Activity "WinGet Installer" "$name uninstalled successfully" "Success"
+                })
+            } else {
+                $win.Dispatcher.Invoke([Action]{ 
+                    Log-Message "[FAIL] $name failed to uninstall."
+                    Add-Activity "WinGet Installer" "$name uninstall failed" "Failed"
+                })
+            }
+        }
+        $win.Dispatcher.Invoke([Action]{ 
+            Log-Message "Uninstallation batch completed." 
+            Add-Activity "Software Installer" "Uninstallation batch completed" "Success"
+        })
+    } @(,$itemsArray)
+})
 
 # Launch GUI
 $window.ShowDialog() | Out-Null
